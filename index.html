@@ -1,0 +1,2076 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0, viewport-fit=cover"
+    />
+    <title>The Noah Protocol</title>
+    <link rel="manifest" href="manifest.json" />
+    <link rel="icon" href="icons/favicon.svg" type="image/svg+xml" />
+    <link rel="icon" href="icons/favicon.ico" sizes="32x32" />
+    <link rel="apple-touch-icon" href="icons/apple-touch-icon.png" />
+    <meta name="theme-color" content="#f3ead6" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-title" content="Noah" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+    <style>
+      @font-face {
+        font-family: "EB Garamond";
+        src: url("fonts/eb-garamond-400.woff2") format("woff2");
+        font-weight: 400;
+        font-style: normal;
+        font-display: swap;
+      }
+      @font-face {
+        font-family: "EB Garamond";
+        src: url("fonts/eb-garamond-400-italic.woff2") format("woff2");
+        font-weight: 400;
+        font-style: italic;
+        font-display: swap;
+      }
+      @font-face {
+        font-family: "EB Garamond";
+        src: url("fonts/eb-garamond-700.woff2") format("woff2");
+        font-weight: 700;
+        font-style: normal;
+        font-display: swap;
+      }
+      @font-face {
+        font-family: "UnifrakturMaguntia";
+        src: url("fonts/unifrakturmaguntia-400.woff2") format("woff2");
+        font-weight: 400;
+        font-style: normal;
+        font-display: swap;
+      }
+
+      :root {
+        --paper: #f3ead6;
+        --paper-2: #e9dcc0;
+        --ink: #2a2118;
+        --ink-soft: #5e5143;
+        --rubric: #7a2418;
+        --rule: #c4b089;
+        --gold: #8a6d3b;
+        --gold-deep: #6a5228;
+        --font-book: "EB Garamond", Georgia, "Palatino Linotype", Palatino,
+          "Times New Roman", serif;
+        --font-display: "UnifrakturMaguntia", Georgia, serif;
+        --pad: 1.1rem;
+        --max: 26.5rem;
+        --nav-h: 3.6rem;
+      }
+
+      @media (prefers-color-scheme: dark) {
+        :root {
+          --paper: #1a1612;
+          --paper-2: #241f19;
+          --ink: #eddcc0;
+          --ink-soft: #b9a78c;
+          --rubric: #d46a58;
+          --rule: #5a4c38;
+          --gold: #c4a056;
+          --gold-deep: #e0c27a;
+        }
+      }
+
+      * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+
+      html,
+      body {
+        background: var(--paper);
+        color: var(--ink);
+      }
+
+      body {
+        font-family: var(--font-book);
+        font-size: 1.125rem;
+        line-height: 1.55;
+        -webkit-font-smoothing: antialiased;
+        padding: env(safe-area-inset-top) 0 0;
+      }
+
+      button,
+      input,
+      textarea,
+      select {
+        font-family: inherit;
+        color: inherit;
+      }
+
+      .page {
+        width: min(var(--max), 100%);
+        margin: 0 auto;
+        padding: 0.6rem var(--pad) calc(var(--nav-h) + 1.5rem + env(safe-area-inset-bottom));
+      }
+
+      .masthead {
+        text-align: center;
+        padding: 0.2rem 0 0.15rem;
+      }
+
+      .date-line {
+        font-size: 0.78rem;
+        letter-spacing: 0.14em;
+        text-transform: uppercase;
+        color: var(--ink-soft);
+        margin-bottom: 0.2rem;
+      }
+
+      .wordmark {
+        font-family: var(--font-display);
+        font-size: clamp(2.4rem, 13vw, 3.1rem);
+        font-weight: 400;
+        line-height: 0.95;
+      }
+
+      .subtitle {
+        margin-top: 0.15rem;
+        font-size: 0.68rem;
+        letter-spacing: 0.4em;
+        text-transform: uppercase;
+        color: var(--gold-deep);
+      }
+
+      .lang-switch {
+        display: block;
+        margin: 0.45rem auto 0;
+        background: none;
+        border: 1px solid var(--rule);
+        color: var(--ink-soft);
+        font-size: 0.68rem;
+        letter-spacing: 0.18em;
+        text-transform: uppercase;
+        min-height: 2.4rem;
+        padding: 0 0.9rem;
+        cursor: pointer;
+      }
+
+      .rule {
+        border: 0;
+        height: 7px;
+        margin: 0.7rem 2.4rem 0.9rem;
+        border-top: 1px solid var(--rule);
+        border-bottom: 1px solid var(--rule);
+      }
+
+      .pane[hidden] {
+        display: none !important;
+      }
+
+      .lede {
+        margin-bottom: 1.15rem;
+      }
+
+      .lede h2 {
+        font-size: 1.02rem;
+        font-weight: 400;
+        font-style: italic;
+        color: var(--rubric);
+        text-align: center;
+        margin-bottom: 0.65rem;
+      }
+
+      .lede p {
+        margin-bottom: 0.75rem;
+        font-size: 1.08rem;
+      }
+
+      .act {
+        padding: 0.95rem 0 1.05rem;
+        border-top: 1px dotted var(--rule);
+      }
+
+      .act-head {
+        display: flex;
+        align-items: flex-start;
+        gap: 0.65rem;
+        cursor: pointer;
+      }
+
+      .act-head input[type="checkbox"] {
+        appearance: none;
+        -webkit-appearance: none;
+        flex: 0 0 1.35rem;
+        width: 1.35rem;
+        height: 1.35rem;
+        margin-top: 0.2rem;
+        border: 1.5px solid var(--gold);
+        background: transparent;
+        border-radius: 1px;
+      }
+
+      .act-head input[type="checkbox"]:checked {
+        background: var(--rubric);
+        border-color: var(--rubric);
+        box-shadow: inset 0 0 0 2px var(--paper);
+      }
+
+      .act-name {
+        font-size: 1.14rem;
+        font-weight: 700;
+        line-height: 1.3;
+      }
+
+      .act-name .n {
+        font-weight: 400;
+        font-style: italic;
+        color: var(--rubric);
+        margin-right: 0.28rem;
+      }
+
+      .act-body {
+        margin: 0.45rem 0 0 2.05rem;
+        color: var(--ink-soft);
+        font-size: 1.04rem;
+      }
+
+      .act-body p {
+        margin-bottom: 0.65rem;
+      }
+
+      .reading {
+        background: var(--paper-2);
+        border: 1px solid var(--rule);
+        padding: 0.9rem 0.85rem 1rem;
+        margin: 0.55rem 0 0.7rem;
+      }
+
+      .reading .src {
+        font-size: 0.72rem;
+        letter-spacing: 0.16em;
+        text-transform: uppercase;
+        color: var(--rubric);
+        margin-bottom: 0.5rem;
+      }
+
+      .reading p {
+        font-style: italic;
+        color: var(--ink);
+        font-size: 1.08rem;
+        line-height: 1.58;
+        margin-bottom: 0.7rem;
+      }
+
+      .reading p:last-child {
+        margin-bottom: 0;
+      }
+
+      .passage {
+        display: block;
+        background: none;
+        border: 0;
+        color: var(--rubric);
+        font-style: italic;
+        font-size: 0.98rem;
+        min-height: 2.4rem;
+        padding: 0.15rem 0;
+        cursor: pointer;
+        text-align: left;
+      }
+
+      .note-block {
+        display: block;
+        margin-top: 0.75rem;
+      }
+
+      .note-block > span {
+        display: block;
+        font-size: 0.7rem;
+        letter-spacing: 0.16em;
+        text-transform: uppercase;
+        color: var(--gold-deep);
+        margin-bottom: 0.3rem;
+      }
+
+      textarea.note {
+        display: block;
+        width: 100%;
+        min-height: 6.2rem;
+        resize: vertical;
+        background: var(--paper-2);
+        color: var(--ink);
+        border: 1px solid var(--rule);
+        padding: 0.6rem 0.7rem;
+        font-size: 1.05rem;
+        line-height: 1.5;
+        font-style: italic;
+      }
+
+      textarea.note:focus {
+        outline: 1px solid var(--gold);
+        background: var(--paper);
+      }
+
+      textarea.note.night {
+        min-height: 9.5rem;
+      }
+
+      .sleep-row {
+        display: flex;
+        gap: 0.5rem;
+        margin-top: 0.85rem;
+      }
+
+      .desk {
+        margin: 0 0 1.35rem;
+        padding: 0.85rem 0.8rem 1rem;
+        border: 1px solid var(--rule);
+        background: var(--paper-2);
+      }
+
+      .desk h3 {
+        font-size: 0.7rem;
+        font-weight: 400;
+        letter-spacing: 0.18em;
+        text-transform: uppercase;
+        text-align: center;
+        color: var(--gold-deep);
+        margin-bottom: 0.35rem;
+      }
+
+      .desk-lead {
+        font-size: 0.95rem;
+        font-style: italic;
+        color: var(--ink-soft);
+        text-align: center;
+        margin-bottom: 0.65rem;
+      }
+
+      .desk-now {
+        font-size: 0.98rem;
+        text-align: center;
+        margin-bottom: 0.55rem;
+        min-height: 1.4em;
+      }
+
+      .chant-frame {
+        width: 100%;
+        aspect-ratio: 16 / 9;
+        max-height: 11rem;
+        background: #140f0c;
+        margin-bottom: 0.55rem;
+        overflow: hidden;
+      }
+
+      .chant-frame iframe,
+      .chant-frame audio {
+        width: 100%;
+        height: 100%;
+        border: 0;
+        display: block;
+      }
+
+      .chant-frame audio {
+        height: 2.8rem;
+        margin-top: 3.5rem;
+      }
+
+      .desk-keys {
+        display: grid;
+        grid-template-columns: 1fr 1fr 1fr;
+        gap: 0.4rem;
+      }
+
+      .desk-keys .key {
+        flex: none;
+        width: 100%;
+      }
+
+      .desk-foot {
+        margin-top: 0.55rem;
+        font-size: 0.82rem;
+        font-style: italic;
+        color: var(--ink-soft);
+        text-align: center;
+      }
+
+      .select-input {
+        flex: 1;
+        background: var(--paper-2);
+        border: 1px solid var(--rule);
+        min-height: 3.15rem;
+        padding: 0 0.7rem;
+        font-size: 1rem;
+        text-align: center;
+      }
+
+      .key {
+        appearance: none;
+        flex: 0 0 5.5rem;
+        background: var(--ink);
+        color: var(--paper);
+        border: 1px solid var(--ink);
+        min-height: 3.15rem;
+        font-size: 0.68rem;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        cursor: pointer;
+      }
+
+      .nav-bar {
+        position: fixed;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        display: grid;
+        grid-template-columns: 1fr 1fr 1fr 1fr;
+        background: var(--paper);
+        border-top: 1px solid var(--rule);
+        padding: 0.25rem 0.2rem calc(0.35rem + env(safe-area-inset-bottom));
+        z-index: 30;
+      }
+
+      .nav-bar button {
+        appearance: none;
+        background: none;
+        border: 0;
+        min-height: 2.85rem;
+        font-size: 0.68rem;
+        letter-spacing: 0.1em;
+        text-transform: uppercase;
+        color: var(--ink-soft);
+        cursor: pointer;
+      }
+
+      .nav-bar button.active {
+        color: var(--rubric);
+        box-shadow: inset 0 -2px 0 var(--rubric);
+      }
+
+      .stats {
+        display: grid;
+        grid-template-columns: 1fr 1fr 1fr;
+        gap: 0.45rem;
+        margin-bottom: 1.25rem;
+      }
+
+      .stat {
+        border: 1px solid var(--rule);
+        padding: 0.65rem 0.4rem 0.7rem;
+        text-align: center;
+      }
+
+      .stat b {
+        display: block;
+        font-size: 1.45rem;
+        font-weight: 400;
+        color: var(--rubric);
+        line-height: 1.15;
+      }
+
+      .stat span {
+        display: block;
+        margin-top: 0.2rem;
+        font-size: 0.62rem;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        color: var(--ink-soft);
+      }
+
+      .log-day {
+        border-bottom: 1px dotted var(--rule);
+        padding: 0.65rem 0;
+      }
+
+      .log-day summary {
+        cursor: pointer;
+        list-style: none;
+        font-size: 1.02rem;
+      }
+
+      .log-day summary::-webkit-details-marker {
+        display: none;
+      }
+
+      .log-day .meta {
+        color: var(--ink-soft);
+        font-size: 0.9rem;
+        font-style: italic;
+      }
+
+      .log-entry {
+        margin-top: 0.55rem;
+      }
+
+      .log-entry .k {
+        font-size: 0.68rem;
+        letter-spacing: 0.12em;
+        text-transform: uppercase;
+        color: var(--gold-deep);
+        margin-bottom: 0.15rem;
+      }
+
+      .log-entry p {
+        font-style: italic;
+        white-space: pre-wrap;
+        color: var(--ink);
+      }
+
+      .log-empty {
+        font-style: italic;
+        color: var(--ink-soft);
+      }
+
+      .modal-overlay {
+        position: fixed;
+        inset: 0;
+        background: rgba(26, 22, 18, 0.78);
+        display: none;
+        justify-content: center;
+        align-items: flex-end;
+        z-index: 40;
+      }
+
+      .modal-box {
+        background: var(--paper);
+        width: 100%;
+        max-width: var(--max);
+        padding: 1.1rem var(--pad) calc(1.2rem + env(safe-area-inset-bottom));
+        max-height: 88dvh;
+        display: flex;
+        flex-direction: column;
+        border-top: 3px solid var(--rubric);
+      }
+
+      .modal-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: baseline;
+        gap: 0.75rem;
+        border-bottom: 1px solid var(--rule);
+        padding-bottom: 0.6rem;
+        margin-bottom: 0.75rem;
+      }
+
+      .modal-title {
+        font-size: 1.05rem;
+        font-style: italic;
+        color: var(--rubric);
+      }
+
+      .modal-close {
+        background: none;
+        border: 0;
+        color: var(--ink-soft);
+        font-size: 1.8rem;
+        min-width: 2.5rem;
+        min-height: 2.5rem;
+        cursor: pointer;
+      }
+
+      .modal-body {
+        overflow-y: auto;
+        font-size: 1.12rem;
+        line-height: 1.65;
+        -webkit-overflow-scrolling: touch;
+      }
+
+      .modal-body p {
+        margin-bottom: 0.9rem;
+      }
+
+      .v-num {
+        color: var(--rubric);
+        font-size: 0.75rem;
+        vertical-align: super;
+        margin-right: 0.25rem;
+      }
+
+      .modal-note {
+        margin-top: 0.7rem;
+        padding-top: 0.7rem;
+        border-top: 1px solid var(--rule);
+      }
+
+      @media (min-width: 480px) {
+        :root {
+          --pad: 1.35rem;
+          --max: 28rem;
+        }
+        .modal-overlay {
+          align-items: center;
+        }
+        .modal-box {
+          border: 1px solid var(--rule);
+          border-top: 3px solid var(--rubric);
+        }
+      }
+
+    </style>
+  </head>
+  <body>
+    <div class="page">
+      <header class="masthead">
+        <p class="date-line" id="dateLine"></p>
+        <h1 class="wordmark">Noah</h1>
+        <p class="subtitle" data-i18n="subtitle">The Protocol</p>
+        <button class="lang-switch" type="button" id="langSwitch">PT</button>
+        <hr class="rule" />
+      </header>
+
+      <!-- MORNING -->
+      <section class="pane" id="pane-morning">
+        <div class="lede">
+          <h2 data-i18n="arkTitle">The mental ark</h2>
+          <p data-i18n="ark1">
+            The church in Rome under Nero could not vote the emperor out. They
+            kept a lamp in a house, a marriage unpoisoned, and a mouth that did
+            not run to every shrine of news. Noah did not drain the flood. He
+            built through it.
+          </p>
+          <p data-i18n="ark2">
+            You have a duty they did not: a ballot. Cast it when the day comes.
+            Do not live in the campaign until then. You walk among a loud
+            majority that talks like yours, and among kin who do not. The first
+            is a temptation to perform. The second is the test of the house.
+            This morning: pray, read, write — then go out.
+          </p>
+        </div>
+
+        <article class="act">
+          <label class="act-head">
+            <input type="checkbox" data-check="pray" />
+            <span class="act-name"
+              ><span class="n">1</span> <span data-i18n="namePray">Pray</span></span
+            >
+          </label>
+          <div class="act-body">
+            <p data-i18n="bodyPray">
+              Phone face down. Behind a door, not for men to see. If you are
+              afraid, say so. Ask that this cup pass if it can, and that you
+              will do the day’s duty if it will not. Ten honest minutes beat an
+              hour in the groups.
+            </p>
+            <button
+              class="passage"
+              type="button"
+              data-i18n="passMat6"
+              onclick="openScripture('mat6', 'pray')"
+            >
+              Matthew 6:6–13 · the inner room
+            </button>
+            <button
+              class="passage"
+              type="button"
+              data-i18n="passMat26"
+              onclick="openScripture('mat26', 'pray')"
+            >
+              Matthew 26:38–39 · Gethsemane
+            </button>
+            <label class="note-block">
+              <span data-i18n="thought">Today's thought</span>
+              <textarea
+                class="note"
+                data-slot="pray"
+                rows="4"
+                data-i18n-placeholder="phPray"
+                placeholder="The prayer you actually prayed."
+              ></textarea>
+            </label>
+          </div>
+        </article>
+
+        <article class="act">
+          <label class="act-head">
+            <input type="checkbox" data-check="reading" />
+            <span class="act-name"
+              ><span class="n">2</span> <span data-i18n="nameRead">Read</span></span
+            >
+          </label>
+          <div class="act-body">
+            <p data-i18n="bodyRead">
+              One passage, drawn for this calendar day — scripture or a stoic
+              older than the panic. Read it through. Copy a sentence if you
+              must. That is the spine you carry into the street.
+            </p>
+            <div class="reading" id="dailyReading"></div>
+            <label class="note-block">
+              <span data-i18n="thought">Today's thought</span>
+              <textarea
+                class="note"
+                data-slot="reading"
+                rows="4"
+                data-i18n-placeholder="phRead"
+                placeholder="The sentence you will carry."
+              ></textarea>
+            </label>
+          </div>
+        </article>
+      </section>
+
+      <!-- DAY -->
+      <section class="pane" id="pane-day" hidden>
+        <div class="lede">
+          <h2 data-i18n="dayTitle">The rule of the day</h2>
+          <p data-i18n="dayLede">
+            You are a voter, not a correspondent. One sober act at the urn is
+            not forty days of commentary. The country will be decided by
+            millions of strangers. This house will be decided by whether you
+            showed up as a husband, and whether a relative still had a table
+            to sit at.
+          </p>
+        </div>
+
+        <div class="desk">
+          <h3 data-i18n="desk">Desk</h3>
+          <p class="desk-lead" data-i18n="deskLead">
+            Latin as texture while you work. No English, no Portuguese, no
+            drums. Local files replace YouTube when you add them.
+          </p>
+          <p class="desk-now" id="chantTitle">Chant at rest</p>
+          <div class="chant-frame" id="chantMount"></div>
+          <div class="desk-keys">
+            <button class="key" type="button" id="chantPrev" data-i18n="prev">
+              Prev
+            </button>
+            <button class="key" type="button" id="chantPlay" data-i18n="load">
+              Load
+            </button>
+            <button class="key" type="button" id="chantNext" data-i18n="next">
+              Next
+            </button>
+          </div>
+          <p class="desk-foot" id="chantFoot"></p>
+        </div>
+
+        <article class="act">
+          <label class="act-head">
+            <input type="checkbox" data-check="forum" />
+            <span class="act-name"
+              ><span class="n">3</span>
+              <span data-i18n="nameForum">Stay out of the Forum</span></span
+            >
+          </label>
+          <div class="act-body">
+            <p data-i18n="bodyForum">
+              The election does not need a dawn briefing. Mute the groups.
+              Leave the pundits closed. If you must know a date, look it up
+              once. What the crowd cheers — even the crowd that agrees with
+              you — is not your food.
+            </p>
+            <button
+              class="passage"
+              type="button"
+              data-i18n="passProv4"
+              onclick="openScripture('prov4', 'forum')"
+            >
+              Proverbs 4:23
+            </button>
+            <label class="note-block">
+              <span data-i18n="thought">Today's thought</span>
+              <textarea
+                class="note"
+                data-slot="forum"
+                rows="3"
+                data-i18n-placeholder="phForum"
+                placeholder="The groups I will not open."
+              ></textarea>
+            </label>
+          </div>
+        </article>
+
+        <article class="act">
+          <label class="act-head">
+            <input type="checkbox" data-check="tongue" />
+            <span class="act-name"
+              ><span class="n">4</span>
+              <span data-i18n="nameTongue">Hold the tongue</span></span
+            >
+          </label>
+          <div class="act-body">
+            <p data-i18n="bodyTongue">
+              The harder silence is not with strangers. It is with kin who
+              already know where you stand. A vocal majority makes the next
+              remark feel like courage. It is usually only noise. You will not
+              evangelize an uncle at lunch. Courtesy is not surrender.
+            </p>
+            <button
+              class="passage"
+              type="button"
+              data-i18n="passAmos"
+              onclick="openScripture('amos5', 'tongue')"
+            >
+              Amos 5:13
+            </button>
+            <button
+              class="passage"
+              type="button"
+              data-i18n="passRom18"
+              onclick="openScripture('rom18', 'tongue')"
+            >
+              Romans 12:17–18
+            </button>
+            <label class="note-block">
+              <span data-i18n="thought">Today's thought</span>
+              <textarea
+                class="note"
+                data-slot="tongue"
+                rows="3"
+                data-i18n-placeholder="phTongue"
+                placeholder="The relative I will not correct."
+              ></textarea>
+            </label>
+          </div>
+        </article>
+
+        <article class="act">
+          <label class="act-head">
+            <input type="checkbox" data-check="wife" />
+            <span class="act-name"
+              ><span class="n">5</span>
+              <span data-i18n="nameWife">Keep the marriage off the campaign</span></span
+            >
+          </label>
+          <div class="act-body">
+            <p data-i18n="bodyWife">
+              She does not need a digest of the race. She needs you unhooked
+              from the groups. Name the strain. Agree that this house is not a
+              rally, and that neither of you will use the other as a weapon at
+              lunch.
+            </p>
+            <button
+              class="passage"
+              type="button"
+              data-i18n="passEcc4"
+              onclick="openScripture('ecc4', 'wife')"
+            >
+              Ecclesiastes 4:9–12
+            </button>
+            <label class="note-block">
+              <span data-i18n="thought">Today's thought</span>
+              <textarea
+                class="note"
+                data-slot="wife"
+                rows="3"
+                data-i18n-placeholder="phWife"
+                placeholder="The vow with her today."
+              ></textarea>
+            </label>
+          </div>
+        </article>
+
+        <article class="act">
+          <label class="act-head">
+            <input type="checkbox" data-check="table" />
+            <span class="act-name"
+              ><span class="n">6</span>
+              <span data-i18n="nameTable">Keep the election off the table</span></span
+            >
+          </label>
+          <div class="act-body">
+            <p data-i18n="bodyTable">
+              Sunday lunch will try to become a debate. Let it fail. Pass the
+              rice. Be briefly dull. You may love people who will mark a
+              different ballot. A joke that is only a knife is still a knife.
+            </p>
+            <button
+              class="passage"
+              type="button"
+              data-i18n="passProv17"
+              onclick="openScripture('prov17', 'table')"
+            >
+              Proverbs 17:1
+            </button>
+            <label class="note-block">
+              <span data-i18n="thought">Today's thought</span>
+              <textarea
+                class="note"
+                data-slot="table"
+                rows="3"
+                data-i18n-placeholder="phTable"
+                placeholder="How lunch stays a meal."
+              ></textarea>
+            </label>
+          </div>
+        </article>
+
+        <article class="act">
+          <label class="act-head">
+            <input type="checkbox" data-check="work" />
+            <span class="act-name"
+              ><span class="n">7</span>
+              <span data-i18n="nameWork">Work with your hands</span></span
+            >
+          </label>
+          <div class="act-body">
+            <p data-i18n="bodyWork">
+              The fire that wants one more audio is the Forum wearing your
+              face. Spend it on the body, a skill, a page, the partnership.
+              Be tired tonight from what you kept, not from what you forwarded.
+            </p>
+            <button
+              class="passage"
+              type="button"
+              data-i18n="passTh4"
+              onclick="openScripture('th4', 'work')"
+            >
+              1 Thessalonians 4:11–12
+            </button>
+            <label class="note-block">
+              <span data-i18n="thought">Today's thought</span>
+              <textarea
+                class="note"
+                data-slot="work"
+                rows="3"
+                data-i18n-placeholder="phWork"
+                placeholder="The work of your hands today."
+              ></textarea>
+            </label>
+          </div>
+        </article>
+      </section>
+
+      <!-- NIGHT -->
+      <section class="pane" id="pane-night" hidden>
+        <div class="lede">
+          <h2 data-i18n="nightTitle">Close the day</h2>
+          <p data-i18n="nightLede">
+            Close as they closed it: a few true sentences, then quiet. Did you
+            keep the house? Did you leave a relative in peace? Release the
+            argument you still want to win. Tomorrow the urns and the groups
+            will still be there. You do not have to sleep inside them.
+          </p>
+        </div>
+        <label class="note-block">
+          <span data-i18n="closing">Closing notes</span>
+          <textarea
+            class="note night"
+            data-slot="night"
+            rows="8"
+            data-i18n-placeholder="phNight"
+            placeholder="What I kept. Whom I did not antagonize. What I release. One gratitude."
+          ></textarea>
+        </label>
+        <div class="sleep-row">
+          <select id="noiseSelect" class="select-input">
+            <option value="white" data-i18n="noiseWhite">White noise</option>
+            <option value="rain" data-i18n="noiseRain">Rain</option>
+            <option value="ocean" data-i18n="noiseOcean">Ocean</option>
+            <option value="crickets" data-i18n="noiseCrickets">Crickets</option>
+          </select>
+          <button
+            class="key"
+            id="audioActionBtn"
+            type="button"
+            onclick="toggleNativeAudio()"
+          >
+            Play
+          </button>
+        </div>
+      </section>
+
+      <section class="pane" id="pane-log" hidden>
+        <div class="lede">
+          <h2 data-i18n="logTitle">The log</h2>
+          <p data-i18n="logLede">
+            Not a score. Proof that you kept showing up — days on the ark,
+            words you actually wrote, a streak only you can see.
+          </p>
+        </div>
+        <div class="stats" id="logStats"></div>
+        <div id="logList"></div>
+      </section>
+    </div>
+
+    <nav class="nav-bar" aria-label="The day">
+      <button type="button" data-pane="morning" class="active" data-i18n="navMorning">
+        Morning
+      </button>
+      <button type="button" data-pane="day" data-i18n="navDay">Day</button>
+      <button type="button" data-pane="night" data-i18n="navNight">Night</button>
+      <button type="button" data-pane="log" data-i18n="navLog">Log</button>
+    </nav>
+
+    <div class="modal-overlay" id="scriptureModal" onclick="closeModal()">
+      <div class="modal-box" onclick="event.stopPropagation()">
+        <div class="modal-header">
+          <div class="modal-title" id="mTitle">Passage</div>
+          <button class="modal-close" type="button" onclick="closeModal()">
+            ×
+          </button>
+        </div>
+        <div class="modal-body" id="mBody"></div>
+        <label class="note-block modal-note">
+          <span data-i18n="thought">Today's thought</span>
+          <textarea
+            class="note"
+            id="modalNote"
+            rows="4"
+            data-i18n-placeholder="phModal"
+            placeholder="Write after you have read."
+          ></textarea>
+        </label>
+      </div>
+    </div>
+
+    <script>
+      const STORE = "noah-journal-v2";
+      const STORE_LOG = "noah-journal-log-v2";
+      const LANG_KEY = "noah-lang";
+      let lang = localStorage.getItem(LANG_KEY) === "pt" ? "pt" : "en";
+
+      const I18N = {
+        en: {
+          subtitle: "The Protocol",
+          arkTitle: "The mental ark",
+          ark1: "The church in Rome under Nero could not vote the emperor out. They kept a lamp in a house, a marriage unpoisoned, and a mouth that did not run to every shrine of news. Noah did not drain the flood. He built through it.",
+          ark2: "You have a duty they did not: a ballot. Cast it when the day comes. Do not live in the campaign until then. You walk among a loud majority that talks like yours, and among kin who do not. The first is a temptation to perform. The second is the test of the house. This morning: pray, read, write — then go out.",
+          namePray: "Pray",
+          bodyPray: "Phone face down. Behind a door, not for men to see. If you are afraid, say so. Ask that this cup pass if it can, and that you will do the day’s duty if it will not. Ten honest minutes beat an hour in the groups.",
+          nameRead: "Read",
+          bodyRead: "One passage, drawn for this calendar day — scripture or a stoic older than the panic. Read it through. Copy a sentence if you must. That is the spine you carry into the street.",
+          thought: "Today's thought",
+          phPray: "The prayer you actually prayed.",
+          phRead: "The sentence you will carry.",
+          phForum: "The groups I will not open.",
+          phTongue: "The relative I will not correct.",
+          phWife: "The vow with her today.",
+          phTable: "How lunch stays a meal.",
+          phWork: "The work of your hands today.",
+          phNight: "What I kept. Whom I did not antagonize. What I release. One gratitude.",
+          phModal: "Write after you have read.",
+          passMat6: "Matthew 6:6–13 · the inner room",
+          passMat26: "Matthew 26:38–39 · Gethsemane",
+          passProv4: "Proverbs 4:23",
+          passAmos: "Amos 5:13",
+          passRom18: "Romans 12:17–18",
+          passEcc4: "Ecclesiastes 4:9–12",
+          passProv17: "Proverbs 17:1",
+          passTh4: "1 Thessalonians 4:11–12",
+          dayTitle: "The rule of the day",
+          dayLede: "You are a voter, not a correspondent. One sober act at the urn is not forty days of commentary. The country will be decided by millions of strangers. This house will be decided by whether you showed up as a husband, and whether a relative still had a table to sit at.",
+          desk: "Desk",
+          deskLead: "Latin as texture while you work. No English, no Portuguese, no drums. Local files replace YouTube when you add them.",
+          chantRest: "Chant at rest",
+          chantLocal: "Playing local files from audio/",
+          chantYt: "YouTube (temporary). Add audio/playlist.json to go offline.",
+          prev: "Prev",
+          load: "Load",
+          next: "Next",
+          reload: "Reload",
+          nameForum: "Stay out of the Forum",
+          bodyForum: "The election does not need a dawn briefing. Mute the groups. Leave the pundits closed. If you must know a date, look it up once. What the crowd cheers — even the crowd that agrees with you — is not your food.",
+          nameTongue: "Hold the tongue",
+          bodyTongue: "The harder silence is not with strangers. It is with kin who already know where you stand. A vocal majority makes the next remark feel like courage. It is usually only noise. You will not evangelize an uncle at lunch. Courtesy is not surrender.",
+          nameWife: "Keep the marriage off the campaign",
+          bodyWife: "She does not need a digest of the race. She needs you unhooked from the groups. Name the strain. Agree that this house is not a rally, and that neither of you will use the other as a weapon at lunch.",
+          nameTable: "Keep the election off the table",
+          bodyTable: "Sunday lunch will try to become a debate. Let it fail. Pass the rice. Be briefly dull. You may love people who will mark a different ballot. A joke that is only a knife is still a knife.",
+          nameWork: "Work with your hands",
+          bodyWork: "The fire that wants one more audio is the Forum wearing your face. Spend it on the body, a skill, a page, the partnership. Be tired tonight from what you kept, not from what you forwarded.",
+          nightTitle: "Close the day",
+          nightLede: "Close as they closed it: a few true sentences, then quiet. Did you keep the house? Did you leave a relative in peace? Release the argument you still want to win. Tomorrow the urns and the groups will still be there. You do not have to sleep inside them.",
+          closing: "Closing notes",
+          noiseWhite: "White noise",
+          noiseRain: "Rain",
+          noiseOcean: "Ocean",
+          noiseCrickets: "Crickets",
+          play: "Play",
+          pause: "Pause",
+          logTitle: "The log",
+          logLede: "Not a score. Proof that you kept showing up — days on the ark, words you actually wrote, a streak only you can see.",
+          logEmpty: "The log fills as you write. Come back tomorrow.",
+          statDays: "Days",
+          statStreak: "In a row",
+          statChars: "Characters",
+          navMorning: "Morning",
+          navDay: "Day",
+          navNight: "Night",
+          navLog: "Log",
+          slotPray: "Prayer",
+          slotReading: "Reading",
+          slotForum: "The Forum",
+          slotTongue: "The tongue",
+          slotWife: "The marriage",
+          slotTable: "The table",
+          slotWork: "The hands",
+          slotNight: "Closing",
+          slotPassage: "Passage",
+        },
+        pt: {
+          subtitle: "O Protocolo",
+          arkTitle: "A arca mental",
+          ark1: "A igreja em Roma, sob Nero, não podia votar o imperador para fora. Guardavam uma lâmpada numa casa, um casamento sem veneno, e uma boca que não corria a cada altar de notícia. Noé não esgotou o dilúvio. Construiu através dele.",
+          ark2: "Tens um dever que eles não tinham: o voto. Usa-o no dia. Não moras na campanha até lá. Caminhas entre uma maioria barulhenta que fala como tu, e entre parentes que não. A primeira é tentação de performar. A segunda é a prova da casa. Esta manhã: ora, lê, escreve — depois sai.",
+          namePray: "Orar",
+          bodyPray: "Telemóvel virado para baixo. Atrás de uma porta, não para os homens verem. Se tens medo, diz. Pede que este cálice passe, se puder, e que cumpra o dever do dia se não puder. Dez minutos honestos valem mais do que uma hora nos grupos.",
+          nameRead: "Ler",
+          bodyRead: "Uma passagem, sorteada para este dia — escritura ou um estoico mais velho do que o pânico. Lê até o fim. Copia uma frase se precisares. É a espinha que levas para a rua.",
+          thought: "Pensamento de hoje",
+          phPray: "A oração que de facto rezaste.",
+          phRead: "A frase que vais levar.",
+          phForum: "Os grupos que não vou abrir.",
+          phTongue: "O parente que não vou corrigir.",
+          phWife: "O voto com ela, hoje.",
+          phTable: "Como o almoço continua refeição.",
+          phWork: "O trabalho das tuas mãos hoje.",
+          phNight: "O que guardei. A quem não antagonizei. O que solto. Uma gratidão.",
+          phModal: "Escreve depois de teres lido.",
+          passMat6: "Mateus 6:6–13 · o quarto interior",
+          passMat26: "Mateus 26:38–39 · Getsêmani",
+          passProv4: "Provérbios 4:23",
+          passAmos: "Amós 5:13",
+          passRom18: "Romanos 12:17–18",
+          passEcc4: "Eclesiastes 4:9–12",
+          passProv17: "Provérbios 17:1",
+          passTh4: "1 Tessalonicenses 4:11–12",
+          dayTitle: "A regra do dia",
+          dayLede: "És eleitor, não correspondente. Um ato sóbrio na urna não é quarenta dias de comentário. O país será decidido por milhões de estranhos. Esta casa será decidida por teres aparecido como marido, e por um parente ainda ter mesa.",
+          desk: "Mesa",
+          deskLead: "Latim como textura enquanto trabalhas. Sem inglês, sem português, sem tambores. Ficheiros locais substituem o YouTube quando os adicionares.",
+          chantRest: "Canto em descanso",
+          chantLocal: "A reproduzir ficheiros locais em audio/",
+          chantYt: "YouTube (provisório). Cria audio/playlist.json para ficar offline.",
+          prev: "Ant.",
+          load: "Abrir",
+          next: "Seg.",
+          reload: "Outra",
+          nameForum: "Não entres no Fórum",
+          bodyForum: "A eleição não precisa de briefing ao amanhecer. Silencia os grupos. Deixa os pundits fechados. Se precisares de uma data, procura uma vez. O que a multidão saúda — mesmo a que concorda contigo — não é o teu pão.",
+          nameTongue: "Guarda a língua",
+          bodyTongue: "O silêncio mais difícil não é com estranhos. É com parentes que já sabem onde estás. Uma maioria vocal faz o próximo reparo parecer coragem. Em geral é só ruído. Não evangelizas um tio no almoço. Cortesia não é rendição.",
+          nameWife: "O casamento não é campanha",
+          bodyWife: "Ela não precisa de um resumo da corrida. Precisa de ti desligado dos grupos. Nomeia a tensão. Combinem que esta casa não é comício, e que nenhum usa o outro como arma à mesa.",
+          nameTable: "A eleição fora da mesa",
+          bodyTable: "O almoço de domingo vai tentar virar debate. Deixa falhar. Passa o arroz. Sê brevemente aborrecido. Podes amar quem marca cédula diferente. Uma piada que é só faca continua faca.",
+          nameWork: "Trabalha com as mãos",
+          bodyWork: "O fogo que quer mais um áudio é o Fórum com a tua cara. Gasta-o no corpo, num ofício, numa página, na parceria. Cansa-te esta noite do que guardaste, não do que reencaminhaste.",
+          nightTitle: "Fechar o dia",
+          nightLede: "Fecha como eles fechavam: umas frases verdadeiras, depois silêncio. Guardaste a casa? Deixaste um parente em paz? Solta o argumento que ainda queres ganhar. Amanhã as urnas e os grupos continuam. Não tens de dormir dentro deles.",
+          closing: "Notas de encerramento",
+          noiseWhite: "Ruído branco",
+          noiseRain: "Chuva",
+          noiseOcean: "Oceano",
+          noiseCrickets: "Grilos",
+          play: "Tocar",
+          pause: "Pausa",
+          logTitle: "O diário",
+          logLede: "Não é um placar. Prova de que continuaste a aparecer — dias na arca, palavras que de facto escreveste, uma sequência só tua.",
+          logEmpty: "O diário enche-se quando escreves. Volta amanhã.",
+          statDays: "Dias",
+          statStreak: "Seguidos",
+          statChars: "Caracteres",
+          navMorning: "Manhã",
+          navDay: "Dia",
+          navNight: "Noite",
+          navLog: "Diário",
+          slotPray: "Oração",
+          slotReading: "Leitura",
+          slotForum: "O Fórum",
+          slotTongue: "A língua",
+          slotWife: "O casamento",
+          slotTable: "A mesa",
+          slotWork: "As mãos",
+          slotNight: "Encerramento",
+          slotPassage: "Passagem",
+        },
+      };
+
+      function t(key) {
+        return (I18N[lang] && I18N[lang][key]) || I18N.en[key] || key;
+      }
+
+      function applyLang() {
+        document.documentElement.lang = lang === "pt" ? "pt-BR" : "en";
+        document.querySelectorAll("[data-i18n]").forEach(function (el) {
+          if (el.id === "chantPlay" && chantLoaded) {
+            el.textContent = t("reload");
+            return;
+          }
+          if (el.id === "audioActionBtn") {
+            el.textContent = t(typeof isPlaying !== "undefined" && isPlaying ? "pause" : "play");
+            return;
+          }
+          el.textContent = t(el.getAttribute("data-i18n"));
+        });
+        document.querySelectorAll("[data-i18n-placeholder]").forEach(function (el) {
+          el.placeholder = t(el.getAttribute("data-i18n-placeholder"));
+        });
+        var sw = document.getElementById("langSwitch");
+        if (sw) sw.textContent = lang === "pt" ? "EN" : "PT";
+        document.getElementById("dateLine").textContent = new Date().toLocaleDateString(
+          lang === "pt" ? "pt-BR" : "en-GB",
+          { weekday: "long", day: "numeric", month: "long", year: "numeric" },
+        );
+        if (typeof renderReading === "function") renderReading();
+        if (typeof renderLog === "function") renderLog();
+        var foot = document.getElementById("chantFoot");
+        if (foot && typeof chantLoaded !== "undefined" && chantLoaded)
+          foot.textContent = t(chantMode === "local" ? "chantLocal" : "chantYt");
+        var rest = document.getElementById("chantTitle");
+        if (rest && typeof chantLoaded !== "undefined" && !chantLoaded)
+          rest.textContent = t("chantRest");
+      }
+
+      const READINGS = [
+        {
+          id: "aur-2-1",
+          src: "Marcus Aurelius · Meditations 2.1",
+          text: "Begin the morning by saying to thyself, I shall meet with the busy-body, the ungrateful, arrogant, deceitful, envious, unsocial. All these things happen to them by reason of their ignorance of what is good and evil. But I who have seen the nature of the good that it is beautiful, and of the bad that it is ugly, and the nature of him who does wrong, that it is akin to me — I can neither be injured by any of them, nor can I be angry with my kinsman, nor hate him.",
+        },
+        {
+          id: "aur-4-3",
+          src: "Marcus Aurelius · Meditations 4.3",
+          text: "Men seek retreats for themselves, houses in the country, sea-shores, and mountains; and thou too art wont to desire such things very much. But this is altogether a mark of the most common sort of men, for it is in thy power whenever thou shalt choose to retire into thyself. For nowhere either with more quiet or more freedom from trouble does a man retire than into his own soul.",
+        },
+        {
+          id: "aur-8-47",
+          src: "Marcus Aurelius · Meditations 8.47",
+          text: "If thou art pained by any external thing, it is not this thing that disturbs thee, but thy own judgment about it. And it is in thy power to wipe out this judgment now. If thou art pained because thou art not doing some particular thing that seems to thee to be right, why dost thou not rather act than complain?",
+        },
+        {
+          id: "aur-5-11",
+          src: "Marcus Aurelius · Meditations 5.11",
+          text: "There is no man so fortunate that there shall not be by him some who are pleased to see him in a fall. Wilt thou then be angry with him whose nature it is to do this? As well be angry with the fig-tree for yielding juice. Remember that thou art a man, and a Roman, and a ruler, and that these things have happened to thee.",
+        },
+        {
+          id: "sen-short",
+          src: "Seneca · On the Shortness of Life",
+          text: "It is not that we have a short space of time, but that we waste much of it. Life is long enough, and it has been given in sufficiently generous measure to allow the accomplishment of the very greatest things if the whole of it is well invested. But when it is squandered in luxury and carelessness, when it is devoted to no good end, forced at last by the ultimate necessity we perceive that it has passed away before we were aware that it was passing.",
+        },
+        {
+          id: "sen-7",
+          src: "Seneca · Letters 7",
+          text: "Do you ask me what you should regard as especially to be avoided? I say, crowds; for as yet you cannot trust yourself to them with safety. I shall never be ashamed of the witness of bad men. I want my life to be a life of my own, not a public show. To consort with the crowd is harmful; there is no one who does not make some vice attractive to us, or stamp it upon us, or taint us unconsciously therewith.",
+        },
+        {
+          id: "sen-calm",
+          src: "Seneca · On Tranquillity",
+          text: "We are all chained to fortune. Some are bound by a loose and golden chain, others by a tight one of base metal; but what does it matter? The same prison surrounds all of us, and others are fettered even as we are. Withdraw into yourself, as far as you can. Associate with those who will make a better man of you. Choose those whose development you can promote. The process is mutual; for men learn while they teach.",
+        },
+        {
+          id: "ecc-1",
+          src: "Ecclesiastes 1:13–14",
+          text: "And I gave my heart to seek and search out by wisdom concerning all things that are done under heaven: this sore travail hath God given to the sons of man to be exercised therewith. I have seen all the works that are done under the sun; and, behold, all is vanity and vexation of spirit.",
+        },
+        {
+          id: "ecc-3",
+          src: "Ecclesiastes 3:1, 7",
+          text: "To every thing there is a season, and a time to every purpose under the heaven: a time to rend, and a time to sew; a time to keep silence, and a time to speak.",
+        },
+        {
+          id: "ecc-4",
+          src: "Ecclesiastes 4:9–12",
+          text: "Two are better than one; because they have a good reward for their labour. For if they fall, the first will lift up his fellow: but woe to him that is alone when he falleth; for he hath not another to help him up. And if one prevail against him, two shall withstand him; and a threefold cord is not quickly broken.",
+        },
+        {
+          id: "prov-4",
+          src: "Proverbs 4:23–24",
+          text: "Keep thy heart with all diligence; for out of it are the issues of life. Put away from thee a froward mouth, and perverse lips put far from thee.",
+        },
+        {
+          id: "prov-17",
+          src: "Proverbs 17:1, 27",
+          text: "Better is a dry morsel, and quietness therewith, than an house full of sacrifices with strife. He that hath knowledge spareth his words: and a man of understanding is of an excellent spirit.",
+        },
+        {
+          id: "amos-5",
+          src: "Amos 5:13–15",
+          text: "Therefore the prudent shall keep silence in that time; for it is an evil time. Seek good, and not evil, that ye may live: and so the Lord, the God of hosts, shall be with you, as ye have spoken. Hate the evil, and love the good, and establish judgment in the gate.",
+        },
+        {
+          id: "matt-6",
+          src: "Matthew 6:6, 9–11",
+          text: "But thou, when thou prayest, enter into thy closet, and when thou hast shut thy door, pray to thy Father which is in secret. After this manner therefore pray ye: Our Father which art in heaven, Hallowed be thy name. Thy kingdom come. Thy will be done in earth, as it is in heaven. Give us this day our daily bread.",
+        },
+        {
+          id: "matt-26",
+          src: "Matthew 26:38–39",
+          text: "Then saith he unto them, My soul is exceeding sorrowful, even unto death: tarry ye here, and watch with me. And he went a little farther, and fell on his face, and prayed, saying, O my Father, if it be possible, let this cup pass from me: nevertheless not as I will, but as thou wilt.",
+        },
+        {
+          id: "rom-12",
+          src: "Romans 12:2, 12, 18",
+          text: "And be not conformed to this world: but be ye transformed by the renewing of your mind. Rejoicing in hope; patient in tribulation; continuing instant in prayer. If it be possible, as much as lieth in you, live peaceably with all men.",
+        },
+        {
+          id: "th-4",
+          src: "1 Thessalonians 4:11–12",
+          text: "And that ye study to be quiet, and to do your own business, and to work with your own hands, as we commanded you; that ye may walk honestly toward them that are without, and that ye may have lack of nothing.",
+        },
+        {
+          id: "pet-2",
+          src: "1 Peter 2:11–12",
+          text: "Dearly beloved, I beseech you as strangers and pilgrims, abstain from fleshly lusts, which war against the soul; having your conversation honest among the Gentiles: that, whereas they speak against you as evildoers, they may by your good works, which they shall behold, glorify God in the day of visitation.",
+        },
+        {
+          id: "mic-6",
+          src: "Micah 6:8",
+          text: "He hath shewed thee, O man, what is good; and what doth the Lord require of thee, but to do justly, and to love mercy, and to walk humbly with thy God?",
+        },
+        {
+          id: "ps-46",
+          src: "Psalm 46:10",
+          text: "Be still, and know that I am God: I will be exalted among the heathen, I will be exalted in the earth.",
+        },
+        {
+          id: "jas-1",
+          src: "James 1:19–20",
+          text: "Wherefore, my beloved brethren, let every man be swift to hear, slow to speak, slow to wrath: for the wrath of man worketh not the righteousness of God.",
+        },
+      ];
+
+      const READING_PT = {
+        "aur-2-1": {
+          src: "Marco Aurélio · Meditações 2.1",
+          text: "Começa a manhã dizendo a ti mesmo: encontrarei o intrometido, o ingrato, o arrogante, o enganador, o invejoso, o insociável. Tudo isso lhes acontece por ignorância do bem e do mal. Mas eu, que vi a natureza do bem — que é belo — e do mal — que é feio — e a natureza do que erra, que é da minha espécie, não posso ser ferido por nenhum deles, nem irar-me contra o meu parente, nem odiá-lo.",
+        },
+        "aur-4-3": {
+          src: "Marco Aurélio · Meditações 4.3",
+          text: "Os homens buscam refúgios para si, casas no campo, praias e montanhas; e tu também costumas desejá-los. Mas isso é próprio dos mais vulgares, pois está em teu poder, quando quiseres, recolher-te a ti mesmo. Em parte nenhuma o homem se recolhe com mais quietude e liberdade de perturbação do que na própria alma.",
+        },
+        "aur-8-47": {
+          src: "Marco Aurélio · Meditações 8.47",
+          text: "Se alguma coisa externa te dói, não é ela que te perturba, mas o teu juízo a respeito dela. E está em teu poder apagar agora esse juízo. Se te dói não fazeres alguma coisa que te parece certa, por que te queixas em vez de agir?",
+        },
+        "aur-5-11": {
+          src: "Marco Aurélio · Meditações 5.11",
+          text: "Não há homem tão afortunado que não haja junto dele quem se alegre em vê-lo cair. Irar-te-ás então com aquele cuja natureza é fazer isso? Tão bem irar-te-ias com a figueira por dar suco. Lembra-te de que és homem, e romano, e que estas coisas te aconteceram.",
+        },
+        "sen-short": {
+          src: "Séneca · Da brevidade da vida",
+          text: "Não é que tenhamos pouco tempo, é que desperdiçamos muito. A vida é bastante longa, e foi dada com medida generosa para as maiores coisas, se toda ela for bem empregada. Mas quando se esbanja no luxo e no descuido, quando a nenhum bom fim se dedica, percebemos tarde demais que passou antes de notarmos que passava.",
+        },
+        "sen-7": {
+          src: "Séneca · Cartas 7",
+          text: "Perguntas o que deves evitar sobretudo? Digo: as multidões; pois ainda não podes confiar-te a elas em segurança. Quero que a minha vida seja minha, não um espetáculo público. Convivir com a turba faz mal; não há quem não nos torne algum vício atraente, ou no-lo imprima, ou nos contamine sem o sabermos.",
+        },
+        "sen-calm": {
+          src: "Séneca · Da tranquilidade",
+          text: "Estamos todos acorrentados à fortuna. Uns por cadeia frouxa e de ouro, outros por uma estreita de metal vil; mas que importa? A mesma prisão nos cerca a todos. Recolhe-te a ti mesmo, quanto puderes. Junta-te a quem te faça melhor. O processo é mútuo: os homens aprendem enquanto ensinam.",
+        },
+        "ecc-1": {
+          src: "Eclesiastes 1:13–14",
+          text: "E apliquei o meu coração a esquadrinhar, e a informar-me com sabedoria de tudo quanto sucede debaixo do céu; esta enfadonha ocupação deu Deus aos filhos dos homens, para nela os exercitar. Atentei para todas as obras que se fazem debaixo do sol, e eis que tudo era vaidade e aflição de espírito.",
+        },
+        "ecc-3": {
+          src: "Eclesiastes 3:1, 7",
+          text: "Tudo tem o seu tempo determinado, e há tempo para todo o propósito debaixo do céu: tempo de rasgar, e tempo de coser; tempo de estar calado, e tempo de falar.",
+        },
+        "ecc-4": {
+          src: "Eclesiastes 4:9–12",
+          text: "Melhor é serem dois do que um, porque têm melhor paga do seu trabalho. Porque se um cair, o outro levanta o seu companheiro; mas ai do que estiver só. E o cordão de três dobras não se quebra tão depressa.",
+        },
+        "prov-4": {
+          src: "Provérbios 4:23–24",
+          text: "Sobre tudo o que se deve guardar, guarda o teu coração, porque dele procedem as saídas da vida. Desvia de ti a distorção da boca, e alonga de ti a perversidade dos lábios.",
+        },
+        "prov-17": {
+          src: "Provérbios 17:1, 27",
+          text: "Melhor é um bocado seco, e com ele a tranquilidade, do que a casa cheia de vítimas, com contenda. O que possui o conhecimento reserva as suas palavras, e o homem de entendimento é de espírito precioso.",
+        },
+        "amos-5": {
+          src: "Amós 5:13–15",
+          text: "Portanto o que for prudente nesse tempo calará, porque o tempo é mau. Buscai o bem, e não o mal, para que vivais. Aborrecei o mal, e amai o bem, e estabelecei o juízo na porta.",
+        },
+        "matt-6": {
+          src: "Mateus 6:6, 9–11",
+          text: "Mas tu, quando orares, entra no teu aposento e, fechando a tua porta, ora a teu Pai que está em secreto. Portanto, vós orareis assim: Pai nosso, que estás nos céus, santificado seja o teu nome. Venha o teu reino. Seja feita a tua vontade, tanto na terra como no céu. O pão nosso de cada dia nos dá hoje.",
+        },
+        "matt-26": {
+          src: "Mateus 26:38–39",
+          text: "Então lhes disse: A minha alma está cheia de tristeza até a morte; ficai aqui, e vigiai comigo. E, indo um pouco mais para diante, se prostrou sobre o seu rosto, orando e dizendo: Meu Pai, se é possível, passe de mim este cálice; todavia, não seja como eu quero, mas como tu queres.",
+        },
+        "rom-12": {
+          src: "Romanos 12:2, 12, 18",
+          text: "E não vos conformeis com este mundo, mas transformai-vos pela renovação do vosso entendimento. Alegrai-vos na esperança, sede pacientes na tribulação, perseverai na oração. Se for possível, quanto estiver em vós, tende paz com todos os homens.",
+        },
+        "th-4": {
+          src: "1 Tessalonicenses 4:11–12",
+          text: "E procurar viver quietos, e tratar dos vossos próprios negócios, e trabalhar com vossas próprias mãos, como já vo-lo temos mandado; para que andeis honestamente para com os que estão de fora, e não necessiteis de coisa alguma.",
+        },
+        "pet-2": {
+          src: "1 Pedro 2:11–12",
+          text: "Amados, peço-vos, como a peregrinos e forasteiros, que vos abstenhais das concupiscências carnais que combatem contra a alma; tendo o vosso viver honesto entre os gentios, para que, naquilo em que falam mal de vós, como de malfeitores, glorifiquem a Deus no dia da visitação, pelas boas obras que em vós observem.",
+        },
+        "mic-6": {
+          src: "Miqueias 6:8",
+          text: "Ele te declarou, ó homem, o que é bom; e que é o que o Senhor pede de ti, senão que pratiques a justiça, e ames a beneficência, e andes humildemente com o teu Deus?",
+        },
+        "ps-46": {
+          src: "Salmo 46:10",
+          text: "Aquietai-vos, e sabei que eu sou Deus; serei exaltado entre as nações; serei exaltado sobre a terra.",
+        },
+        "jas-1": {
+          src: "Tiago 1:19–20",
+          text: "Sabei isto, meus amados irmãos: Todo o homem seja pronto para ouvir, tardio para falar, tardio para se irar. Porque a ira do homem não opera a justiça de Deus.",
+        },
+      };
+
+      const database = {
+        mat26: {
+          title: "Matthew 26:38–39",
+          text: "<p><span class='v-num'>38</span> Then saith he unto them, My soul is exceeding sorrowful, even unto death: tarry ye here, and watch with me.</p><p><span class='v-num'>39</span> And he went a little farther, and fell on his face, and prayed, saying, O my Father, if it be possible, let this cup pass from me: nevertheless not as I will, but as thou wilt.</p>",
+          pt: {
+            title: "Mateus 26:38–39",
+            text: "<p><span class='v-num'>38</span> Então lhes disse: A minha alma está cheia de tristeza até a morte; ficai aqui, e vigiai comigo.</p><p><span class='v-num'>39</span> E, indo um pouco mais para diante, se prostrou sobre o seu rosto, orando e dizendo: Meu Pai, se é possível, passe de mim este cálice; todavia, não seja como eu quero, mas como tu queres.</p>",
+          },
+        },
+        mat6: {
+          title: "Matthew 6:6–13",
+          text: "<p><span class='v-num'>6</span> But thou, when thou prayest, enter into thy closet, and when thou hast shut thy door, pray to thy Father which is in secret; and thy Father which seeth in secret shall reward thee openly.</p><p><span class='v-num'>9</span> After this manner therefore pray ye: Our Father which art in heaven, Hallowed be thy name.</p><p><span class='v-num'>10</span> Thy kingdom come. Thy will be done in earth, as it is in heaven.</p><p><span class='v-num'>11</span> Give us this day our daily bread.</p><p><span class='v-num'>12</span> And forgive us our debts, as we forgive our debtors.</p><p><span class='v-num'>13</span> And lead us not into temptation, but deliver us from evil: For thine is the kingdom, and the power, and the glory, for ever. Amen.</p>",
+          pt: {
+            title: "Mateus 6:6–13",
+            text: "<p><span class='v-num'>6</span> Mas tu, quando orares, entra no teu aposento e, fechando a tua porta, ora a teu Pai que está em secreto; e teu Pai, que vê em secreto, te recompensará publicamente.</p><p><span class='v-num'>9</span> Portanto, vós orareis assim: Pai nosso, que estás nos céus, santificado seja o teu nome.</p><p><span class='v-num'>10</span> Venha o teu reino. Seja feita a tua vontade, tanto na terra como no céu.</p><p><span class='v-num'>11</span> O pão nosso de cada dia nos dá hoje.</p><p><span class='v-num'>12</span> E perdoa-nos as nossas dívidas, assim como nós perdoamos aos nossos devedores.</p><p><span class='v-num'>13</span> E não nos induzas à tentação, mas livra-nos do mal; porque teu é o reino, e o poder, e a glória, para sempre. Amém.</p>",
+          },
+        },
+        prov4: {
+          title: "Proverbs 4:23",
+          text: "<p><span class='v-num'>23</span> Keep thy heart with all diligence; for out of it are the issues of life.</p>",
+          pt: {
+            title: "Provérbios 4:23",
+            text: "<p><span class='v-num'>23</span> Sobre tudo o que se deve guardar, guarda o teu coração, porque dele procedem as saídas da vida.</p>",
+          },
+        },
+        amos5: {
+          title: "Amos 5:13",
+          text: "<p><span class='v-num'>13</span> Therefore the prudent shall keep silence in that time; for it is an evil time.</p>",
+          pt: {
+            title: "Amós 5:13",
+            text: "<p><span class='v-num'>13</span> Portanto, o que for prudente nesse tempo calará, porque o tempo é mau.</p>",
+          },
+        },
+        rom18: {
+          title: "Romans 12:17–18",
+          text: "<p><span class='v-num'>17</span> Recompense to no man evil for evil. Provide things honest in the sight of all men.</p><p><span class='v-num'>18</span> If it be possible, as much as lieth in you, live peaceably with all men.</p>",
+          pt: {
+            title: "Romanos 12:17–18",
+            text: "<p><span class='v-num'>17</span> A ninguém torneis mal por mal; procurai as coisas honestas, perante todos os homens.</p><p><span class='v-num'>18</span> Se for possível, quanto estiver em vós, tende paz com todos os homens.</p>",
+          },
+        },
+        ecc4: {
+          title: "Ecclesiastes 4:9–12",
+          text: "<p><span class='v-num'>9</span> Two are better than one; because they have a good reward for their labour.</p><p><span class='v-num'>10</span> For if they fall, the first will lift up his fellow: but woe to him that is alone when he falleth; for he hath not another to help him up.</p><p><span class='v-num'>12</span> And if one prevail against him, two shall withstand him; and a threefold cord is not quickly broken.</p>",
+          pt: {
+            title: "Eclesiastes 4:9–12",
+            text: "<p><span class='v-num'>9</span> Melhor é serem dois do que um, porque têm melhor paga do seu trabalho.</p><p><span class='v-num'>10</span> Porque se um cair, o outro levanta o seu companheiro; mas ai do que estiver só; pois, caindo, não haverá outro que o levante.</p><p><span class='v-num'>12</span> Se alguém quiser prevalecer contra um, os dois lhe resistirão; e o cordão de três dobras não se quebra tão depressa.</p>",
+          },
+        },
+        prov17: {
+          title: "Proverbs 17:1",
+          text: "<p><span class='v-num'>1</span> Better is a dry morsel, and quietness therewith, than an house full of sacrifices with strife.</p>",
+          pt: {
+            title: "Provérbios 17:1",
+            text: "<p><span class='v-num'>1</span> Melhor é um bocado seco, e com ele a tranquilidade, do que a casa cheia de vítimas, com contenda.</p>",
+          },
+        },
+        th4: {
+          title: "1 Thessalonians 4:11–12",
+          text: "<p><span class='v-num'>11</span> And that ye study to be quiet, and to do your own business, and to work with your own hands, as we commanded you;</p><p><span class='v-num'>12</span> That ye may walk honestly toward them that are without, and that ye may have lack of nothing.</p>",
+          pt: {
+            title: "1 Tessalonicenses 4:11–12",
+            text: "<p><span class='v-num'>11</span> E procurar viver quietos, e tratar dos vossos próprios negócios, e trabalhar com vossas próprias mãos, como já vo-lo temos mandado;</p><p><span class='v-num'>12</span> Para que andeis honestamente para com os que estão de fora, e não necessiteis de coisa alguma.</p>",
+          },
+        },
+      };
+
+      const YT_CHANT = [
+        {
+          title: "Santo Domingo de Silos · Canto Gregoriano",
+          yt: "GCuDBo4F-Ac",
+        },
+        {
+          title: "Silos · Chant (1994 album)",
+          yt: "qFUFF-YK5v8",
+        },
+        {
+          title: "Monks of Norcia · Benedicta",
+          yt: "bTKfstuIUKM",
+        },
+        {
+          title: "Norcia · Salve Regina",
+          yt: "e9BBWZKnTvQ",
+        },
+        {
+          title: "Schola Gregoriana Mediolanensis · Holy Mass",
+          yt: "nsrKNcjzcSU",
+        },
+        {
+          title: "Schola Gregoriana Mediolanensis · Missae",
+          yt: "c79SszUBZUE",
+        },
+      ];
+
+      let chantList = YT_CHANT.slice();
+      let chantMode = "yt";
+      let chantIndex = 0;
+      let chantLoaded = false;
+
+      function chantYoutubeSrc(id, autoplay) {
+        return (
+          "https://www.youtube-nocookie.com/embed/" +
+          id +
+          "?rel=0&modestbranding=1&playsinline=1&iv_load_policy=3&fs=0" +
+          (autoplay ? "&autoplay=1" : "")
+        );
+      }
+
+      function renderChant(autoplay) {
+        const item = chantList[chantIndex];
+        if (!item) return;
+        document.getElementById("chantTitle").textContent = item.title;
+        document.getElementById("chantFoot").textContent =
+          chantMode === "local" ? t("chantLocal") : t("chantYt");
+        if (!chantLoaded && !autoplay) {
+          document.getElementById("chantTitle").textContent = t("chantRest");
+        }
+        const mount = document.getElementById("chantMount");
+        mount.innerHTML = "";
+        if (!chantLoaded && !autoplay) return;
+        chantLoaded = true;
+        if (chantMode === "local") {
+          const audio = document.createElement("audio");
+          audio.controls = true;
+          audio.src = item.src;
+          audio.setAttribute("playsinline", "");
+          audio.addEventListener("ended", () => stepChant(1, true));
+          mount.appendChild(audio);
+          if (autoplay) audio.play().catch(function () {});
+        } else {
+          const iframe = document.createElement("iframe");
+          iframe.src = chantYoutubeSrc(item.yt, !!autoplay);
+          iframe.allow =
+            "accelerometer; autoplay; encrypted-media; picture-in-picture";
+          iframe.referrerPolicy = "strict-origin-when-cross-origin";
+          iframe.title = item.title;
+          mount.appendChild(iframe);
+        }
+        const playBtn = document.getElementById("chantPlay");
+        playBtn.textContent = chantLoaded ? t("reload") : t("load");
+      }
+
+      function stepChant(delta, autoplay) {
+        if (!chantList.length) return;
+        chantIndex =
+          (chantIndex + delta + chantList.length) % chantList.length;
+        chantLoaded = true;
+        renderChant(autoplay);
+      }
+
+      async function initChant() {
+        try {
+          const res = await fetch("audio/playlist.json", { cache: "no-store" });
+          if (res.ok) {
+            const data = await res.json();
+            const local = (Array.isArray(data) ? data : data.tracks || [])
+              .map(function (t) {
+                if (!t || !t.src) return null;
+                return { title: t.title || t.src, src: t.src };
+              })
+              .filter(Boolean);
+            if (local.length) {
+              chantList = local;
+              chantMode = "local";
+              chantIndex = 0;
+            }
+          }
+        } catch (e) {}
+        document.getElementById("chantPrev").addEventListener("click", () =>
+          stepChant(-1, chantLoaded),
+        );
+        document.getElementById("chantNext").addEventListener("click", () =>
+          stepChant(1, chantLoaded),
+        );
+        document.getElementById("chantPlay").addEventListener("click", () => {
+          chantLoaded = true;
+          renderChant(true);
+        });
+        renderChant(false);
+      }
+
+      function todayKey() {
+        const d = new Date();
+        return (
+          d.getFullYear() +
+          "-" +
+          String(d.getMonth() + 1).padStart(2, "0") +
+          "-" +
+          String(d.getDate()).padStart(2, "0")
+        );
+      }
+
+      function hashStr(s) {
+        let h = 0;
+        for (let i = 0; i < s.length; i++) h = (h * 31 + s.charCodeAt(i)) >>> 0;
+        return h;
+      }
+
+      function emptyJournal() {
+        return { date: todayKey(), checks: {}, notes: {}, readingId: null };
+      }
+
+      function loadJournal() {
+        try {
+          const raw = JSON.parse(localStorage.getItem(STORE) || "null");
+          if (!raw || !raw.date) return emptyJournal();
+          if (raw.date !== todayKey()) {
+            const log = JSON.parse(localStorage.getItem(STORE_LOG) || "[]");
+            log.push(raw);
+            localStorage.setItem(STORE_LOG, JSON.stringify(log.slice(-180)));
+            return emptyJournal();
+          }
+          raw.checks = raw.checks || {};
+          raw.notes = raw.notes || {};
+          return raw;
+        } catch (e) {
+          return emptyJournal();
+        }
+      }
+
+      let journal = loadJournal();
+
+      function saveJournal() {
+        localStorage.setItem(STORE, JSON.stringify(journal));
+      }
+
+      function pickReading() {
+        if (!journal.readingId) {
+          journal.readingId =
+            READINGS[hashStr(journal.date) % READINGS.length].id;
+          saveJournal();
+        }
+        return (
+          READINGS.find((r) => r.id === journal.readingId) || READINGS[0]
+        );
+      }
+
+      function renderReading() {
+        const r = pickReading();
+        const el = document.getElementById("dailyReading");
+        const extra = lang === "pt" ? READING_PT[r.id] : null;
+        const loc = extra || { src: r.src, text: r.text };
+        const paras = loc.text
+          .split(/\n\n/)
+          .map((chunk) => "<p>" + chunk + "</p>")
+          .join("");
+        el.innerHTML = '<div class="src">' + loc.src + "</div>" + paras;
+      }
+
+      function writeNote(slot, value) {
+        if (!slot) return;
+        journal.notes[slot] = value;
+        saveJournal();
+        document
+          .querySelectorAll('textarea.note[data-slot="' + slot + '"]')
+          .forEach((el) => {
+            if (el.value !== value) el.value = value;
+          });
+        const modalTa = document.getElementById("modalNote");
+        if (modalTa && modalTa.dataset.slot === slot && modalTa.value !== value)
+          modalTa.value = value;
+        renderLog();
+      }
+
+      const SLOT_KEY = {
+        pray: "slotPray",
+        reading: "slotReading",
+        forum: "slotForum",
+        tongue: "slotTongue",
+        wife: "slotWife",
+        table: "slotTable",
+        work: "slotWork",
+        night: "slotNight",
+      };
+
+      function esc(s) {
+        return String(s)
+          .replace(/&/g, "&amp;")
+          .replace(/</g, "&lt;")
+          .replace(/>/g, "&gt;");
+      }
+
+      function loadLog() {
+        try {
+          return JSON.parse(localStorage.getItem(STORE_LOG) || "[]");
+        } catch (e) {
+          return [];
+        }
+      }
+
+      function allDays() {
+        const byDate = {};
+        loadLog().forEach((d) => {
+          if (d && d.date) byDate[d.date] = d;
+        });
+        byDate[journal.date] = journal;
+        return Object.keys(byDate)
+          .sort()
+          .reverse()
+          .map((k) => byDate[k]);
+      }
+
+      function noteChars(d) {
+        return Object.values(d.notes || {}).reduce(
+          (n, t) => n + String(t || "").length,
+          0,
+        );
+      }
+
+      function dayUsed(d) {
+        if (noteChars(d) > 0) return true;
+        return Object.values(d.checks || {}).some(Boolean);
+      }
+
+      function shiftDate(key, delta) {
+        const p = key.split("-").map(Number);
+        const dt = new Date(p[0], p[1] - 1, p[2]);
+        dt.setDate(dt.getDate() + delta);
+        return (
+          dt.getFullYear() +
+          "-" +
+          String(dt.getMonth() + 1).padStart(2, "0") +
+          "-" +
+          String(dt.getDate()).padStart(2, "0")
+        );
+      }
+
+      function countStreak(used) {
+        const set = {};
+        used.forEach((k) => {
+          set[k] = true;
+        });
+        let start = todayKey();
+        if (!set[start]) start = shiftDate(start, -1);
+        let n = 0;
+        let k = start;
+        while (set[k]) {
+          n++;
+          k = shiftDate(k, -1);
+        }
+        return n;
+      }
+
+      function formatDay(key) {
+        const p = key.split("-").map(Number);
+        return new Date(p[0], p[1] - 1, p[2]).toLocaleDateString("en-GB", {
+          weekday: "short",
+          day: "numeric",
+          month: "short",
+          year: "numeric",
+        });
+      }
+
+      function renderLog() {
+        const days = allDays();
+        const used = days.filter(dayUsed);
+        const chars = days.reduce((n, d) => n + noteChars(d), 0);
+        const streak = countStreak(used.map((d) => d.date));
+        document.getElementById("logStats").innerHTML =
+          '<div class="stat"><b>' +
+          used.length +
+          "</b><span>" +
+          t("statDays") +
+          "</span></div>" +
+          '<div class="stat"><b>' +
+          streak +
+          "</b><span>" +
+          t("statStreak") +
+          "</span></div>" +
+          '<div class="stat"><b>' +
+          chars.toLocaleString(lang === "pt" ? "pt-BR" : "en-GB") +
+          "</b><span>" +
+          t("statChars") +
+          "</span></div>";
+
+        if (!used.length) {
+          document.getElementById("logList").innerHTML =
+            '<p class="log-empty">' + t("logEmpty") + "</p>";
+          return;
+        }
+
+        document.getElementById("logList").innerHTML = used
+          .map((d) => {
+            const reading = READINGS.find((r) => r.id === d.readingId);
+            const slots = Object.keys(SLOT_KEY);
+            const body = slots
+              .map((slot) => {
+                const note = (d.notes && d.notes[slot]) || "";
+                if (!note.trim()) return "";
+                return (
+                  '<div class="log-entry"><div class="k">' +
+                  t(SLOT_KEY[slot]) +
+                  "</div><p>" +
+                  esc(note) +
+                  "</p></div>"
+                );
+              })
+              .join("");
+            const src = reading
+              ? '<div class="log-entry"><div class="k">' +
+                t("slotPassage") +
+                "</div><p>" +
+                esc(
+                  (lang === "pt" && READING_PT[reading.id]
+                    ? READING_PT[reading.id].src
+                    : reading.src),
+                ) +
+                "</p></div>"
+              : "";
+            return (
+              '<details class="log-day"><summary>' +
+              formatDay(d.date) +
+              ' <span class="meta">· ' +
+              noteChars(d).toLocaleString("en-GB") +
+              " characters</span></summary>" +
+              src +
+              body +
+              "</details>"
+            );
+          })
+          .join("");
+      }
+
+      function showPane(name) {
+        document.querySelectorAll(".pane").forEach((p) => {
+          p.hidden = p.id !== "pane-" + name;
+        });
+        document.querySelectorAll(".nav-bar button").forEach((b) => {
+          b.classList.toggle("active", b.dataset.pane === name);
+        });
+        try {
+          sessionStorage.setItem("noah-pane", name);
+        } catch (e) {}
+        if (name === "log") renderLog();
+        window.scrollTo(0, 0);
+      }
+
+      function bindJournal() {
+        document.querySelectorAll("input[data-check]").forEach((cb) => {
+          const slot = cb.getAttribute("data-check");
+          cb.checked = !!journal.checks[slot];
+          cb.addEventListener("change", () => {
+            journal.checks[slot] = cb.checked;
+            saveJournal();
+            renderLog();
+          });
+        });
+        document.querySelectorAll("textarea.note[data-slot]").forEach((ta) => {
+          const slot = ta.dataset.slot;
+          ta.value = journal.notes[slot] || "";
+          ta.addEventListener("input", () => writeNote(slot, ta.value));
+        });
+        const modalTa = document.getElementById("modalNote");
+        modalTa.addEventListener("input", () =>
+          writeNote(modalTa.dataset.slot, modalTa.value),
+        );
+      }
+
+      function openScripture(key, slot) {
+        if (!database[key]) return;
+        const pack =
+          lang === "pt" && database[key].pt
+            ? database[key].pt
+            : database[key];
+        document.getElementById("mTitle").innerText = pack.title;
+        document.getElementById("mBody").innerHTML = pack.text;
+        const modalTa = document.getElementById("modalNote");
+        modalTa.dataset.slot = slot || "";
+        modalTa.value = slot ? journal.notes[slot] || "" : "";
+        document.getElementById("scriptureModal").style.display = "flex";
+      }
+
+      function closeModal() {
+        document.getElementById("scriptureModal").style.display = "none";
+      }
+
+      document.getElementById("langSwitch").addEventListener("click", function () {
+        lang = lang === "pt" ? "en" : "pt";
+        localStorage.setItem(LANG_KEY, lang);
+        applyLang();
+      });
+
+      document.querySelectorAll(".nav-bar button").forEach((b) => {
+        b.addEventListener("click", () => showPane(b.dataset.pane));
+      });
+
+      renderReading();
+      bindJournal();
+      renderLog();
+      initChant();
+      applyLang();
+      try {
+        const last = sessionStorage.getItem("noah-pane");
+        if (last) showPane(last);
+      } catch (e) {}
+    </script>
+
+    <script>
+      let audioCtx = null,
+        noiseNode = null,
+        filterNode = null,
+        lfoNode = null,
+        synthNodes = [],
+        gainNode = null,
+        isPlaying = false;
+
+      function toggleNativeAudio() {
+        const btn = document.getElementById("audioActionBtn");
+        const trackType = document.getElementById("noiseSelect").value;
+
+        if (!isPlaying) {
+          if (!audioCtx)
+            audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+          const bufferSize = 4 * audioCtx.sampleRate;
+          const noiseBuffer = audioCtx.createBuffer(
+            1,
+            bufferSize,
+            audioCtx.sampleRate,
+          );
+          const output = noiseBuffer.getChannelData(0);
+
+          let b0 = 0,
+            b1 = 0,
+            b2 = 0,
+            b3 = 0,
+            b4 = 0,
+            b5 = 0,
+            b6 = 0;
+          for (let i = 0; i < bufferSize; i++) {
+            let white = Math.random() * 2 - 1;
+            b0 = 0.99886 * b0 + white * 0.0555179;
+            b1 = 0.99332 * b1 + white * 0.0750759;
+            b2 = 0.969 * b2 + white * 0.153852;
+            b3 = 0.8665 * b3 + white * 0.3104856;
+            b4 = 0.55 * b4 + white * 0.5329522;
+            b5 = -0.7616 * b5 - white * 0.016898;
+            let pink = b0 + b1 + b2 + b3 + b4 + b5 + b6 + white * 0.5362;
+            b6 = white * 0.115926;
+            output[i] = pink * 0.11;
+          }
+
+          noiseNode = audioCtx.createBufferSource();
+          noiseNode.buffer = noiseBuffer;
+          noiseNode.loop = true;
+          filterNode = audioCtx.createBiquadFilter();
+          gainNode = audioCtx.createGain();
+
+          if (trackType === "white") {
+            filterNode.type = "lowpass";
+            filterNode.frequency.setValueAtTime(4500, audioCtx.currentTime);
+            gainNode.gain.setValueAtTime(0.2, audioCtx.currentTime);
+            noiseNode.connect(filterNode);
+          } else if (trackType === "rain") {
+            filterNode.type = "lowpass";
+            filterNode.frequency.setValueAtTime(1100, audioCtx.currentTime);
+            lfoNode = audioCtx.createOscillator();
+            lfoNode.type = "sine";
+            lfoNode.frequency.setValueAtTime(0.05, audioCtx.currentTime);
+            let lfoGain = audioCtx.createGain();
+            lfoGain.gain.setValueAtTime(0.015, audioCtx.currentTime);
+            lfoNode.connect(lfoGain);
+            lfoGain.connect(gainNode.gain);
+            gainNode.gain.setValueAtTime(0.25, audioCtx.currentTime);
+            noiseNode.connect(filterNode);
+            lfoNode.start();
+          } else if (trackType === "ocean") {
+            filterNode.type = "lowpass";
+            lfoNode = audioCtx.createOscillator();
+            lfoNode.type = "sine";
+            lfoNode.frequency.setValueAtTime(0.08, audioCtx.currentTime);
+            let lfoGain = audioCtx.createGain();
+            lfoGain.gain.setValueAtTime(350, audioCtx.currentTime);
+            lfoNode.connect(lfoGain);
+            lfoGain.connect(filterNode.frequency);
+            filterNode.frequency.setValueAtTime(450, audioCtx.currentTime);
+            gainNode.gain.setValueAtTime(0.35, audioCtx.currentTime);
+            noiseNode.connect(filterNode);
+            lfoNode.start();
+          } else if (trackType === "crickets") {
+            gainNode.gain.setValueAtTime(0.08, audioCtx.currentTime);
+            let osc1 = audioCtx.createOscillator();
+            let chirpLfo1 = audioCtx.createOscillator();
+            let shimmer1 = audioCtx.createOscillator();
+            let gChirp1 = audioCtx.createGain();
+            let gShim1 = audioCtx.createGain();
+            osc1.type = "sine";
+            osc1.frequency.setValueAtTime(2200, audioCtx.currentTime);
+            chirpLfo1.type = "sine";
+            chirpLfo1.frequency.setValueAtTime(0.8, audioCtx.currentTime);
+            shimmer1.type = "sine";
+            shimmer1.frequency.setValueAtTime(28, audioCtx.currentTime);
+            chirpLfo1.connect(gChirp1.gain);
+            shimmer1.connect(gShim1.gain);
+            osc1.connect(gChirp1);
+            gChirp1.connect(gShim1);
+
+            let osc2 = audioCtx.createOscillator();
+            let chirpLfo2 = audioCtx.createOscillator();
+            let gChirp2 = audioCtx.createGain();
+            osc2.type = "sine";
+            osc2.frequency.setValueAtTime(3400, audioCtx.currentTime);
+            chirpLfo2.type = "sine";
+            chirpLfo2.frequency.setValueAtTime(0.5, audioCtx.currentTime);
+            chirpLfo2.connect(gChirp2.gain);
+            osc2.connect(gChirp2);
+
+            lfoNode = audioCtx.createOscillator();
+            lfoNode.type = "triangle";
+            lfoNode.frequency.setValueAtTime(0.07, audioCtx.currentTime);
+            let gateGain = audioCtx.createGain();
+            gateGain.gain.setValueAtTime(0.3, audioCtx.currentTime);
+            lfoNode.connect(gateGain.gain);
+            gShim1.connect(gateGain);
+            gChirp2.connect(gateGain);
+            gateGain.connect(gainNode);
+
+            osc1.start();
+            chirpLfo1.start();
+            shimmer1.start();
+            osc2.start();
+            chirpLfo2.start();
+            lfoNode.start();
+            synthNodes.push(
+              osc1,
+              chirpLfo1,
+              shimmer1,
+              osc2,
+              chirpLfo2,
+              lfoNode,
+            );
+          }
+
+          if (trackType !== "crickets") filterNode.connect(gainNode);
+          gainNode.connect(audioCtx.destination);
+          if (trackType !== "crickets") noiseNode.start();
+          btn.textContent = t("pause");
+          isPlaying = true;
+        } else {
+          if (noiseNode) {
+            try {
+              noiseNode.stop();
+              noiseNode.disconnect();
+            } catch (e) {}
+          }
+          if (lfoNode) {
+            try {
+              lfoNode.stop();
+              lfoNode.disconnect();
+            } catch (e) {}
+          }
+          synthNodes.forEach((n) => {
+            try {
+              n.stop();
+              n.disconnect();
+            } catch (e) {}
+          });
+          synthNodes = [];
+          btn.textContent = t("play");
+          isPlaying = false;
+        }
+      }
+    </script>
+    <script>
+      if ("serviceWorker" in navigator) {
+        window.addEventListener("load", () => {
+          navigator.serviceWorker.register("sw.js").catch(() => {});
+        });
+      }
+    </script>
+  </body>
+</html>

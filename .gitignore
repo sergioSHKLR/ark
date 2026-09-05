@@ -1,0 +1,9 @@
+*.webm
+*.mp4
+audio/*.ogg
+audio/*.mp3
+audio/*.m4a
+audio/*.opus
+audio/*.flac
+audio/playlist.json
+.DS_Store
