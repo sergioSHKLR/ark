@@ -62,8 +62,19 @@
         --nav-h: 3.6rem;
       }
 
+      html[data-theme="dark"] {
+        --paper: #1a1612;
+        --paper-2: #241f19;
+        --ink: #eddcc0;
+        --ink-soft: #b9a78c;
+        --rubric: #d46a58;
+        --rule: #5a4c38;
+        --gold: #c4a056;
+        --gold-deep: #e0c27a;
+      }
+
       @media (prefers-color-scheme: dark) {
-        :root {
+        html:not([data-theme="light"]) {
           --paper: #1a1612;
           --paper-2: #241f19;
           --ink: #eddcc0;
@@ -137,18 +148,61 @@
         color: var(--gold-deep);
       }
 
-      .lang-switch {
-        display: block;
-        margin: 0.45rem auto 0;
-        background: none;
+      .settings-btn {
+        position: fixed;
+        top: max(0.3rem, env(safe-area-inset-top));
+        right: 0.4rem;
+        z-index: 36;
+        width: 2.7rem;
+        height: 2.7rem;
+        padding: 0;
         border: 1px solid var(--rule);
-        color: var(--ink-soft);
-        font-size: 0.68rem;
-        letter-spacing: 0.18em;
-        text-transform: uppercase;
-        min-height: 2.4rem;
-        padding: 0 0.9rem;
+        background: var(--paper);
+        color: var(--ink);
+        font-family: var(--font-display);
+        font-size: 1.55rem;
+        line-height: 1;
         cursor: pointer;
+      }
+
+      .masthead {
+        padding-right: 2.6rem;
+        padding-left: 2.6rem;
+      }
+
+      .choice {
+        display: flex;
+        gap: 0.35rem;
+      }
+
+      .choice button {
+        appearance: none;
+        background: var(--paper-2);
+        border: 1px solid var(--rule);
+        color: var(--ink);
+        min-height: 2.5rem;
+        padding: 0 0.7rem;
+        font-size: 0.78rem;
+        letter-spacing: 0.06em;
+        cursor: pointer;
+      }
+
+      .choice button.active {
+        background: var(--ink);
+        color: var(--paper);
+        border-color: var(--ink);
+      }
+
+      .setting {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 0.75rem;
+        margin: 0.85rem 0;
+      }
+
+      .setting > span {
+        font-size: 1.02rem;
       }
 
       .rule {
@@ -669,12 +723,19 @@
     </style>
   </head>
   <body>
+    <button
+      type="button"
+      class="settings-btn"
+      id="settingsBtn"
+      aria-label="Settings"
+    >
+      S
+    </button>
     <div class="page">
       <header class="masthead">
         <p class="date-line" id="dateLine"></p>
         <h1 class="wordmark">Noah</h1>
         <p class="subtitle" data-i18n="subtitle">The Protocol</p>
-        <button class="lang-switch" type="button" id="langSwitch">PT</button>
         <hr class="rule" />
       </header>
 
@@ -1100,11 +1161,66 @@
       </div>
     </div>
 
+    <div class="modal-overlay" id="settingsModal" onclick="closeSettings()">
+      <div class="modal-box" onclick="event.stopPropagation()">
+        <div class="modal-header">
+          <div class="modal-title" data-i18n="settingsTitle">Settings</div>
+          <button
+            class="modal-close"
+            type="button"
+            onclick="closeSettings()"
+          >
+            ×
+          </button>
+        </div>
+        <div class="setting">
+          <span data-i18n="settingsLang">Language</span>
+          <div class="choice" id="langChoice">
+            <button type="button" data-lang="en">EN</button>
+            <button type="button" data-lang="pt">PT</button>
+          </div>
+        </div>
+        <div class="setting">
+          <span data-i18n="settingsTheme">Theme</span>
+          <div class="choice" id="themeChoice">
+            <button type="button" data-theme-choice="system" data-i18n="themeSystem">
+              System
+            </button>
+            <button type="button" data-theme-choice="light" data-i18n="themeLight">
+              Light
+            </button>
+            <button type="button" data-theme-choice="dark" data-i18n="themeDark">
+              Dark
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
     <script>
       const STORE = "noah-journal-v2";
       const STORE_LOG = "noah-journal-log-v2";
       const LANG_KEY = "noah-lang";
+      const THEME_KEY = "noah-theme";
       let lang = localStorage.getItem(LANG_KEY) === "pt" ? "pt" : "en";
+      let theme = localStorage.getItem(THEME_KEY) || "system";
+      if (theme !== "light" && theme !== "dark") theme = "system";
+
+      function applyTheme() {
+        if (theme === "light" || theme === "dark")
+          document.documentElement.setAttribute("data-theme", theme);
+        else document.documentElement.removeAttribute("data-theme");
+        var meta = document.querySelector('meta[name="theme-color"]');
+        if (meta) {
+          var dark =
+            theme === "dark" ||
+            (theme === "system" &&
+              window.matchMedia &&
+              window.matchMedia("(prefers-color-scheme: dark)").matches);
+          meta.setAttribute("content", dark ? "#1a1612" : "#f3ead6");
+        }
+      }
+      applyTheme();
 
       const I18N = {
         en: {
@@ -1193,6 +1309,12 @@
           "remindBody-day": "Stay out of the Forum. Keep the house.",
           "remindTitle-night": "Noah · Night",
           "remindBody-night": "Close the day. A few true sentences, then quiet.",
+          settingsTitle: "Settings",
+          settingsLang: "Language",
+          settingsTheme: "Theme",
+          themeSystem: "System",
+          themeLight: "Light",
+          themeDark: "Dark",
         },
         pt: {
           subtitle: "O Protocolo",
@@ -1280,6 +1402,12 @@
           "remindBody-day": "Fora do Fórum. Guarde a casa.",
           "remindTitle-night": "Noé · Noite",
           "remindBody-night": "Feche o dia. Umas frases verdadeiras, depois silêncio.",
+          settingsTitle: "Ajustes",
+          settingsLang: "Idioma",
+          settingsTheme: "Tema",
+          themeSystem: "Sistema",
+          themeLight: "Claro",
+          themeDark: "Escuro",
         },
       };
 
@@ -1303,8 +1431,19 @@
         document.querySelectorAll("[data-i18n-placeholder]").forEach(function (el) {
           el.placeholder = t(el.getAttribute("data-i18n-placeholder"));
         });
-        var sw = document.getElementById("langSwitch");
-        if (sw) sw.textContent = lang === "pt" ? "EN" : "PT";
+        document.querySelectorAll("#langChoice [data-lang]").forEach(function (b) {
+          b.classList.toggle("active", b.getAttribute("data-lang") === lang);
+        });
+        document.querySelectorAll("#themeChoice [data-theme-choice]").forEach(function (b) {
+          b.classList.toggle(
+            "active",
+            b.getAttribute("data-theme-choice") === theme,
+          );
+        });
+        document.getElementById("settingsBtn").setAttribute(
+          "aria-label",
+          t("settingsTitle"),
+        );
         document.getElementById("dateLine").textContent = new Date().toLocaleDateString(
           lang === "pt" ? "pt-BR" : "en-GB",
           { weekday: "long", day: "numeric", month: "long", year: "numeric" },
@@ -2157,10 +2296,31 @@
         maybeFireReminders();
       }
 
-      document.getElementById("langSwitch").addEventListener("click", function () {
-        lang = lang === "pt" ? "en" : "pt";
-        localStorage.setItem(LANG_KEY, lang);
-        applyLang();
+      function openSettings() {
+        document.getElementById("settingsModal").style.display = "flex";
+      }
+      function closeSettings() {
+        document.getElementById("settingsModal").style.display = "none";
+      }
+
+      document.getElementById("settingsBtn").addEventListener("click", openSettings);
+      document.querySelectorAll("#langChoice [data-lang]").forEach(function (b) {
+        b.addEventListener("click", function () {
+          lang = b.getAttribute("data-lang") === "pt" ? "pt" : "en";
+          localStorage.setItem(LANG_KEY, lang);
+          applyLang();
+        });
+      });
+      document.querySelectorAll("#themeChoice [data-theme-choice]").forEach(function (b) {
+        b.addEventListener("click", function () {
+          theme = b.getAttribute("data-theme-choice") || "system";
+          localStorage.setItem(THEME_KEY, theme);
+          applyTheme();
+          applyLang();
+        });
+      });
+      document.addEventListener("keydown", function (e) {
+        if (e.key === "Escape") closeSettings();
       });
 
       document.querySelectorAll(".nav-bar button").forEach((b) => {
