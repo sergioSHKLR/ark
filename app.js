@@ -1,6 +1,11 @@
 const STORE = "noah-journal-v2";
 const LANG_KEY = "noah-lang";
 const THEME_KEY = "noah-theme";
+const DRIVE_CLIENT_KEY = "noah-drive-client-id";
+const DRIVE_FILE_KEY = "noah-drive-file-id";
+const DRIVE_SYNC_KEY = "noah-drive-synced";
+const DRIVE_FILE_NAME = "ark-journal.json";
+const DRIVE_SCOPE = "https://www.googleapis.com/auth/drive.appdata";
 const FILM_EPOCH = "2026-09-06";
 
 let lang = localStorage.getItem(LANG_KEY) === "pt" ? "pt" : "en";
@@ -32,10 +37,36 @@ function t(key) {
     en: {
       filmFoot: "Watch first. Then pray and read.",
       filmCaption: "English picture. Captions on.",
+      settingsDrive: "Google Drive",
+      driveHint:
+        "Backs the journal into a private Drive app-data file. Each Google account is its own ark. Needs a Google Cloud OAuth client ID (Web application) whose origins include this site.",
+      driveClient: "OAuth client ID",
+      driveConnect: "Connect Drive",
+      driveSync: "Sync now",
+      driveSignOut: "Sign out",
+      driveOff: "Not connected.",
+      driveOn: "Connected. Sync after you write, or tap Sync now.",
+      driveNeedId: "Paste a Web OAuth client ID first.",
+      driveNeedGis: "Could not load Google sign-in.",
+      driveOk: "Synced.",
+      driveErr: "Sync failed.",
     },
     pt: {
       filmFoot: "Assista primeiro. Depois ore e leia.",
       filmCaption: "Imagem em ingl\u00eas. Legendas ligadas.",
+      settingsDrive: "Google Drive",
+      driveHint:
+        "Copia o diário para um arquivo privado no Drive (dados do app). Cada conta Google é a sua arca. Precisa de um client ID OAuth (aplicativo da Web) com a origem deste site.",
+      driveClient: "Client ID OAuth",
+      driveConnect: "Conectar Drive",
+      driveSync: "Sincronizar agora",
+      driveSignOut: "Sair",
+      driveOff: "Não conectado.",
+      driveOn: "Conectado. Sincroniza depois de escrever, ou toque em Sincronizar agora.",
+      driveNeedId: "Cole primeiro um client ID OAuth da Web.",
+      driveNeedGis: "Não deu para carregar o login Google.",
+      driveOk: "Sincronizado.",
+      driveErr: "A sincronização falhou.",
     },
   };
   return (pack[lang] && pack[lang][key]) || pack.en[key] || key;
@@ -121,6 +152,285 @@ function loadJournal() {
 
 function saveJournal(data) {
   localStorage.setItem(STORE, JSON.stringify(data));
+  scheduleDriveSync();
+}
+
+let driveToken = "";
+let driveSyncTimer = 0;
+let tokenClient = null;
+
+function driveClientId() {
+  const input = document.getElementById("driveClientId");
+  const typed = input && input.value.trim();
+  return (
+    typed ||
+    localStorage.getItem(DRIVE_CLIENT_KEY) ||
+    window.NOAH_DRIVE_CLIENT_ID ||
+    ""
+  );
+}
+
+function setDriveStatus(msg) {
+  const el = document.getElementById("driveStatus");
+  if (el) el.textContent = msg || "";
+}
+
+function applyDriveLabels() {
+  const map = [
+    ["driveHint", "driveHint"],
+    ["driveConnect", "driveConnect"],
+    ["driveSync", "driveSync"],
+    ["driveSignOut", "driveSignOut"],
+  ];
+  map.forEach(([id, key]) => {
+    const el = document.getElementById(id);
+    if (el && el.tagName !== "INPUT") el.textContent = t(key);
+  });
+  const lab = document.querySelector('label[for="driveClientId"], .drive-block .note-block span');
+  if (lab) lab.textContent = t("driveClient");
+  const head = document.querySelector(".drive-block > span");
+  if (head) head.textContent = t("settingsDrive");
+  setDriveStatus(driveToken ? t("driveOn") : t("driveOff"));
+}
+
+function loadGis() {
+  return new Promise((resolve, reject) => {
+    if (window.google && google.accounts && google.accounts.oauth2)
+      return resolve();
+    const s = document.createElement("script");
+    s.src = "https://accounts.google.com/gsi/client";
+    s.async = true;
+    s.onload = resolve;
+    s.onerror = reject;
+    document.head.appendChild(s);
+  });
+}
+
+function driveHeaders() {
+  return { Authorization: "Bearer " + driveToken };
+}
+
+async function driveFindFile() {
+  const cached = localStorage.getItem(DRIVE_FILE_KEY);
+  if (cached) return cached;
+  const q = encodeURIComponent("name='" + DRIVE_FILE_NAME + "'");
+  const res = await fetch(
+    "https://www.googleapis.com/drive/v3/files?spaces=appDataFolder&q=" +
+      q +
+      "&fields=files(id,name)",
+    { headers: driveHeaders() },
+  );
+  if (!res.ok) throw new Error("list");
+  const data = await res.json();
+  const id = data.files && data.files[0] && data.files[0].id;
+  if (id) localStorage.setItem(DRIVE_FILE_KEY, id);
+  return id || "";
+}
+
+async function driveDownload(id) {
+  const res = await fetch(
+    "https://www.googleapis.com/drive/v3/files/" + id + "?alt=media",
+    { headers: driveHeaders() },
+  );
+  if (res.status === 404) return {};
+  if (!res.ok) throw new Error("get");
+  const text = await res.text();
+  try {
+    return JSON.parse(text);
+  } catch (e) {
+    return {};
+  }
+}
+
+async function driveUpload(payload, fileId) {
+  const body = JSON.stringify(payload);
+  if (fileId) {
+    const res = await fetch(
+      "https://www.googleapis.com/upload/drive/v3/files/" +
+        fileId +
+        "?uploadType=media",
+      {
+        method: "PATCH",
+        headers: Object.assign(
+          { "Content-Type": "application/json" },
+          driveHeaders(),
+        ),
+        body: body,
+      },
+    );
+    if (!res.ok) throw new Error("patch");
+    return fileId;
+  }
+  const meta = {
+    name: DRIVE_FILE_NAME,
+    parents: ["appDataFolder"],
+    mimeType: "application/json",
+  };
+  const boundary = "ark" + Date.now();
+  const mixed =
+    "--" +
+    boundary +
+    "\r\nContent-Type: application/json; charset=UTF-8\r\n\r\n" +
+    JSON.stringify(meta) +
+    "\r\n--" +
+    boundary +
+    "\r\nContent-Type: application/json\r\n\r\n" +
+    body +
+    "\r\n--" +
+    boundary +
+    "--";
+  const res = await fetch(
+    "https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart",
+    {
+      method: "POST",
+      headers: Object.assign(
+        { "Content-Type": "multipart/related; boundary=" + boundary },
+        driveHeaders(),
+      ),
+      body: mixed,
+    },
+  );
+  if (!res.ok) throw new Error("create");
+  const created = await res.json();
+  if (created.id) localStorage.setItem(DRIVE_FILE_KEY, created.id);
+  return created.id;
+}
+
+function mergeNotes(a, b, preferB) {
+  const out = Object.assign({}, a || {});
+  Object.keys(b || {}).forEach((slot) => {
+    const bv = b[slot] || "";
+    const av = out[slot] || "";
+    if (!av) out[slot] = bv;
+    else if (!bv) return;
+    else out[slot] = preferB ? bv : av;
+  });
+  return out;
+}
+
+function mergeJournals(local, remote) {
+  const out = {};
+  const keys = new Set(
+    Object.keys(local || {}).concat(Object.keys(remote || {})),
+  );
+  keys.forEach((day) => {
+    const L = local[day] || { checks: {}, notes: {}, updatedAt: "" };
+    const R = remote[day] || { checks: {}, notes: {}, updatedAt: "" };
+    const preferLocal = (L.updatedAt || "") >= (R.updatedAt || "");
+    const newer = preferLocal ? L : R;
+    const older = preferLocal ? R : L;
+    out[day] = {
+      checks: Object.assign({}, older.checks || {}, newer.checks || {}),
+      notes: mergeNotes(older.notes, newer.notes, true),
+      updatedAt: newer.updatedAt || older.updatedAt || "",
+    };
+  });
+  return out;
+}
+
+async function syncDrive() {
+  if (!driveToken) throw new Error("auth");
+  const local = loadJournal();
+  const fileId = await driveFindFile();
+  const remote = fileId ? await driveDownload(fileId) : {};
+  const merged = mergeJournals(local, remote);
+  await driveUpload(merged, fileId);
+  saveJournalSilent(merged);
+  localStorage.setItem(DRIVE_SYNC_KEY, new Date().toISOString());
+  bindJournalRefresh();
+}
+
+function saveJournalSilent(data) {
+  localStorage.setItem(STORE, JSON.stringify(data));
+}
+
+function scheduleDriveSync() {
+  if (!driveToken) return;
+  clearTimeout(driveSyncTimer);
+  driveSyncTimer = setTimeout(() => {
+    syncDrive()
+      .then(() => setDriveStatus(t("driveOk")))
+      .catch(() => setDriveStatus(t("driveErr")));
+  }, 2500);
+}
+
+function bindJournalRefresh() {
+  const data = loadJournal();
+  const day = data[todayKey()] || { checks: {}, notes: {} };
+  document.querySelectorAll("[data-check]").forEach((box) => {
+    const key = box.getAttribute("data-check");
+    box.checked = !!day.checks[key];
+  });
+  document.querySelectorAll("textarea.note[data-slot]").forEach((area) => {
+    const slot = area.getAttribute("data-slot");
+    if (document.activeElement !== area) area.value = day.notes[slot] || "";
+  });
+}
+
+async function connectDrive() {
+  const id = driveClientId();
+  if (!id) {
+    setDriveStatus(t("driveNeedId"));
+    return;
+  }
+  localStorage.setItem(DRIVE_CLIENT_KEY, id);
+  try {
+    await loadGis();
+  } catch (e) {
+    setDriveStatus(t("driveNeedGis"));
+    return;
+  }
+  tokenClient = google.accounts.oauth2.initTokenClient({
+    client_id: id,
+    scope: DRIVE_SCOPE,
+    callback: (resp) => {
+      if (resp && resp.access_token) {
+        driveToken = resp.access_token;
+        setDriveStatus(t("driveOn"));
+        syncDrive()
+          .then(() => setDriveStatus(t("driveOk")))
+          .catch(() => setDriveStatus(t("driveErr")));
+      } else setDriveStatus(t("driveErr"));
+    },
+  });
+  tokenClient.requestAccessToken({ prompt: driveToken ? "" : "consent" });
+}
+
+function signOutDrive() {
+  const done = () => {
+    driveToken = "";
+    localStorage.removeItem(DRIVE_FILE_KEY);
+    setDriveStatus(t("driveOff"));
+  };
+  if (driveToken && window.google && google.accounts && google.accounts.oauth2) {
+    google.accounts.oauth2.revoke(driveToken, done);
+  } else done();
+}
+
+function bindDrive() {
+  const input = document.getElementById("driveClientId");
+  if (input) {
+    input.value =
+      localStorage.getItem(DRIVE_CLIENT_KEY) ||
+      window.NOAH_DRIVE_CLIENT_ID ||
+      "";
+    input.addEventListener("change", () => {
+      localStorage.setItem(DRIVE_CLIENT_KEY, input.value.trim());
+    });
+  }
+  const conn = document.getElementById("driveConnect");
+  const sync = document.getElementById("driveSync");
+  const out = document.getElementById("driveSignOut");
+  if (conn) conn.addEventListener("click", connectDrive);
+  if (sync)
+    sync.addEventListener("click", () => {
+      if (!driveToken) return connectDrive();
+      syncDrive()
+        .then(() => setDriveStatus(t("driveOk")))
+        .catch(() => setDriveStatus(t("driveErr")));
+    });
+  if (out) out.addEventListener("click", signOutDrive);
+  applyDriveLabels();
 }
 
 function showPane(name) {
@@ -143,6 +453,7 @@ function bindJournal() {
       const k = todayKey();
       j[k] = j[k] || { checks: {}, notes: {} };
       j[k].checks[key] = box.checked;
+      j[k].updatedAt = new Date().toISOString();
       saveJournal(j);
     });
   });
@@ -154,6 +465,7 @@ function bindJournal() {
       const k = todayKey();
       j[k] = j[k] || { checks: {}, notes: {} };
       j[k].notes[slot] = area.value;
+      j[k].updatedAt = new Date().toISOString();
       saveJournal(j);
     });
   });
@@ -183,6 +495,7 @@ function bindSettings() {
         x.classList.toggle("active", x.getAttribute("data-lang") === lang);
       });
       renderFilm();
+      applyDriveLabels();
     });
   });
   document.querySelectorAll("[data-theme-choice]").forEach((b) => {
@@ -220,6 +533,7 @@ if (dateLine) {
 bindNav();
 bindJournal();
 bindSettings();
+bindDrive();
 initFilm();
 
 if ("serviceWorker" in navigator) {

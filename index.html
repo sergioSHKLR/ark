@@ -202,6 +202,34 @@
             <button type="button" data-theme-choice="dark" data-i18n="themeDark">Dark</button>
           </div>
         </div>
+        <div class="drive-block">
+          <span data-i18n="settingsDrive">Google Drive</span>
+          <p class="remind-note" id="driveHint" data-i18n="driveHint">
+            Backs the journal into a private Drive app-data file. Each Google
+            account is its own ark. Needs a Google Cloud OAuth client ID
+            (Web application) whose origins include this site.
+          </p>
+          <label class="note-block">
+            <span data-i18n="driveClient">OAuth client ID</span>
+            <input
+              type="text"
+              id="driveClientId"
+              class="drive-id"
+              autocomplete="off"
+              spellcheck="false"
+            />
+          </label>
+          <p class="remind-note" id="driveStatus"></p>
+          <button type="button" class="remind-ics" id="driveConnect" data-i18n="driveConnect">
+            Connect Drive
+          </button>
+          <button type="button" class="remind-ics" id="driveSync" data-i18n="driveSync">
+            Sync now
+          </button>
+          <button type="button" class="remind-ics" id="driveSignOut" data-i18n="driveSignOut">
+            Sign out
+          </button>
+        </div>
       </div>
     </div>
     <script src="app.js"></script>
