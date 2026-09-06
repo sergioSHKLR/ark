@@ -7,7 +7,7 @@ const DRIVE_SYNC_KEY = "noah-drive-synced";
 const DRIVE_FILE_NAME = "ark-journal.json";
 const DRIVE_SCOPE = "https://www.googleapis.com/auth/drive.appdata";
 const FILM_EPOCH = "2026-09-06";
-const APP_BUILD = 40;
+const APP_BUILD = 41;
 
 let lang = localStorage.getItem(LANG_KEY) === "pt" ? "pt" : "en";
 let theme = localStorage.getItem(THEME_KEY) || "system";
@@ -47,6 +47,7 @@ function applyAppName() {
   const apple = document.querySelector(
     'meta[name="apple-mobile-web-app-title"]',
   );
+  document.documentElement.setAttribute("dir", "ltr");
   if (apple) apple.setAttribute("content", name);
   const man = document.querySelector('link[rel="manifest"]');
   if (man)
@@ -1257,6 +1258,7 @@ function bindSettings() {
       lang = b.getAttribute("data-lang");
       localStorage.setItem(LANG_KEY, lang);
       document.documentElement.lang = lang === "pt" ? "pt-BR" : "en";
+      document.documentElement.setAttribute("dir", "ltr");
       applyAppName();
       document.querySelectorAll("[data-lang]").forEach((x) => {
         x.classList.toggle("active", x.getAttribute("data-lang") === lang);
@@ -1428,15 +1430,31 @@ bindDrive();
 bindReminders();
 bindModalNote();
 initFilm();
-initChant();
 renderReading();
 renderLog();
 checkBuild();
 
-try {
-  const q = new URLSearchParams(location.search).get("pane");
-  if (q) showPane(q);
-} catch (e) {}
+function lockPortrait() {
+  try {
+    if (screen.orientation && screen.orientation.lock)
+      screen.orientation.lock("portrait").catch(function () {});
+  } catch (e) {}
+}
+lockPortrait();
+
+function applyLaunchQuery() {
+  try {
+    const q = new URLSearchParams(location.search);
+    const pane = q.get("pane");
+    const play = q.get("play");
+    if (play === "chant") {
+      showPane("day");
+      playChant();
+    } else if (pane) showPane(pane);
+  } catch (e) {}
+}
+
+initChant().then(applyLaunchQuery).catch(applyLaunchQuery);
 
 if (navigator.serviceWorker) {
   navigator.serviceWorker.addEventListener("message", function (e) {
