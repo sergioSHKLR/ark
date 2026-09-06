@@ -7,7 +7,7 @@ const DRIVE_SYNC_KEY = "noah-drive-synced";
 const DRIVE_FILE_NAME = "ark-journal.json";
 const DRIVE_SCOPE = "https://www.googleapis.com/auth/drive.appdata";
 const FILM_EPOCH = "2026-09-06";
-const APP_BUILD = 36;
+const APP_BUILD = 37;
 
 let lang = localStorage.getItem(LANG_KEY) === "pt" ? "pt" : "en";
 let theme = localStorage.getItem(THEME_KEY) || "system";
@@ -89,6 +89,11 @@ function t(key) {
       buildReload: "Reload to update",
       buildUnknown: "Could not check for a newer build.",
       buildOffline: "Offline. Could not check.",
+      chantRest: "Chant at rest",
+      chantLocal: "Playing local files from audio/",
+      chantYt: "YouTube (temporary). Add audio/playlist.json to go offline.",
+      load: "Load",
+      reload: "Reload",
       logEmpty: "The log fills as you write. Come back tomorrow.",
       statDays: "Days",
       statStreak: "In a row",
@@ -133,6 +138,11 @@ function t(key) {
       buildReload: "Recarregar para atualizar",
       buildUnknown: "Não deu para checar se há versão nova.",
       buildOffline: "Sem rede. Não deu para checar.",
+      chantRest: "Canto em descanso",
+      chantLocal: "Reproduzindo arquivos locais em audio/",
+      chantYt: "YouTube (provisório). Coloque audio/playlist.json para ficar offline.",
+      load: "Abrir",
+      reload: "Outra",
       logEmpty: "O diário enche quando você escreve. Volte amanhã.",
       statDays: "Dias",
       statStreak: "Seguidos",
@@ -563,6 +573,109 @@ function bindDrive() {
     });
   if (out) out.addEventListener("click", signOutDrive);
   applyDriveLabels();
+}
+
+const YT_CHANT = [
+  { title: "Santo Domingo de Silos · Canto Gregoriano", yt: "GCuDBo4F-Ac" },
+  { title: "Silos · Chant (1994 album)", yt: "qFUFF-YK5v8" },
+  { title: "Monks of Norcia · Benedicta", yt: "bTKfstuIUKM" },
+  { title: "Norcia · Salve Regina", yt: "e9BBWZKnTvQ" },
+  { title: "Schola Gregoriana Mediolanensis · Holy Mass", yt: "nsrKNcjzcSU" },
+  { title: "Schola Gregoriana Mediolanensis · Missae", yt: "c79SszUBZUE" },
+];
+
+let chantList = YT_CHANT.slice();
+let chantMode = "yt";
+let chantIndex = 0;
+let chantLoaded = false;
+
+function chantYoutubeSrc(id, autoplay) {
+  return (
+    "https://www.youtube-nocookie.com/embed/" +
+    id +
+    "?rel=0&modestbranding=1&playsinline=1&iv_load_policy=3&fs=0" +
+    (autoplay ? "&autoplay=1" : "")
+  );
+}
+
+function renderChant(autoplay) {
+  const item = chantList[chantIndex];
+  const titleEl = document.getElementById("chantTitle");
+  const footEl = document.getElementById("chantFoot");
+  const mount = document.getElementById("chantMount");
+  const playBtn = document.getElementById("chantPlay");
+  if (!item || !titleEl || !mount) return;
+  titleEl.textContent =
+    !chantLoaded && !autoplay ? t("chantRest") : item.title;
+  if (footEl)
+    footEl.textContent =
+      !chantLoaded && !autoplay
+        ? ""
+        : chantMode === "local"
+          ? t("chantLocal")
+          : t("chantYt");
+  if (playBtn) playBtn.textContent = chantLoaded ? t("reload") : t("load");
+  if (!chantLoaded && !autoplay) {
+    mount.innerHTML = "";
+    return;
+  }
+  chantLoaded = true;
+  mount.innerHTML = "";
+  if (chantMode === "local") {
+    const audio = document.createElement("audio");
+    audio.controls = true;
+    audio.src = item.src;
+    audio.setAttribute("playsinline", "");
+    audio.addEventListener("ended", () => stepChant(1, true));
+    mount.appendChild(audio);
+    if (autoplay) audio.play().catch(function () {});
+  } else {
+    const iframe = document.createElement("iframe");
+    iframe.src = chantYoutubeSrc(item.yt, !!autoplay);
+    iframe.allow = "accelerometer; autoplay; encrypted-media; picture-in-picture";
+    iframe.referrerPolicy = "strict-origin-when-cross-origin";
+    iframe.title = item.title;
+    mount.appendChild(iframe);
+  }
+  if (playBtn) playBtn.textContent = t("reload");
+}
+
+function stepChant(delta, autoplay) {
+  if (!chantList.length) return;
+  chantIndex = (chantIndex + delta + chantList.length) % chantList.length;
+  chantLoaded = true;
+  renderChant(autoplay);
+}
+
+async function initChant() {
+  try {
+    const res = await fetch("audio/playlist.json", { cache: "no-store" });
+    if (res.ok) {
+      const data = await res.json();
+      const local = (Array.isArray(data) ? data : data.tracks || [])
+        .map(function (track) {
+          if (!track || !track.src) return null;
+          return { title: track.title || track.src, src: track.src };
+        })
+        .filter(Boolean);
+      if (local.length) {
+        chantList = local;
+        chantMode = "local";
+        chantIndex = 0;
+      }
+    }
+  } catch (e) {}
+  const prev = document.getElementById("chantPrev");
+  const next = document.getElementById("chantNext");
+  const play = document.getElementById("chantPlay");
+  if (prev) prev.addEventListener("click", () => stepChant(-1, chantLoaded));
+  if (next) next.addEventListener("click", () => stepChant(1, chantLoaded));
+  if (play)
+    play.addEventListener("click", () => {
+      chantLoaded = true;
+      renderChant(true);
+    });
+  renderChant(false);
 }
 
 function showPane(name) {
@@ -1007,6 +1120,7 @@ function bindSettings() {
       });
       renderFilm();
       renderReading();
+      renderChant(false);
       applyDriveLabels();
       applyBuildLabels();
       checkBuild();
@@ -1109,6 +1223,7 @@ bindSettings();
 bindDrive();
 bindReminders();
 initFilm();
+initChant();
 renderReading();
 renderLog();
 checkBuild();
