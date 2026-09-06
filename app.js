@@ -7,7 +7,7 @@ const DRIVE_SYNC_KEY = "noah-drive-synced";
 const DRIVE_FILE_NAME = "ark-journal.json";
 const DRIVE_SCOPE = "https://www.googleapis.com/auth/drive.appdata";
 const FILM_EPOCH = "2026-09-06";
-const APP_BUILD = 44;
+const APP_BUILD = 45;
 
 let lang = localStorage.getItem(LANG_KEY) === "pt" ? "pt" : "en";
 let theme = localStorage.getItem(THEME_KEY) || "system";
@@ -1380,7 +1380,174 @@ function bindModalNote() {
   });
 }
 
-function toggleNativeAudio() {}
+let noiseCtx = null;
+let noiseNode = null;
+let noiseFilter = null;
+let noiseLfo = null;
+let noiseGain = null;
+let noiseSynth = [];
+let noisePlaying = false;
+
+function stopNoise() {
+  if (noiseNode) {
+    try {
+      noiseNode.stop();
+      noiseNode.disconnect();
+    } catch (e) {}
+    noiseNode = null;
+  }
+  if (noiseLfo) {
+    try {
+      noiseLfo.stop();
+      noiseLfo.disconnect();
+    } catch (e) {}
+    noiseLfo = null;
+  }
+  if (noiseFilter) {
+    try {
+      noiseFilter.disconnect();
+    } catch (e) {}
+    noiseFilter = null;
+  }
+  noiseSynth.forEach((n) => {
+    try {
+      n.stop();
+      n.disconnect();
+    } catch (e) {}
+  });
+  noiseSynth = [];
+  if (noiseGain) {
+    try {
+      noiseGain.disconnect();
+    } catch (e) {}
+    noiseGain = null;
+  }
+  noisePlaying = false;
+  const btn = document.getElementById("audioActionBtn");
+  if (btn) btn.textContent = t("play");
+}
+
+function startNoise() {
+  const sel = document.getElementById("noiseSelect");
+  const trackType = sel ? sel.value : "white";
+  const AC = window.AudioContext || window.webkitAudioContext;
+  if (!AC) return;
+  if (!noiseCtx) noiseCtx = new AC();
+  if (noiseCtx.state === "suspended") noiseCtx.resume();
+  const bufferSize = 4 * noiseCtx.sampleRate;
+  const noiseBuffer = noiseCtx.createBuffer(1, bufferSize, noiseCtx.sampleRate);
+  const output = noiseBuffer.getChannelData(0);
+  let b0 = 0,
+    b1 = 0,
+    b2 = 0,
+    b3 = 0,
+    b4 = 0,
+    b5 = 0,
+    b6 = 0;
+  for (let i = 0; i < bufferSize; i++) {
+    const white = Math.random() * 2 - 1;
+    b0 = 0.99886 * b0 + white * 0.0555179;
+    b1 = 0.99332 * b1 + white * 0.0750759;
+    b2 = 0.969 * b2 + white * 0.153852;
+    b3 = 0.8665 * b3 + white * 0.3104856;
+    b4 = 0.55 * b4 + white * 0.5329522;
+    b5 = -0.7616 * b5 - white * 0.016898;
+    const pink = b0 + b1 + b2 + b3 + b4 + b5 + b6 + white * 0.5362;
+    b6 = white * 0.115926;
+    output[i] = pink * 0.11;
+  }
+  noiseNode = noiseCtx.createBufferSource();
+  noiseNode.buffer = noiseBuffer;
+  noiseNode.loop = true;
+  noiseFilter = noiseCtx.createBiquadFilter();
+  noiseGain = noiseCtx.createGain();
+  if (trackType === "white") {
+    noiseFilter.type = "lowpass";
+    noiseFilter.frequency.setValueAtTime(4500, noiseCtx.currentTime);
+    noiseGain.gain.setValueAtTime(0.2, noiseCtx.currentTime);
+    noiseNode.connect(noiseFilter);
+  } else if (trackType === "rain") {
+    noiseFilter.type = "lowpass";
+    noiseFilter.frequency.setValueAtTime(1100, noiseCtx.currentTime);
+    noiseLfo = noiseCtx.createOscillator();
+    noiseLfo.type = "sine";
+    noiseLfo.frequency.setValueAtTime(0.05, noiseCtx.currentTime);
+    const lfoGain = noiseCtx.createGain();
+    lfoGain.gain.setValueAtTime(0.015, noiseCtx.currentTime);
+    noiseLfo.connect(lfoGain);
+    lfoGain.connect(noiseGain.gain);
+    noiseGain.gain.setValueAtTime(0.25, noiseCtx.currentTime);
+    noiseNode.connect(noiseFilter);
+    noiseLfo.start();
+  } else if (trackType === "ocean") {
+    noiseFilter.type = "lowpass";
+    noiseLfo = noiseCtx.createOscillator();
+    noiseLfo.type = "sine";
+    noiseLfo.frequency.setValueAtTime(0.08, noiseCtx.currentTime);
+    const lfoGain = noiseCtx.createGain();
+    lfoGain.gain.setValueAtTime(350, noiseCtx.currentTime);
+    noiseLfo.connect(lfoGain);
+    lfoGain.connect(noiseFilter.frequency);
+    noiseFilter.frequency.setValueAtTime(450, noiseCtx.currentTime);
+    noiseGain.gain.setValueAtTime(0.35, noiseCtx.currentTime);
+    noiseNode.connect(noiseFilter);
+    noiseLfo.start();
+  } else if (trackType === "crickets") {
+    noiseGain.gain.setValueAtTime(0.08, noiseCtx.currentTime);
+    const osc1 = noiseCtx.createOscillator();
+    const chirpLfo1 = noiseCtx.createOscillator();
+    const shimmer1 = noiseCtx.createOscillator();
+    const gChirp1 = noiseCtx.createGain();
+    const gShim1 = noiseCtx.createGain();
+    osc1.type = "sine";
+    osc1.frequency.setValueAtTime(2200, noiseCtx.currentTime);
+    chirpLfo1.type = "sine";
+    chirpLfo1.frequency.setValueAtTime(0.8, noiseCtx.currentTime);
+    shimmer1.type = "sine";
+    shimmer1.frequency.setValueAtTime(28, noiseCtx.currentTime);
+    chirpLfo1.connect(gChirp1.gain);
+    shimmer1.connect(gShim1.gain);
+    osc1.connect(gChirp1);
+    gChirp1.connect(gShim1);
+    const osc2 = noiseCtx.createOscillator();
+    const chirpLfo2 = noiseCtx.createOscillator();
+    const gChirp2 = noiseCtx.createGain();
+    osc2.type = "sine";
+    osc2.frequency.setValueAtTime(3400, noiseCtx.currentTime);
+    chirpLfo2.type = "sine";
+    chirpLfo2.frequency.setValueAtTime(0.5, noiseCtx.currentTime);
+    chirpLfo2.connect(gChirp2.gain);
+    osc2.connect(gChirp2);
+    noiseLfo = noiseCtx.createOscillator();
+    noiseLfo.type = "triangle";
+    noiseLfo.frequency.setValueAtTime(0.07, noiseCtx.currentTime);
+    const gateGain = noiseCtx.createGain();
+    gateGain.gain.setValueAtTime(0.3, noiseCtx.currentTime);
+    noiseLfo.connect(gateGain.gain);
+    gShim1.connect(gateGain);
+    gChirp2.connect(gateGain);
+    gateGain.connect(noiseGain);
+    osc1.start();
+    chirpLfo1.start();
+    shimmer1.start();
+    osc2.start();
+    chirpLfo2.start();
+    noiseLfo.start();
+    noiseSynth.push(osc1, chirpLfo1, shimmer1, osc2, chirpLfo2, noiseLfo);
+  }
+  if (trackType !== "crickets") noiseFilter.connect(noiseGain);
+  noiseGain.connect(noiseCtx.destination);
+  if (trackType !== "crickets") noiseNode.start();
+  noisePlaying = true;
+  const btn = document.getElementById("audioActionBtn");
+  if (btn) btn.textContent = t("pause");
+}
+
+function toggleNativeAudio() {
+  if (noisePlaying) stopNoise();
+  else startNoise();
+}
+window.toggleNativeAudio = toggleNativeAudio;
 
 function dayOrdinalEn(n) {
   const j = n % 10;
@@ -1455,6 +1622,16 @@ bindDrive();
 bindReminders();
 bindModalNote();
 bindPassages();
+(function bindNoise() {
+  const sel = document.getElementById("noiseSelect");
+  if (sel)
+    sel.addEventListener("change", () => {
+      if (noisePlaying) {
+        stopNoise();
+        startNoise();
+      }
+    });
+})();
 initFilm();
 renderReading();
 renderLog();
