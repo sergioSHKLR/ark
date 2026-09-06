@@ -7,6 +7,7 @@ const DRIVE_SYNC_KEY = "noah-drive-synced";
 const DRIVE_FILE_NAME = "ark-journal.json";
 const DRIVE_SCOPE = "https://www.googleapis.com/auth/drive.appdata";
 const FILM_EPOCH = "2026-09-06";
+const APP_BUILD = 29;
 
 let lang = localStorage.getItem(LANG_KEY) === "pt" ? "pt" : "en";
 let theme = localStorage.getItem(THEME_KEY) || "system";
@@ -41,6 +42,7 @@ function applyAppName() {
   if (settingsBtn) settingsBtn.setAttribute("aria-label", t("settingsBtn"));
   const sub = document.querySelector(".subtitle");
   if (sub) sub.textContent = t("subtitle");
+  applyBuildLabels();
   const apple = document.querySelector(
     'meta[name="apple-mobile-web-app-title"]',
   );
@@ -80,6 +82,12 @@ function t(key) {
       driveNeedGis: "Could not load Google sign-in.",
       driveOk: "Synced.",
       driveErr: "Sync failed.",
+      buildLabel: "Build",
+      buildCurrent: "This copy is up to date.",
+      buildUpdate: "A newer build is on the server.",
+      buildReload: "Reload to update",
+      buildUnknown: "Could not check for a newer build.",
+      buildOffline: "Offline. Could not check.",
     },
     pt: {
       filmFoot: "Assista primeiro. Depois ore e leia.",
@@ -105,6 +113,12 @@ function t(key) {
       driveNeedGis: "Não deu para carregar o login Google.",
       driveOk: "Sincronizado.",
       driveErr: "A sincronização falhou.",
+      buildLabel: "Versão",
+      buildCurrent: "Esta cópia está atualizada.",
+      buildUpdate: "Há uma versão mais nova no servidor.",
+      buildReload: "Recarregar para atualizar",
+      buildUnknown: "Não deu para checar se há versão nova.",
+      buildOffline: "Sem rede. Não deu para checar.",
     },
   };
   return (pack[lang] && pack[lang][key]) || pack.en[key] || key;
@@ -707,14 +721,59 @@ function bindNav() {
   });
 }
 
+function applyBuildLabels() {
+  const line = document.getElementById("buildLine");
+  if (line) line.textContent = t("buildLabel") + " " + APP_BUILD;
+  const btn = document.getElementById("buildReload");
+  if (btn) btn.textContent = t("buildReload");
+}
+
+async function checkBuild() {
+  const status = document.getElementById("buildStatus");
+  const btn = document.getElementById("buildReload");
+  if (btn) btn.hidden = true;
+  applyBuildLabels();
+  try {
+    const res = await fetch("version.json?t=" + Date.now(), { cache: "no-store" });
+    if (!res.ok) throw new Error("http");
+    const data = await res.json();
+    const remote = Number(data.build);
+    if (!remote) throw new Error("bad");
+    if (remote > APP_BUILD) {
+      if (status) status.textContent = t("buildUpdate") + " " + remote;
+      if (btn) btn.hidden = false;
+    } else if (status) status.textContent = t("buildCurrent");
+  } catch (e) {
+    if (status)
+      status.textContent = navigator.onLine ? t("buildUnknown") : t("buildOffline");
+  }
+}
+
+async function reloadToUpdate() {
+  try {
+    if (navigator.serviceWorker) {
+      const regs = await navigator.serviceWorker.getRegistrations();
+      await Promise.all(regs.map((r) => r.update()));
+    }
+    if (window.caches) {
+      const names = await caches.keys();
+      await Promise.all(names.map((n) => caches.delete(n)));
+    }
+  } catch (e) {}
+  location.reload();
+}
+
 function bindSettings() {
   const btn = document.getElementById("settingsBtn");
   const modal = document.getElementById("settingsModal");
   if (btn && modal) {
     btn.addEventListener("click", () => {
       modal.style.display = "flex";
+      checkBuild();
     });
   }
+  const reload = document.getElementById("buildReload");
+  if (reload) reload.addEventListener("click", reloadToUpdate);
   document.querySelectorAll("[data-lang]").forEach((b) => {
     b.classList.toggle("active", b.getAttribute("data-lang") === lang);
     b.addEventListener("click", () => {
@@ -727,6 +786,8 @@ function bindSettings() {
       });
       renderFilm();
       applyDriveLabels();
+      applyBuildLabels();
+      checkBuild();
     });
   });
   document.querySelectorAll("[data-theme-choice]").forEach((b) => {
@@ -767,6 +828,7 @@ bindSettings();
 bindDrive();
 bindReminders();
 initFilm();
+checkBuild();
 
 try {
   const q = new URLSearchParams(location.search).get("pane");

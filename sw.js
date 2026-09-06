@@ -1,4 +1,4 @@
-const CACHE_VERSION = "noah-protocol-v28";
+const CACHE_VERSION = "noah-protocol-v29";
 const ASSETS_TO_CACHE = [
   "./",
   "./index.html",
@@ -38,6 +38,10 @@ self.addEventListener("activate", (evt) => {
 self.addEventListener("fetch", (evt) => {
   const url = new URL(evt.request.url);
   if (url.origin !== self.location.origin) return;
+  if (url.pathname.endsWith("/version.json") || url.pathname.endsWith("version.json")) {
+    evt.respondWith(fetch(evt.request, { cache: "no-store" }));
+    return;
+  }
   evt.respondWith(
     fetch(evt.request)
       .then((resp) => {
