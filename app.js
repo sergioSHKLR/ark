@@ -7,7 +7,7 @@ const DRIVE_SYNC_KEY = "noah-drive-synced";
 const DRIVE_FILE_NAME = "ark-journal.json";
 const DRIVE_SCOPE = "https://www.googleapis.com/auth/drive.appdata";
 const FILM_EPOCH = "2026-09-06";
-const APP_BUILD = 32;
+const APP_BUILD = 33;
 
 let lang = localStorage.getItem(LANG_KEY) === "pt" ? "pt" : "en";
 let theme = localStorage.getItem(THEME_KEY) || "system";
@@ -43,6 +43,7 @@ function applyAppName() {
   const sub = document.querySelector(".subtitle");
   if (sub) sub.textContent = t("subtitle");
   applyBuildLabels();
+  renderDateLine();
   const apple = document.querySelector(
     'meta[name="apple-mobile-web-app-title"]',
   );
@@ -814,12 +815,70 @@ function closeModal() {
 function openScripture() {}
 function toggleNativeAudio() {}
 
-const dateLine = document.getElementById("dateLine");
-if (dateLine) {
-  dateLine.textContent = new Date().toLocaleDateString(
-    lang === "pt" ? "pt-BR" : "en-GB",
-    { weekday: "long", day: "numeric", month: "long", year: "numeric" }
+function dayOrdinalEn(n) {
+  const j = n % 10;
+  const k = n % 100;
+  if (k >= 11 && k <= 13) return n + "th";
+  if (j === 1) return n + "st";
+  if (j === 2) return n + "nd";
+  if (j === 3) return n + "rd";
+  return n + "th";
+}
+
+function formatLongDate(d) {
+  const day = d.getDate();
+  const monthsEn = [
+    "first",
+    "second",
+    "third",
+    "fourth",
+    "fifth",
+    "sixth",
+    "seventh",
+    "eighth",
+    "ninth",
+    "tenth",
+    "eleventh",
+    "twelfth",
+  ];
+  const monthsPt = [
+    "primeiro",
+    "segundo",
+    "terceiro",
+    "quarto",
+    "quinto",
+    "sexto",
+    "sétimo",
+    "oitavo",
+    "nono",
+    "décimo",
+    "décimo primeiro",
+    "décimo segundo",
+  ];
+  const year = d.getFullYear();
+  const month = d.getMonth();
+  if (lang === "pt")
+    return (
+      "O " +
+      day +
+      ".º dia do " +
+      monthsPt[month] +
+      " mês do ano de Nosso Senhor, " +
+      year
+    );
+  return (
+    "The " +
+    dayOrdinalEn(day) +
+    " day of the " +
+    monthsEn[month] +
+    " month of the year of our Lord, " +
+    year
   );
+}
+
+function renderDateLine() {
+  const dateLine = document.getElementById("dateLine");
+  if (dateLine) dateLine.textContent = formatLongDate(new Date());
 }
 
 bindNav();
