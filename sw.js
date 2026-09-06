@@ -1,4 +1,4 @@
-const CACHE_VERSION = "noah-protocol-v23";
+const CACHE_VERSION = "noah-protocol-v24";
 const ASSETS_TO_CACHE = [
   "./",
   "./index.html",
@@ -17,6 +17,7 @@ const ASSETS_TO_CACHE = [
   "./fonts/eb-garamond-400-italic.woff2",
   "./fonts/eb-garamond-700.woff2",
   "./fonts/grenze-gotisch-400.woff2",
+  "./ark.svg",
 ];
 
 self.addEventListener("install", (evt) => {
@@ -46,5 +47,38 @@ self.addEventListener("fetch", (evt) => {
         return resp;
       })
       .catch(() => caches.match(evt.request).then((cached) => cached || caches.match("./index.html")))
+  );
+});
+
+self.addEventListener("message", (evt) => {
+  const data = evt.data || {};
+  if (data.type !== "notify") return;
+  evt.waitUntil(
+    self.registration.showNotification(data.title || "Ark", {
+      body: data.body || "",
+      tag: "ark-" + (data.pane || "bell"),
+      icon: "./icons/icon-192.png",
+      badge: "./icons/icon-192.png",
+      data: { pane: data.pane },
+    }),
+  );
+});
+
+self.addEventListener("notificationclick", (evt) => {
+  evt.notification.close();
+  const pane = evt.notification.data && evt.notification.data.pane;
+  const url = new URL("./index.html", self.registration.scope);
+  if (pane) url.searchParams.set("pane", pane);
+  evt.waitUntil(
+    self.clients
+      .matchAll({ type: "window", includeUncontrolled: true })
+      .then((list) => {
+        for (let i = 0; i < list.length; i++) {
+          const client = list[i];
+          client.postMessage({ type: "open-pane", pane: pane });
+          if (client.focus) return client.focus();
+        }
+        return self.clients.openWindow(url.href);
+      }),
   );
 });

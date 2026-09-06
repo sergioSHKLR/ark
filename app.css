@@ -9,7 +9,7 @@ html[data-theme="dark"]{--paper:#1a1612;--paper-2:#241f19;--ink:#eddcc0;--ink-so
 .page{width:min(var(--max),100%);margin:0 auto;padding:0.6rem var(--pad) calc(var(--nav-h) + 1.5rem + env(safe-area-inset-bottom))}
 .masthead{text-align:center;padding:0.2rem 2.6rem 0.15rem}.date-line{font-size:0.78rem;letter-spacing:0.14em;text-transform:uppercase;color:var(--ink-soft);margin-bottom:0.2rem}
 .wordmark{font-family:var(--font-display);font-size:clamp(2.5rem,14vw,3.2rem);font-weight:400;line-height:1;letter-spacing:0.02em}
-.subtitle{margin-top:0.15rem;font-size:0.68rem;letter-spacing:0.4em;text-transform:uppercase;color:var(--gold-deep)}
+.subtitle{margin-top:0.15rem;font-size:0.68rem;letter-spacing:0.22em;text-transform:uppercase;color:var(--gold-deep)}
 .settings-btn{position:fixed;top:max(0.25rem,env(safe-area-inset-top));right:0.25rem;z-index:36;width:2.6rem;height:2.6rem;padding:0;border:0;background:transparent;box-shadow:none;appearance:none;-webkit-appearance:none;color:inherit;font-family:"Apple Color Emoji","Segoe UI Emoji","Noto Color Emoji",sans-serif;font-size:1.55rem;line-height:1;cursor:pointer;-webkit-tap-highlight-color:transparent}
 .choice{display:flex;gap:0.35rem}.choice button{appearance:none;background:var(--paper-2);border:1px solid var(--rule);color:var(--ink);min-height:2.5rem;padding:0 0.7rem;font-size:0.78rem;letter-spacing:0.06em;cursor:pointer}.choice button.active{background:var(--ink);color:var(--paper);border-color:var(--ink)}
 .setting{display:flex;align-items:center;justify-content:space-between;gap:0.75rem;margin:0.85rem 0}.setting>span{font-size:1.02rem}

@@ -39,6 +39,8 @@ function applyAppName() {
   if (word) word.textContent = name;
   const settingsBtn = document.getElementById("settingsBtn");
   if (settingsBtn) settingsBtn.setAttribute("aria-label", t("settingsBtn"));
+  const sub = document.querySelector(".subtitle");
+  if (sub) sub.textContent = t("subtitle");
   const apple = document.querySelector(
     'meta[name="apple-mobile-web-app-title"]',
   );
@@ -59,8 +61,15 @@ function t(key) {
       filmCaption: "English picture. Captions on.",
       settingsDrive: "Google Drive",
       settingsBtn: "Settings",
+      subtitle: "The Noah Protocol",
+      "remindTitle-morning": "Ark · Morning",
+      "remindBody-morning": "Pray, read, write. Then go out.",
+      "remindTitle-day": "Ark · Day",
+      "remindBody-day": "Stay out of the Forum. Keep the house.",
+      "remindTitle-night": "Ark · Night",
+      "remindBody-night": "Close the day. A few true sentences, then quiet.",
       driveHint:
-        "Backs the journal into a private Drive app-data file. Each Google account is its own ark. In Google Cloud Console: enable the Drive API, create an OAuth client of type Web application, add this site's origin (no path) under Authorized JavaScript origins, then paste the client ID here.",
+        "Private journal file in Drive app data. Project ark1 (ark1-507813). Origin to paste: https://sergioshklr.github.io — no path, no slash. Enable Drive API, finish Google Auth platform (External + test users), then create a Web application client.",
       driveClient: "OAuth client ID",
       driveConnect: "Connect Drive",
       driveSync: "Sync now",
@@ -77,8 +86,15 @@ function t(key) {
       filmCaption: "Imagem em ingl\u00eas. Legendas ligadas.",
       settingsDrive: "Google Drive",
       settingsBtn: "Configurações",
+      subtitle: "O Protocolo de Noé",
+      "remindTitle-morning": "Arca · Manhã",
+      "remindBody-morning": "Ora, lê, escreve. Depois sai.",
+      "remindTitle-day": "Arca · Dia",
+      "remindBody-day": "Fora do Fórum. Guarda a casa.",
+      "remindTitle-night": "Arca · Noite",
+      "remindBody-night": "Fecha o dia. Umas frases verdadeiras, depois silêncio.",
       driveHint:
-        "Copia o diário para um arquivo privado no Drive (dados do app). Cada conta Google é a sua arca. No Google Cloud Console: ative a API do Drive, crie um cliente OAuth do tipo aplicativo da Web, coloque a origem deste site (sem caminho) em Origens JavaScript autorizadas e cole o client ID aqui.",
+        "Arquivo privado do diário nos dados do app no Drive. Projeto ark1 (ark1-507813). Origem: https://sergioshklr.github.io — sem caminho, sem barra. Ative a API do Drive, configure o Google Auth platform (Externo + usuários de teste) e crie um cliente aplicativo da Web.",
       driveClient: "Client ID OAuth",
       driveConnect: "Conectar Drive",
       driveSync: "Sincronizar agora",
@@ -464,6 +480,177 @@ function showPane(name) {
   });
 }
 
+const REMIND_KEY = "noah-reminders-v1";
+const REMIND_PANES = ["morning", "day", "night"];
+
+function defaultRemind() {
+  return {
+    enabled: false,
+    morning: "06:00",
+    day: "12:00",
+    night: "21:00",
+    lastTick: Date.now(),
+    fired: {},
+  };
+}
+
+function loadRemind() {
+  try {
+    const parsed = JSON.parse(localStorage.getItem(REMIND_KEY) || "{}");
+    if (parsed.morning === "06:30") parsed.morning = "06:00";
+    if (parsed.night === "21:30") parsed.night = "21:00";
+    return Object.assign(defaultRemind(), parsed);
+  } catch (e) {
+    return defaultRemind();
+  }
+}
+
+function saveRemind(r) {
+  localStorage.setItem(REMIND_KEY, JSON.stringify(r));
+}
+
+function todaysStamp(hhmm) {
+  const p = String(hhmm || "00:00").split(":");
+  const d = new Date();
+  d.setHours(Number(p[0]) || 0, Number(p[1]) || 0, 0, 0);
+  return d.getTime();
+}
+
+function notifyPane(pane) {
+  const title = t("remindTitle-" + pane);
+  const body = t("remindBody-" + pane);
+  if (navigator.serviceWorker && navigator.serviceWorker.controller) {
+    navigator.serviceWorker.controller.postMessage({
+      type: "notify",
+      pane: pane,
+      title: title,
+      body: body,
+    });
+  } else if (
+    typeof Notification !== "undefined" &&
+    Notification.permission === "granted"
+  ) {
+    new Notification(title, {
+      body: body,
+      tag: "ark-" + pane,
+      icon: "icons/icon-192.png",
+    });
+  }
+}
+
+function maybeFireReminders() {
+  const r = loadRemind();
+  const now = Date.now();
+  if (!r.enabled) {
+    r.lastTick = now;
+    saveRemind(r);
+    return;
+  }
+  const last = r.lastTick || now;
+  const day = todayKey();
+  REMIND_PANES.forEach(function (pane) {
+    const at = todaysStamp(r[pane]);
+    if (last < at && now >= at && r.fired[pane] !== day) {
+      r.fired[pane] = day;
+      notifyPane(pane);
+    }
+  });
+  r.lastTick = now;
+  saveRemind(r);
+}
+
+function pad2(n) {
+  return String(n).padStart(2, "0");
+}
+
+function icsLocal(d) {
+  return (
+    d.getFullYear() +
+    pad2(d.getMonth() + 1) +
+    pad2(d.getDate()) +
+    "T" +
+    pad2(d.getHours()) +
+    pad2(d.getMinutes()) +
+    "00"
+  );
+}
+
+function downloadIcs() {
+  const r = loadRemind();
+  const now = new Date();
+  const events = REMIND_PANES.map(function (pane) {
+    const start = new Date();
+    const hm = String(r[pane] || "00:00").split(":");
+    start.setHours(Number(hm[0]) || 0, Number(hm[1]) || 0, 0, 0);
+    if (start.getTime() < now.getTime()) start.setDate(start.getDate() + 1);
+    return [
+      "BEGIN:VEVENT",
+      "UID:ark-" + pane + "@ark.local",
+      "DTSTAMP:" + icsLocal(now),
+      "DTSTART:" + icsLocal(start),
+      "RRULE:FREQ=DAILY",
+      "SUMMARY:" + t("remindTitle-" + pane),
+      "DESCRIPTION:" + t("remindBody-" + pane),
+      "BEGIN:VALARM",
+      "TRIGGER:PT0S",
+      "ACTION:DISPLAY",
+      "DESCRIPTION:" + t("remindTitle-" + pane),
+      "END:VALARM",
+      "END:VEVENT",
+    ].join("\r\n");
+  });
+  const ics =
+    "BEGIN:VCALENDAR\r\nVERSION:2.0\r\nPRODID:-//Ark//EN\r\nCALSCALE:GREGORIAN\r\n" +
+    events.join("\r\n") +
+    "\r\nEND:VCALENDAR\r\n";
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(
+    new Blob([ics], { type: "text/calendar;charset=utf-8" }),
+  );
+  a.download = "ark-reminders.ics";
+  a.click();
+}
+
+function bindReminders() {
+  const on = document.getElementById("remindOn");
+  if (!on) return;
+  const r = loadRemind();
+  on.checked = !!r.enabled;
+  REMIND_PANES.forEach(function (p) {
+    const el = document.getElementById("remind-" + p);
+    if (el) el.value = r[p];
+  });
+  on.addEventListener("change", function () {
+    const cur = loadRemind();
+    cur.enabled = on.checked;
+    cur.lastTick = Date.now();
+    saveRemind(cur);
+    if (
+      cur.enabled &&
+      typeof Notification !== "undefined" &&
+      Notification.permission !== "granted"
+    ) {
+      Notification.requestPermission();
+    }
+  });
+  REMIND_PANES.forEach(function (p) {
+    const el = document.getElementById("remind-" + p);
+    if (!el) return;
+    el.addEventListener("change", function (e) {
+      const cur = loadRemind();
+      cur[p] = e.target.value;
+      saveRemind(cur);
+    });
+  });
+  const icsBtn = document.getElementById("remindIcs");
+  if (icsBtn) icsBtn.addEventListener("click", downloadIcs);
+  setInterval(maybeFireReminders, 20000);
+  document.addEventListener("visibilitychange", function () {
+    if (!document.hidden) maybeFireReminders();
+  });
+  maybeFireReminders();
+}
+
 function bindJournal() {
   const data = loadJournal();
   const day = data[todayKey()] || { checks: {}, notes: {} };
@@ -557,7 +744,20 @@ bindNav();
 bindJournal();
 bindSettings();
 bindDrive();
+bindReminders();
 initFilm();
+
+try {
+  const q = new URLSearchParams(location.search).get("pane");
+  if (q) showPane(q);
+} catch (e) {}
+
+if (navigator.serviceWorker) {
+  navigator.serviceWorker.addEventListener("message", function (e) {
+    if (e.data && e.data.type === "open-pane" && e.data.pane)
+      showPane(e.data.pane);
+  });
+}
 
 if ("serviceWorker" in navigator) {
   window.addEventListener("load", () => {
