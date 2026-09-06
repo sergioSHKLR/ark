@@ -7,7 +7,7 @@ const DRIVE_SYNC_KEY = "noah-drive-synced";
 const DRIVE_FILE_NAME = "ark-journal.json";
 const DRIVE_SCOPE = "https://www.googleapis.com/auth/drive.appdata";
 const FILM_EPOCH = "2026-09-06";
-const APP_BUILD = 33;
+const APP_BUILD = 34;
 
 let lang = localStorage.getItem(LANG_KEY) === "pt" ? "pt" : "en";
 let theme = localStorage.getItem(THEME_KEY) || "system";
@@ -123,6 +123,36 @@ function t(key) {
     },
   };
   return (pack[lang] && pack[lang][key]) || pack.en[key] || key;
+}
+
+function hashStr(s) {
+  let h = 0;
+  for (let i = 0; i < s.length; i++) h = (h * 31 + s.charCodeAt(i)) >>> 0;
+  return h;
+}
+
+function pickReading() {
+  const list = typeof READINGS !== "undefined" ? READINGS : [];
+  if (!list.length) return null;
+  return list[hashStr(todayKey()) % list.length];
+}
+
+function renderReading() {
+  const el = document.getElementById("dailyReading");
+  if (!el) return;
+  const r = pickReading();
+  if (!r) {
+    el.innerHTML = "";
+    return;
+  }
+  const extra =
+    lang === "pt" && typeof READING_PT !== "undefined" ? READING_PT[r.id] : null;
+  const loc = extra || { src: r.src, text: r.text };
+  const paras = String(loc.text || "")
+    .split(/\n\n/)
+    .map((chunk) => "<p>" + chunk + "</p>")
+    .join("");
+  el.innerHTML = '<div class="src">' + loc.src + "</div>" + paras;
 }
 
 function daysSinceEpoch() {
@@ -786,6 +816,7 @@ function bindSettings() {
         x.classList.toggle("active", x.getAttribute("data-lang") === lang);
       });
       renderFilm();
+      renderReading();
       applyDriveLabels();
       applyBuildLabels();
       checkBuild();
@@ -887,6 +918,7 @@ bindSettings();
 bindDrive();
 bindReminders();
 initFilm();
+renderReading();
 checkBuild();
 
 try {
