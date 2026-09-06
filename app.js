@@ -32,6 +32,24 @@ function applyTheme() {
 }
 applyTheme();
 
+function applyAppName() {
+  const name = lang === "pt" ? "Arca" : "Ark";
+  document.title = name;
+  const word = document.querySelector(".wordmark");
+  if (word) word.textContent = name;
+  const apple = document.querySelector(
+    'meta[name="apple-mobile-web-app-title"]',
+  );
+  if (apple) apple.setAttribute("content", name);
+  const man = document.querySelector('link[rel="manifest"]');
+  if (man)
+    man.setAttribute(
+      "href",
+      lang === "pt" ? "manifest-pt.json" : "manifest.json",
+    );
+}
+applyAppName();
+
 function t(key) {
   const pack = {
     en: {
@@ -490,7 +508,8 @@ function bindSettings() {
     b.addEventListener("click", () => {
       lang = b.getAttribute("data-lang");
       localStorage.setItem(LANG_KEY, lang);
-      document.documentElement.lang = lang;
+      document.documentElement.lang = lang === "pt" ? "pt-BR" : "en";
+      applyAppName();
       document.querySelectorAll("[data-lang]").forEach((x) => {
         x.classList.toggle("active", x.getAttribute("data-lang") === lang);
       });
