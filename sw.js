@@ -1,7 +1,9 @@
-const CACHE_VERSION = "noah-protocol-v16";
+const CACHE_VERSION = "noah-protocol-v17";
 const ASSETS_TO_CACHE = [
   "./",
   "./index.html",
+  "./app.css",
+  "./app.js",
   "./films.json",
   "./manifest.json",
   "./manifest-pt.json",
@@ -19,25 +21,15 @@ const ASSETS_TO_CACHE = [
 
 self.addEventListener("install", (evt) => {
   evt.waitUntil(
-    caches
-      .open(CACHE_VERSION)
-      .then((cache) => cache.addAll(ASSETS_TO_CACHE))
-      .then(() => self.skipWaiting()),
+    caches.open(CACHE_VERSION).then((cache) => cache.addAll(ASSETS_TO_CACHE)).then(() => self.skipWaiting())
   );
 });
 
 self.addEventListener("activate", (evt) => {
   evt.waitUntil(
-    caches
-      .keys()
-      .then((keys) =>
-        Promise.all(
-          keys.map((k) => {
-            if (k !== CACHE_VERSION) return caches.delete(k);
-          }),
-        ),
-      )
-      .then(() => self.clients.claim()),
+    caches.keys().then((keys) =>
+      Promise.all(keys.map((k) => (k !== CACHE_VERSION ? caches.delete(k) : undefined)))
+    ).then(() => self.clients.claim())
   );
 });
 
@@ -53,43 +45,6 @@ self.addEventListener("fetch", (evt) => {
         }
         return resp;
       })
-      .catch(() =>
-        caches
-          .match(evt.request)
-          .then((cached) => cached || caches.match("./index.html")),
-      ),
-  );
-});
-
-self.addEventListener("message", (evt) => {
-  const data = evt.data || {};
-  if (data.type !== "notify") return;
-  evt.waitUntil(
-    self.registration.showNotification(data.title || "Ark", {
-      body: data.body || "",
-      tag: "noah-" + (data.pane || "bell"),
-      icon: "./icons/icon-192.png",
-      badge: "./icons/icon-192.png",
-      data: { pane: data.pane },
-    }),
-  );
-});
-
-self.addEventListener("notificationclick", (evt) => {
-  evt.notification.close();
-  const pane = evt.notification.data && evt.notification.data.pane;
-  const url = new URL("./index.html", self.registration.scope);
-  if (pane) url.searchParams.set("pane", pane);
-  evt.waitUntil(
-    self.clients
-      .matchAll({ type: "window", includeUncontrolled: true })
-      .then((list) => {
-        for (let i = 0; i < list.length; i++) {
-          const client = list[i];
-          client.postMessage({ type: "open-pane", pane: pane });
-          if (client.focus) return client.focus();
-        }
-        return self.clients.openWindow(url.href);
-      }),
+      .catch(() => caches.match(evt.request).then((cached) => cached || caches.match("./index.html")))
   );
 });
