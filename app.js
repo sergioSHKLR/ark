@@ -37,6 +37,8 @@ function applyAppName() {
   document.title = name;
   const word = document.querySelector(".wordmark");
   if (word) word.textContent = name;
+  const settingsBtn = document.getElementById("settingsBtn");
+  if (settingsBtn) settingsBtn.setAttribute("aria-label", t("settingsBtn"));
   const apple = document.querySelector(
     'meta[name="apple-mobile-web-app-title"]',
   );
@@ -56,8 +58,9 @@ function t(key) {
       filmFoot: "Watch first. Then pray and read.",
       filmCaption: "English picture. Captions on.",
       settingsDrive: "Google Drive",
+      settingsBtn: "Settings",
       driveHint:
-        "Backs the journal into a private Drive app-data file. Each Google account is its own ark. Needs a Google Cloud OAuth client ID (Web application) whose origins include this site.",
+        "Backs the journal into a private Drive app-data file. Each Google account is its own ark. In Google Cloud Console: enable the Drive API, create an OAuth client of type Web application, add this site's origin (no path) under Authorized JavaScript origins, then paste the client ID here.",
       driveClient: "OAuth client ID",
       driveConnect: "Connect Drive",
       driveSync: "Sync now",
@@ -73,8 +76,9 @@ function t(key) {
       filmFoot: "Assista primeiro. Depois ore e leia.",
       filmCaption: "Imagem em ingl\u00eas. Legendas ligadas.",
       settingsDrive: "Google Drive",
+      settingsBtn: "Configurações",
       driveHint:
-        "Copia o diário para um arquivo privado no Drive (dados do app). Cada conta Google é a sua arca. Precisa de um client ID OAuth (aplicativo da Web) com a origem deste site.",
+        "Copia o diário para um arquivo privado no Drive (dados do app). Cada conta Google é a sua arca. No Google Cloud Console: ative a API do Drive, crie um cliente OAuth do tipo aplicativo da Web, coloque a origem deste site (sem caminho) em Origens JavaScript autorizadas e cole o client ID aqui.",
       driveClient: "Client ID OAuth",
       driveConnect: "Conectar Drive",
       driveSync: "Sincronizar agora",

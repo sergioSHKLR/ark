@@ -15,7 +15,7 @@
     <link rel="stylesheet" href="app.css" />
   </head>
   <body>
-    <button type="button" class="settings-btn" id="settingsBtn" aria-label="Settings">S</button>
+    <button type="button" class="settings-btn" id="settingsBtn" aria-label="Settings">📜</button>
     <div class="page">
       <header class="masthead">
         <p class="date-line" id="dateLine"></p>
@@ -206,8 +206,10 @@
           <span data-i18n="settingsDrive">Google Drive</span>
           <p class="remind-note" id="driveHint" data-i18n="driveHint">
             Backs the journal into a private Drive app-data file. Each Google
-            account is its own ark. Needs a Google Cloud OAuth client ID
-            (Web application) whose origins include this site.
+            account is its own ark. In Google Cloud Console: enable the Drive
+            API, create an OAuth client of type Web application, add this
+            site's origin (no path) under Authorized JavaScript origins, then
+            paste the client ID here.
           </p>
           <label class="note-block">
             <span data-i18n="driveClient">OAuth client ID</span>

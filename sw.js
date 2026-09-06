@@ -1,4 +1,4 @@
-const CACHE_VERSION = "noah-protocol-v22";
+const CACHE_VERSION = "noah-protocol-v23";
 const ASSETS_TO_CACHE = [
   "./",
   "./index.html",
@@ -16,7 +16,7 @@ const ASSETS_TO_CACHE = [
   "./fonts/eb-garamond-400.woff2",
   "./fonts/eb-garamond-400-italic.woff2",
   "./fonts/eb-garamond-700.woff2",
-  "./fonts/unifrakturmaguntia-400.woff2",
+  "./fonts/grenze-gotisch-400.woff2",
 ];
 
 self.addEventListener("install", (evt) => {
