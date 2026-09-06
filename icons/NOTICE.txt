@@ -1,3 +1,2 @@
-App icon from ark.svg: boat only (no wordmark).
-Sky, water, ARK letters, Noah, and the dove sit off-canvas
-or under the hull. PNG icons composite the boat on a sky.
+App icon: boat trimmed to its edges, as large as the square allows.
+ark.svg is the full artboard; icons/favicon.svg is a tight crop.

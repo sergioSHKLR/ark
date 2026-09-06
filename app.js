@@ -69,7 +69,7 @@ function t(key) {
       "remindTitle-night": "Ark · Night",
       "remindBody-night": "Close the day. A few true sentences, then quiet.",
       driveHint:
-        "Private journal file in Drive app data. Project ark1 (ark1-507813). Origin to paste: https://sergioshklr.github.io — no path, no slash. Enable Drive API, finish Google Auth platform (External + test users), then create a Web application client.",
+        "Private journal file (ark-journal.json) in Drive app data — it will not appear in My Drive. After Connect or Sync now, the line below should say Synced with a time.",
       driveClient: "OAuth client ID",
       driveConnect: "Connect Drive",
       driveSync: "Sync now",
@@ -94,7 +94,7 @@ function t(key) {
       "remindTitle-night": "Arca · Noite",
       "remindBody-night": "Fecha o dia. Umas frases verdadeiras, depois silêncio.",
       driveHint:
-        "Arquivo privado do diário nos dados do app no Drive. Projeto ark1 (ark1-507813). Origem: https://sergioshklr.github.io — sem caminho, sem barra. Ative a API do Drive, configure o Google Auth platform (Externo + usuários de teste) e crie um cliente aplicativo da Web.",
+        "Arquivo privado (ark-journal.json) nos dados do app no Drive — não aparece em Meu Drive. Depois de Conectar ou Sincronizar agora, a linha abaixo deve dizer Sincronizado com um horário.",
       driveClient: "Client ID OAuth",
       driveConnect: "Conectar Drive",
       driveSync: "Sincronizar agora",
@@ -213,6 +213,24 @@ function setDriveStatus(msg) {
   if (el) el.textContent = msg || "";
 }
 
+function formatSyncAt() {
+  const at = localStorage.getItem(DRIVE_SYNC_KEY);
+  if (!at) return "";
+  const d = new Date(at);
+  if (isNaN(d.getTime())) return "";
+  return d.toLocaleString(lang === "pt" ? "pt-BR" : "en-GB", {
+    day: "numeric",
+    month: "short",
+    hour: "2-digit",
+    minute: "2-digit",
+  });
+}
+
+function markDriveOk() {
+  const when = formatSyncAt();
+  setDriveStatus(when ? t("driveOk") + " " + when : t("driveOk"));
+}
+
 function applyDriveLabels() {
   const map = [
     ["driveHint", "driveHint"],
@@ -228,7 +246,10 @@ function applyDriveLabels() {
   if (lab) lab.textContent = t("driveClient");
   const head = document.querySelector(".drive-block > span");
   if (head) head.textContent = t("settingsDrive");
-  setDriveStatus(driveToken ? t("driveOn") : t("driveOff"));
+  if (driveToken) {
+    const when = formatSyncAt();
+    setDriveStatus(when ? t("driveOn") + " " + t("driveOk") + " " + when : t("driveOn"));
+  } else setDriveStatus(t("driveOff"));
 }
 
 function loadGis() {
@@ -387,7 +408,7 @@ function scheduleDriveSync() {
   clearTimeout(driveSyncTimer);
   driveSyncTimer = setTimeout(() => {
     syncDrive()
-      .then(() => setDriveStatus(t("driveOk")))
+      .then(() => markDriveOk())
       .catch(() => setDriveStatus(t("driveErr")));
   }, 2500);
 }
@@ -426,7 +447,7 @@ async function connectDrive() {
         driveToken = resp.access_token;
         setDriveStatus(t("driveOn"));
         syncDrive()
-          .then(() => setDriveStatus(t("driveOk")))
+          .then(() => markDriveOk())
           .catch(() => setDriveStatus(t("driveErr")));
       } else setDriveStatus(t("driveErr"));
     },
@@ -464,7 +485,7 @@ function bindDrive() {
     sync.addEventListener("click", () => {
       if (!driveToken) return connectDrive();
       syncDrive()
-        .then(() => setDriveStatus(t("driveOk")))
+        .then(() => markDriveOk())
         .catch(() => setDriveStatus(t("driveErr")));
     });
   if (out) out.addEventListener("click", signOutDrive);
