@@ -7,7 +7,7 @@ const DRIVE_SYNC_KEY = "noah-drive-synced";
 const DRIVE_FILE_NAME = "ark-journal.json";
 const DRIVE_SCOPE = "https://www.googleapis.com/auth/drive.appdata";
 const FILM_EPOCH = "2026-09-06";
-const APP_BUILD = 31;
+const APP_BUILD = 32;
 
 let lang = localStorage.getItem(LANG_KEY) === "pt" ? "pt" : "en";
 let theme = localStorage.getItem(THEME_KEY) || "system";
