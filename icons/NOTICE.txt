@@ -1,1 +1,1 @@
-App icon from ark.svg (ark + dove). Dove glyph from the source file.
+App icon from ark.svg (boat + ARK wordmark, no dove).
