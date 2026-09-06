@@ -1,2 +1,2 @@
-App icon: boat trimmed to its edges, as large as the square allows.
+App icon: boat only, transparent ground (no sky, no sea).
 ark.svg is the full artboard; icons/favicon.svg is a tight crop.
