@@ -1,8 +1,9 @@
-const CACHE_VERSION = "noah-protocol-v14";
+const CACHE_VERSION = "noah-protocol-v15";
 const ASSETS_TO_CACHE = [
   "./",
   "./index.html",
   "./manifest.json",
+  "./manifest-pt.json",
   "./icons/favicon.svg",
   "./icons/favicon.ico",
   "./icons/icon-192.png",
@@ -63,7 +64,7 @@ self.addEventListener("message", (evt) => {
   const data = evt.data || {};
   if (data.type !== "notify") return;
   evt.waitUntil(
-    self.registration.showNotification(data.title || "Noah", {
+    self.registration.showNotification(data.title || "Ark", {
       body: data.body || "",
       tag: "noah-" + (data.pane || "bell"),
       icon: "./icons/icon-192.png",

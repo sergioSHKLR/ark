@@ -1,14 +1,14 @@
 {
   "id": "./",
-  "name": "Ark",
-  "short_name": "Ark",
+  "name": "Arca",
+  "short_name": "Arca",
   "start_url": "./",
   "scope": "./",
   "display": "standalone",
   "background_color": "#f3ead6",
   "theme_color": "#000000",
-  "description": "Daily rite: stoic, faithful, insulated.",
-  "lang": "en",
+  "description": "Rito diário: estoico, fiel, isolado.",
+  "lang": "pt",
   "icons": [
     {
       "src": "icons/icon-192.png",
