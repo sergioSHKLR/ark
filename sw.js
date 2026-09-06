@@ -1,7 +1,8 @@
-const CACHE_VERSION = "noah-protocol-v15";
+const CACHE_VERSION = "noah-protocol-v16";
 const ASSETS_TO_CACHE = [
   "./",
   "./index.html",
+  "./films.json",
   "./manifest.json",
   "./manifest-pt.json",
   "./icons/favicon.svg",
