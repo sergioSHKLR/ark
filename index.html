@@ -517,6 +517,70 @@
         color: var(--ink-soft);
       }
 
+      .remind {
+        margin: 0 0 1.4rem;
+        padding: 0.85rem 0 0.2rem;
+        border-bottom: 1px dotted var(--rule);
+      }
+
+      .remind h3 {
+        font-size: 0.7rem;
+        font-weight: 400;
+        letter-spacing: 0.18em;
+        text-transform: uppercase;
+        color: var(--gold-deep);
+        margin-bottom: 0.45rem;
+      }
+
+      .remind-note {
+        font-size: 0.95rem;
+        font-style: italic;
+        color: var(--ink-soft);
+        margin-bottom: 0.7rem;
+      }
+
+      .remind-row {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 0.75rem;
+        min-height: 2.75rem;
+        margin: 0.2rem 0;
+      }
+
+      .remind-row label {
+        font-size: 1.02rem;
+      }
+
+      .remind-row input[type="time"] {
+        background: var(--paper-2);
+        border: 1px solid var(--rule);
+        color: var(--ink);
+        min-height: 2.6rem;
+        padding: 0 0.5rem;
+        font-size: 1rem;
+      }
+
+      .remind-row input[type="checkbox"] {
+        width: 1.25rem;
+        height: 1.25rem;
+        accent-color: var(--rubric);
+      }
+
+      .remind-ics {
+        display: block;
+        width: 100%;
+        margin: 0.65rem 0 0.85rem;
+        background: var(--ink);
+        color: var(--paper);
+        border: 0;
+        min-height: 2.8rem;
+        font-size: 0.78rem;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        cursor: pointer;
+      }
+
       .modal-overlay {
         position: fixed;
         inset: 0;
@@ -973,6 +1037,33 @@
             words you actually wrote, a streak only you can see.
           </p>
         </div>
+        <div class="remind" id="remindBox">
+          <h3 data-i18n="remindHead">Bells</h3>
+          <p class="remind-note" data-i18n="remindNote">
+            Set a time for morning, day, and night. While this app is open it
+            can ring. Add the calendar file so the phone still rings when it is
+            closed.
+          </p>
+          <div class="remind-row">
+            <label for="remindOn" data-i18n="remindEnable">Enable</label>
+            <input type="checkbox" id="remindOn" />
+          </div>
+          <div class="remind-row">
+            <label for="remind-morning" data-i18n="navMorning">Morning</label>
+            <input type="time" id="remind-morning" />
+          </div>
+          <div class="remind-row">
+            <label for="remind-day" data-i18n="navDay">Day</label>
+            <input type="time" id="remind-day" />
+          </div>
+          <div class="remind-row">
+            <label for="remind-night" data-i18n="navNight">Night</label>
+            <input type="time" id="remind-night" />
+          </div>
+          <button class="remind-ics" type="button" id="remindIcs" data-i18n="remindIcs">
+            Add to phone calendar
+          </button>
+        </div>
         <div class="stats" id="logStats"></div>
         <div id="logList"></div>
       </section>
@@ -1092,6 +1183,16 @@
           slotWork: "The hands",
           slotNight: "Closing",
           slotPassage: "Passage",
+          remindHead: "Bells",
+          remindNote: "Set a time for morning, day, and night. While this app is open it can ring. Add the calendar file so the phone still rings when it is closed.",
+          remindEnable: "Enable",
+          remindIcs: "Add to phone calendar",
+          "remindTitle-morning": "Noah · Morning",
+          "remindBody-morning": "Pray, read, write. Then go out.",
+          "remindTitle-day": "Noah · Day",
+          "remindBody-day": "Stay out of the Forum. Keep the house.",
+          "remindTitle-night": "Noah · Night",
+          "remindBody-night": "Close the day. A few true sentences, then quiet.",
         },
         pt: {
           subtitle: "O Protocolo",
@@ -1169,6 +1270,16 @@
           slotWork: "As mãos",
           slotNight: "Encerramento",
           slotPassage: "Passagem",
+          remindHead: "Sinos",
+          remindNote: "Marca uma hora para manhã, dia e noite. Com a aplicação aberta, pode tocar. O ficheiro de calendário toca mesmo fechada.",
+          remindEnable: "Ativar",
+          remindIcs: "Juntar ao calendário do telefone",
+          "remindTitle-morning": "Noé · Manhã",
+          "remindBody-morning": "Ora, lê, escreve. Depois sai.",
+          "remindTitle-day": "Noé · Dia",
+          "remindBody-day": "Fora do Fórum. Guarda a casa.",
+          "remindTitle-night": "Noé · Noite",
+          "remindBody-night": "Fecha o dia. Umas frases verdadeiras, depois silêncio.",
         },
       };
 
@@ -1879,6 +1990,173 @@
         document.getElementById("scriptureModal").style.display = "none";
       }
 
+      const REMIND_KEY = "noah-reminders-v1";
+      const REMIND_PANES = ["morning", "day", "night"];
+
+      function defaultRemind() {
+        return {
+          enabled: false,
+          morning: "06:30",
+          day: "12:00",
+          night: "21:30",
+          lastTick: Date.now(),
+          fired: {},
+        };
+      }
+
+      function loadRemind() {
+        try {
+          return Object.assign(
+            defaultRemind(),
+            JSON.parse(localStorage.getItem(REMIND_KEY) || "{}"),
+          );
+        } catch (e) {
+          return defaultRemind();
+        }
+      }
+
+      function saveRemind(r) {
+        localStorage.setItem(REMIND_KEY, JSON.stringify(r));
+      }
+
+      function todaysStamp(hhmm) {
+        const p = String(hhmm || "00:00").split(":");
+        const d = new Date();
+        d.setHours(Number(p[0]) || 0, Number(p[1]) || 0, 0, 0);
+        return d.getTime();
+      }
+
+      function notifyPane(pane) {
+        const title = t("remindTitle-" + pane);
+        const body = t("remindBody-" + pane);
+        if (navigator.serviceWorker && navigator.serviceWorker.controller) {
+          navigator.serviceWorker.controller.postMessage({
+            type: "notify",
+            pane: pane,
+            title: title,
+            body: body,
+          });
+        } else if (
+          typeof Notification !== "undefined" &&
+          Notification.permission === "granted"
+        ) {
+          new Notification(title, {
+            body: body,
+            tag: "noah-" + pane,
+            icon: "icons/icon-192.png",
+          });
+        }
+      }
+
+      function maybeFireReminders() {
+        const r = loadRemind();
+        const now = Date.now();
+        if (!r.enabled) {
+          r.lastTick = now;
+          saveRemind(r);
+          return;
+        }
+        const last = r.lastTick || now;
+        const day = todayKey();
+        REMIND_PANES.forEach(function (pane) {
+          const at = todaysStamp(r[pane]);
+          if (last < at && now >= at && r.fired[pane] !== day) {
+            r.fired[pane] = day;
+            notifyPane(pane);
+          }
+        });
+        r.lastTick = now;
+        saveRemind(r);
+      }
+
+      function pad2(n) {
+        return String(n).padStart(2, "0");
+      }
+
+      function icsLocal(d) {
+        return (
+          d.getFullYear() +
+          pad2(d.getMonth() + 1) +
+          pad2(d.getDate()) +
+          "T" +
+          pad2(d.getHours()) +
+          pad2(d.getMinutes()) +
+          "00"
+        );
+      }
+
+      function downloadIcs() {
+        const r = loadRemind();
+        const now = new Date();
+        const events = REMIND_PANES.map(function (pane) {
+          const start = new Date();
+          const hm = String(r[pane] || "00:00").split(":");
+          start.setHours(Number(hm[0]) || 0, Number(hm[1]) || 0, 0, 0);
+          if (start.getTime() < now.getTime())
+            start.setDate(start.getDate() + 1);
+          return [
+            "BEGIN:VEVENT",
+            "UID:noah-" + pane + "@noah.local",
+            "DTSTAMP:" + icsLocal(now),
+            "DTSTART:" + icsLocal(start),
+            "RRULE:FREQ=DAILY",
+            "SUMMARY:" + t("remindTitle-" + pane),
+            "DESCRIPTION:" + t("remindBody-" + pane),
+            "BEGIN:VALARM",
+            "TRIGGER:PT0S",
+            "ACTION:DISPLAY",
+            "DESCRIPTION:" + t("remindTitle-" + pane),
+            "END:VALARM",
+            "END:VEVENT",
+          ].join("\r\n");
+        });
+        const ics =
+          "BEGIN:VCALENDAR\r\nVERSION:2.0\r\nPRODID:-//Noah Protocol//EN\r\nCALSCALE:GREGORIAN\r\n" +
+          events.join("\r\n") +
+          "\r\nEND:VCALENDAR\r\n";
+        const a = document.createElement("a");
+        a.href = URL.createObjectURL(
+          new Blob([ics], { type: "text/calendar;charset=utf-8" }),
+        );
+        a.download = "noah-reminders.ics";
+        a.click();
+      }
+
+      function bindReminders() {
+        const r = loadRemind();
+        const on = document.getElementById("remindOn");
+        on.checked = !!r.enabled;
+        REMIND_PANES.forEach(function (p) {
+          document.getElementById("remind-" + p).value = r[p];
+        });
+        on.addEventListener("change", function () {
+          const cur = loadRemind();
+          cur.enabled = on.checked;
+          cur.lastTick = Date.now();
+          saveRemind(cur);
+          if (
+            cur.enabled &&
+            typeof Notification !== "undefined" &&
+            Notification.permission !== "granted"
+          ) {
+            Notification.requestPermission();
+          }
+        });
+        REMIND_PANES.forEach(function (p) {
+          document.getElementById("remind-" + p).addEventListener("change", function (e) {
+            const cur = loadRemind();
+            cur[p] = e.target.value;
+            saveRemind(cur);
+          });
+        });
+        document.getElementById("remindIcs").addEventListener("click", downloadIcs);
+        setInterval(maybeFireReminders, 20000);
+        document.addEventListener("visibilitychange", function () {
+          if (!document.hidden) maybeFireReminders();
+        });
+        maybeFireReminders();
+      }
+
       document.getElementById("langSwitch").addEventListener("click", function () {
         lang = lang === "pt" ? "en" : "pt";
         localStorage.setItem(LANG_KEY, lang);
@@ -1893,11 +2171,20 @@
       bindJournal();
       renderLog();
       initChant();
+      bindReminders();
       applyLang();
       try {
+        const q = new URLSearchParams(location.search).get("pane");
         const last = sessionStorage.getItem("noah-pane");
-        if (last) showPane(last);
+        if (q) showPane(q);
+        else if (last) showPane(last);
       } catch (e) {}
+      if (navigator.serviceWorker) {
+        navigator.serviceWorker.addEventListener("message", function (e) {
+          if (e.data && e.data.type === "open-pane" && e.data.pane)
+            showPane(e.data.pane);
+        });
+      }
     </script>
 
     <script>

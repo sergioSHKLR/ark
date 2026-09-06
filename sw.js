@@ -1,4 +1,4 @@
-const CACHE_VERSION = "noah-protocol-v11";
+const CACHE_VERSION = "noah-protocol-v12";
 const ASSETS_TO_CACHE = [
   "./",
   "./index.html",
@@ -56,5 +56,38 @@ self.addEventListener("fetch", (evt) => {
           .match(evt.request)
           .then((cached) => cached || caches.match("./index.html")),
       ),
+  );
+});
+
+self.addEventListener("message", (evt) => {
+  const data = evt.data || {};
+  if (data.type !== "notify") return;
+  evt.waitUntil(
+    self.registration.showNotification(data.title || "Noah", {
+      body: data.body || "",
+      tag: "noah-" + (data.pane || "bell"),
+      icon: "./icons/icon-192.png",
+      badge: "./icons/icon-192.png",
+      data: { pane: data.pane },
+    }),
+  );
+});
+
+self.addEventListener("notificationclick", (evt) => {
+  evt.notification.close();
+  const pane = evt.notification.data && evt.notification.data.pane;
+  const url = new URL("./index.html", self.registration.scope);
+  if (pane) url.searchParams.set("pane", pane);
+  evt.waitUntil(
+    self.clients
+      .matchAll({ type: "window", includeUncontrolled: true })
+      .then((list) => {
+        for (let i = 0; i < list.length; i++) {
+          const client = list[i];
+          client.postMessage({ type: "open-pane", pane: pane });
+          if (client.focus) return client.focus();
+        }
+        return self.clients.openWindow(url.href);
+      }),
   );
 });
