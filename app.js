@@ -7,7 +7,7 @@ const DRIVE_SYNC_KEY = "noah-drive-synced";
 const DRIVE_FILE_NAME = "ark-journal.json";
 const DRIVE_SCOPE = "https://www.googleapis.com/auth/drive.appdata";
 const FILM_EPOCH = "2026-09-06";
-const APP_BUILD = 38;
+const APP_BUILD = 39;
 
 let lang = localStorage.getItem(LANG_KEY) === "pt" ? "pt" : "en";
 let theme = localStorage.getItem(THEME_KEY) || "system";
@@ -92,8 +92,8 @@ function t(key) {
       chantRest: "Chant at rest",
       chantLocal: "Playing local files from audio/",
       chantYt: "YouTube (temporary). Add audio/playlist.json to go offline.",
-      load: "Load",
-      reload: "Reload",
+      play: "Play",
+      pause: "Pause",
       logEmpty: "The log fills as you write. Come back tomorrow.",
       statDays: "Days",
       statStreak: "In a row",
@@ -141,8 +141,8 @@ function t(key) {
       chantRest: "Canto em descanso",
       chantLocal: "Reproduzindo arquivos locais em audio/",
       chantYt: "YouTube (provisório). Coloque audio/playlist.json para ficar offline.",
-      load: "Abrir",
-      reload: "Outra",
+      play: "Tocar",
+      pause: "Pausa",
       logEmpty: "O diário enche quando você escreve. Volte amanhã.",
       statDays: "Dias",
       statStreak: "Seguidos",
@@ -588,6 +588,7 @@ let chantList = YT_CHANT.slice();
 let chantMode = "yt";
 let chantIndex = 0;
 let chantLoaded = false;
+let chantPlaying = false;
 let chantAnalyser = null;
 let chantAudioCtx = null;
 let chantWaveRaf = 0;
@@ -596,7 +597,7 @@ function chantYoutubeSrc(id, autoplay) {
   return (
     "https://www.youtube-nocookie.com/embed/" +
     id +
-    "?rel=0&modestbranding=1&playsinline=1&iv_load_policy=3&fs=0" +
+    "?rel=0&modestbranding=1&playsinline=1&iv_load_policy=3&fs=0&enablejsapi=1" +
     (autoplay ? "&autoplay=1" : "")
   );
 }
@@ -623,7 +624,7 @@ function drawChantWave() {
   ctx.clearRect(0, 0, w, h);
   const style = getComputedStyle(document.body);
   ctx.strokeStyle = (style.getPropertyValue("--ink") || "#2a2118").trim();
-  ctx.globalAlpha = chantLoaded ? 0.85 : 0.35;
+  ctx.globalAlpha = chantPlaying ? 0.85 : 0.35;
   ctx.lineWidth = Math.max(1, w / 420);
   ctx.beginPath();
   if (chantAnalyser && chantLoaded && chantMode === "local") {
@@ -637,7 +638,7 @@ function drawChantWave() {
     }
   } else {
     const t = Date.now() / 900;
-    const amp = chantLoaded ? 0.2 : 0.045;
+    const amp = chantPlaying ? 0.2 : 0.045;
     const steps = 80;
     for (let i = 0; i <= steps; i++) {
       const x = (i / steps) * w;
@@ -657,6 +658,59 @@ function drawChantWave() {
 function startChantWave() {
   if (chantWaveRaf) return;
   drawChantWave();
+}
+
+function chantMedia() {
+  return document.querySelector("#chantMount audio");
+}
+
+function chantFrame() {
+  return document.querySelector("#chantMount iframe");
+}
+
+function chantYtCommand(func) {
+  const iframe = chantFrame();
+  if (!iframe || !iframe.contentWindow) return;
+  iframe.contentWindow.postMessage(
+    JSON.stringify({ event: "command", func: func, args: [] }),
+    "*",
+  );
+}
+
+function updateChantButton() {
+  const playBtn = document.getElementById("chantPlay");
+  if (playBtn) playBtn.textContent = chantPlaying ? t("pause") : t("play");
+}
+
+function pauseChant() {
+  const audio = chantMedia();
+  if (audio) audio.pause();
+  else chantYtCommand("pauseVideo");
+  chantPlaying = false;
+  updateChantButton();
+}
+
+function playChant() {
+  const item = chantList[chantIndex];
+  if (!item) return;
+  chantLoaded = true;
+  const audio = chantMedia();
+  const iframe = chantFrame();
+  if (audio) {
+    if (chantAudioCtx && chantAudioCtx.state === "suspended")
+      chantAudioCtx.resume();
+    audio.play().catch(function () {});
+    chantPlaying = true;
+    updateChantButton();
+    return;
+  }
+  if (iframe && iframe.src) {
+    chantYtCommand("playVideo");
+    chantPlaying = true;
+    updateChantButton();
+    return;
+  }
+  renderChant(true);
 }
 
 function hookChantAnalyser(audio) {
@@ -692,14 +746,17 @@ function renderChant(autoplay) {
         : chantMode === "local"
           ? t("chantLocal")
           : t("chantYt");
-  if (playBtn) playBtn.textContent = chantLoaded ? t("reload") : t("load");
+  updateChantButton();
   chantAnalyser = null;
   if (!chantLoaded && !autoplay) {
+    chantPlaying = false;
     mount.innerHTML = "";
+    updateChantButton();
     startChantWave();
     return;
   }
   chantLoaded = true;
+  chantPlaying = !!autoplay;
   mount.innerHTML = "";
   if (chantMode === "local") {
     const audio = document.createElement("audio");
@@ -719,7 +776,7 @@ function renderChant(autoplay) {
     iframe.setAttribute("tabindex", "-1");
     mount.appendChild(iframe);
   }
-  if (playBtn) playBtn.textContent = t("reload");
+  updateChantButton();
   startChantWave();
 }
 
@@ -751,12 +808,12 @@ async function initChant() {
   const prev = document.getElementById("chantPrev");
   const next = document.getElementById("chantNext");
   const play = document.getElementById("chantPlay");
-  if (prev) prev.addEventListener("click", () => stepChant(-1, chantLoaded));
-  if (next) next.addEventListener("click", () => stepChant(1, chantLoaded));
+  if (prev) prev.addEventListener("click", () => stepChant(-1, chantPlaying));
+  if (next) next.addEventListener("click", () => stepChant(1, chantPlaying));
   if (play)
     play.addEventListener("click", () => {
-      chantLoaded = true;
-      renderChant(true);
+      if (chantPlaying) pauseChant();
+      else playChant();
     });
   renderChant(false);
 }
@@ -1203,7 +1260,7 @@ function bindSettings() {
       });
       renderFilm();
       renderReading();
-      renderChant(false);
+      renderChant(chantPlaying);
       applyDriveLabels();
       applyBuildLabels();
       checkBuild();
