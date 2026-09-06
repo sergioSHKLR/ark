@@ -7,3 +7,5 @@ audio/*.opus
 audio/*.flac
 audio/playlist.json
 .DS_Store
+client_secret_*.json
+drive-config.js
