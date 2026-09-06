@@ -7,7 +7,7 @@ const DRIVE_SYNC_KEY = "noah-drive-synced";
 const DRIVE_FILE_NAME = "ark-journal.json";
 const DRIVE_SCOPE = "https://www.googleapis.com/auth/drive.appdata";
 const FILM_EPOCH = "2026-09-06";
-const APP_BUILD = 39;
+const APP_BUILD = 40;
 
 let lang = localStorage.getItem(LANG_KEY) === "pt" ? "pt" : "en";
 let theme = localStorage.getItem(THEME_KEY) || "system";
@@ -173,22 +173,25 @@ function pickReading() {
   return list[hashStr(todayKey()) % list.length];
 }
 
-function renderReading() {
-  const el = document.getElementById("dailyReading");
-  if (!el) return;
+function dailyLoc() {
   const r = pickReading();
-  if (!r) {
-    el.innerHTML = "";
-    return;
-  }
+  if (!r) return null;
   const extra =
     lang === "pt" && typeof READING_PT !== "undefined" ? READING_PT[r.id] : null;
-  const loc = extra || { src: r.src, text: r.text };
-  const paras = String(loc.text || "")
-    .split(/\n\n/)
-    .map((chunk) => "<p>" + chunk + "</p>")
-    .join("");
-  el.innerHTML = '<div class="src">' + loc.src + "</div>" + paras;
+  return extra || { src: r.src, text: r.text };
+}
+
+function renderReading() {
+  const btn = document.getElementById("dailyReadingBtn");
+  if (!btn) return;
+  const loc = dailyLoc();
+  if (!loc) {
+    btn.hidden = true;
+    btn.textContent = "";
+    return;
+  }
+  btn.hidden = false;
+  btn.textContent = loc.src;
 }
 
 function daysSinceEpoch() {
@@ -1260,6 +1263,7 @@ function bindSettings() {
       });
       renderFilm();
       renderReading();
+      if (openPassageKey) openScripture(openPassageKey, openPassageSlot);
       renderChant(chantPlaying);
       applyDriveLabels();
       applyBuildLabels();
@@ -1288,7 +1292,67 @@ function closeModal() {
   const modal = document.getElementById("scriptureModal");
   if (modal) modal.style.display = "none";
 }
-function openScripture() {}
+
+let openPassageKey = "";
+let openPassageSlot = "";
+
+function fillScriptureModal(title, html, slot) {
+  const titleEl = document.getElementById("mTitle");
+  const bodyEl = document.getElementById("mBody");
+  const modalTa = document.getElementById("modalNote");
+  const modal = document.getElementById("scriptureModal");
+  if (!titleEl || !bodyEl || !modal) return;
+  titleEl.textContent = title;
+  bodyEl.innerHTML = html;
+  openPassageSlot = slot || "";
+  if (modalTa) {
+    modalTa.dataset.slot = openPassageSlot;
+    if (openPassageSlot) {
+      const day = loadJournal()[todayKey()] || { notes: {} };
+      modalTa.value = day.notes[openPassageSlot] || "";
+    } else modalTa.value = "";
+  }
+  modal.style.display = "flex";
+}
+
+function openScripture(key, slot) {
+  openPassageKey = key || "";
+  if (key === "daily") {
+    const loc = dailyLoc();
+    if (!loc) return;
+    const paras = String(loc.text || "")
+      .split(/\n\n/)
+      .map((chunk) => "<p>" + chunk + "</p>")
+      .join("");
+    fillScriptureModal(loc.src, paras, slot || "reading");
+    return;
+  }
+  const pack = typeof SCRIPTURE !== "undefined" ? SCRIPTURE[key] : null;
+  if (!pack) return;
+  const loc = lang === "pt" && pack.pt ? pack.pt : pack;
+  fillScriptureModal(loc.title, loc.text, slot);
+}
+
+function bindModalNote() {
+  const modalTa = document.getElementById("modalNote");
+  if (!modalTa) return;
+  modalTa.addEventListener("input", () => {
+    const slot = modalTa.dataset.slot;
+    if (!slot) return;
+    const j = loadJournal();
+    const k = todayKey();
+    j[k] = j[k] || { checks: {}, notes: {} };
+    j[k].notes[slot] = modalTa.value;
+    j[k].updatedAt = new Date().toISOString();
+    saveJournal(j);
+    document.querySelectorAll('textarea.note[data-slot="' + slot + '"]').forEach(
+      (el) => {
+        if (document.activeElement !== el) el.value = modalTa.value;
+      },
+    );
+  });
+}
+
 function toggleNativeAudio() {}
 
 function dayOrdinalEn(n) {
@@ -1362,6 +1426,7 @@ bindJournal();
 bindSettings();
 bindDrive();
 bindReminders();
+bindModalNote();
 initFilm();
 initChant();
 renderReading();

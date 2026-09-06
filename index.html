@@ -58,7 +58,12 @@
           </label>
           <div class="act-body">
             <p data-i18n="bodyRead">One passage, drawn for this calendar day — scripture or a stoic older than the panic. Read it through. Copy a sentence if you must. That is the spine you carry into the street.</p>
-            <div class="reading" id="dailyReading"></div>
+            <button
+              class="passage"
+              type="button"
+              id="dailyReadingBtn"
+              onclick="openScripture('daily', 'reading')"
+            ></button>
             <label class="note-block">
               <span data-i18n="thought">Today's thought</span>
               <textarea class="note" data-slot="reading" rows="4" data-i18n-placeholder="phRead" placeholder="The sentence you will carry."></textarea>
@@ -232,7 +237,7 @@
           </button>
         </div>
         <div class="build-block">
-          <p class="remind-note" id="buildLine">Build 39</p>
+          <p class="remind-note" id="buildLine">Build 40</p>
           <p class="remind-note" id="buildStatus"></p>
           <button type="button" class="remind-ics" id="buildReload" hidden>
             Reload to update
@@ -242,6 +247,7 @@
     </div>
     <script src="drive-config.js"></script>
     <script src="readings.js"></script>
+    <script src="scriptures.js"></script>
     <script src="app.js"></script>
   </body>
 </html>
