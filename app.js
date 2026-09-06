@@ -7,7 +7,7 @@ const DRIVE_SYNC_KEY = "noah-drive-synced";
 const DRIVE_FILE_NAME = "ark-journal.json";
 const DRIVE_SCOPE = "https://www.googleapis.com/auth/drive.appdata";
 const FILM_EPOCH = "2026-09-06";
-const APP_BUILD = 41;
+const APP_BUILD = 42;
 
 let lang = localStorage.getItem(LANG_KEY) === "pt" ? "pt" : "en";
 let theme = localStorage.getItem(THEME_KEY) || "system";
@@ -1288,11 +1288,17 @@ function bindSettings() {
 
 function closeSettings() {
   const modal = document.getElementById("settingsModal");
-  if (modal) modal.style.display = "none";
+  if (modal) {
+    modal.classList.remove("open");
+    modal.style.display = "none";
+  }
 }
 function closeModal() {
   const modal = document.getElementById("scriptureModal");
-  if (modal) modal.style.display = "none";
+  if (modal) {
+    modal.classList.remove("open");
+    modal.style.display = "none";
+  }
 }
 
 let openPassageKey = "";
@@ -1314,6 +1320,7 @@ function fillScriptureModal(title, html, slot) {
       modalTa.value = day.notes[openPassageSlot] || "";
     } else modalTa.value = "";
   }
+  modal.classList.add("open");
   modal.style.display = "flex";
 }
 
@@ -1333,6 +1340,20 @@ function openScripture(key, slot) {
   if (!pack) return;
   const loc = lang === "pt" && pack.pt ? pack.pt : pack;
   fillScriptureModal(loc.title, loc.text, slot);
+}
+window.openScripture = openScripture;
+
+function bindPassages() {
+  document.querySelectorAll("button.passage[data-passage]").forEach((btn) => {
+    btn.addEventListener("click", (evt) => {
+      evt.preventDefault();
+      evt.stopPropagation();
+      openScripture(
+        btn.getAttribute("data-passage"),
+        btn.getAttribute("data-slot") || "",
+      );
+    });
+  });
 }
 
 function bindModalNote() {
@@ -1429,6 +1450,7 @@ bindSettings();
 bindDrive();
 bindReminders();
 bindModalNote();
+bindPassages();
 initFilm();
 renderReading();
 renderLog();
