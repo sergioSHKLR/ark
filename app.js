@@ -7,7 +7,7 @@ const DRIVE_SYNC_KEY = "noah-drive-synced";
 const DRIVE_FILE_NAME = "ark-journal.json";
 const DRIVE_SCOPE = "https://www.googleapis.com/auth/drive.appdata";
 const FILM_EPOCH = "2026-09-06";
-const APP_BUILD = 43;
+const APP_BUILD = 44;
 
 let lang = localStorage.getItem(LANG_KEY) === "pt" ? "pt" : "en";
 let theme = localStorage.getItem(THEME_KEY) || "system";
@@ -1343,18 +1343,22 @@ function openScripture(key, slot) {
 }
 window.openScripture = openScripture;
 
-function bindPassages() {
-  document.querySelectorAll("button.passage[data-passage]").forEach((btn) => {
-    btn.addEventListener("click", (evt) => {
-      evt.preventDefault();
-      evt.stopPropagation();
-      openScripture(
-        btn.getAttribute("data-passage"),
-        btn.getAttribute("data-slot") || "",
-      );
-    });
-  });
-}
+document.addEventListener(
+  "click",
+  function (evt) {
+    const btn =
+      evt.target && evt.target.closest
+        ? evt.target.closest("button.passage")
+        : null;
+    if (!btn) return;
+    const key = btn.getAttribute("data-passage");
+    if (!key) return;
+    openScripture(key, btn.getAttribute("data-slot") || "");
+  },
+  true,
+);
+
+function bindPassages() {}
 
 function bindModalNote() {
   const modalTa = document.getElementById("modalNote");
