@@ -7,7 +7,7 @@ const DRIVE_SYNC_KEY = "noah-drive-synced";
 const DRIVE_FILE_NAME = "ark-journal.json";
 const DRIVE_SCOPE = "https://www.googleapis.com/auth/drive.appdata";
 const FILM_EPOCH = "2026-09-06";
-const APP_BUILD = 37;
+const APP_BUILD = 38;
 
 let lang = localStorage.getItem(LANG_KEY) === "pt" ? "pt" : "en";
 let theme = localStorage.getItem(THEME_KEY) || "system";
@@ -588,6 +588,9 @@ let chantList = YT_CHANT.slice();
 let chantMode = "yt";
 let chantIndex = 0;
 let chantLoaded = false;
+let chantAnalyser = null;
+let chantAudioCtx = null;
+let chantWaveRaf = 0;
 
 function chantYoutubeSrc(id, autoplay) {
   return (
@@ -596,6 +599,81 @@ function chantYoutubeSrc(id, autoplay) {
     "?rel=0&modestbranding=1&playsinline=1&iv_load_policy=3&fs=0" +
     (autoplay ? "&autoplay=1" : "")
   );
+}
+
+function sizeChantWave() {
+  const c = document.getElementById("chantWave");
+  if (!c) return;
+  const dpr = window.devicePixelRatio || 1;
+  const rect = c.getBoundingClientRect();
+  const w = Math.max(2, Math.floor(rect.width * dpr));
+  const h = Math.max(2, Math.floor(rect.height * dpr));
+  if (c.width !== w) c.width = w;
+  if (c.height !== h) c.height = h;
+}
+
+function drawChantWave() {
+  const c = document.getElementById("chantWave");
+  if (!c) return;
+  sizeChantWave();
+  const ctx = c.getContext("2d");
+  if (!ctx) return;
+  const w = c.width;
+  const h = c.height;
+  ctx.clearRect(0, 0, w, h);
+  const style = getComputedStyle(document.body);
+  ctx.strokeStyle = (style.getPropertyValue("--ink") || "#2a2118").trim();
+  ctx.globalAlpha = chantLoaded ? 0.85 : 0.35;
+  ctx.lineWidth = Math.max(1, w / 420);
+  ctx.beginPath();
+  if (chantAnalyser && chantLoaded && chantMode === "local") {
+    const buf = new Uint8Array(chantAnalyser.fftSize);
+    chantAnalyser.getByteTimeDomainData(buf);
+    for (let i = 0; i < buf.length; i++) {
+      const x = (i / (buf.length - 1)) * w;
+      const y = (buf[i] / 255) * h;
+      if (i) ctx.lineTo(x, y);
+      else ctx.moveTo(x, y);
+    }
+  } else {
+    const t = Date.now() / 900;
+    const amp = chantLoaded ? 0.2 : 0.045;
+    const steps = 80;
+    for (let i = 0; i <= steps; i++) {
+      const x = (i / steps) * w;
+      const y =
+        h / 2 +
+        Math.sin(t + i * 0.28) * h * amp +
+        Math.sin(t * 0.37 + i * 0.11) * h * amp * 0.55;
+      if (i) ctx.lineTo(x, y);
+      else ctx.moveTo(x, y);
+    }
+  }
+  ctx.stroke();
+  ctx.globalAlpha = 1;
+  chantWaveRaf = requestAnimationFrame(drawChantWave);
+}
+
+function startChantWave() {
+  if (chantWaveRaf) return;
+  drawChantWave();
+}
+
+function hookChantAnalyser(audio) {
+  chantAnalyser = null;
+  const AC = window.AudioContext || window.webkitAudioContext;
+  if (!AC || !audio) return;
+  try {
+    if (!chantAudioCtx) chantAudioCtx = new AC();
+    if (chantAudioCtx.state === "suspended") chantAudioCtx.resume();
+    const src = chantAudioCtx.createMediaElementSource(audio);
+    chantAnalyser = chantAudioCtx.createAnalyser();
+    chantAnalyser.fftSize = 256;
+    src.connect(chantAnalyser);
+    chantAnalyser.connect(chantAudioCtx.destination);
+  } catch (e) {
+    chantAnalyser = null;
+  }
 }
 
 function renderChant(autoplay) {
@@ -615,19 +693,22 @@ function renderChant(autoplay) {
           ? t("chantLocal")
           : t("chantYt");
   if (playBtn) playBtn.textContent = chantLoaded ? t("reload") : t("load");
+  chantAnalyser = null;
   if (!chantLoaded && !autoplay) {
     mount.innerHTML = "";
+    startChantWave();
     return;
   }
   chantLoaded = true;
   mount.innerHTML = "";
   if (chantMode === "local") {
     const audio = document.createElement("audio");
-    audio.controls = true;
     audio.src = item.src;
     audio.setAttribute("playsinline", "");
+    audio.crossOrigin = "anonymous";
     audio.addEventListener("ended", () => stepChant(1, true));
     mount.appendChild(audio);
+    hookChantAnalyser(audio);
     if (autoplay) audio.play().catch(function () {});
   } else {
     const iframe = document.createElement("iframe");
@@ -635,9 +716,11 @@ function renderChant(autoplay) {
     iframe.allow = "accelerometer; autoplay; encrypted-media; picture-in-picture";
     iframe.referrerPolicy = "strict-origin-when-cross-origin";
     iframe.title = item.title;
+    iframe.setAttribute("tabindex", "-1");
     mount.appendChild(iframe);
   }
   if (playBtn) playBtn.textContent = t("reload");
+  startChantWave();
 }
 
 function stepChant(delta, autoplay) {

@@ -75,7 +75,8 @@
           <h3 data-i18n="desk">Desk</h3>
           <p class="desk-lead" data-i18n="deskLead">Latin as texture while you work. No English, no Portuguese, no drums. Local files replace YouTube when you add them.</p>
           <p class="desk-now" id="chantTitle">Chant at rest</p>
-          <div class="chant-frame" id="chantMount"></div>
+          <canvas class="chant-wave" id="chantWave" width="640" height="96" aria-hidden="true"></canvas>
+          <div class="chant-hidden" id="chantMount"></div>
           <div class="desk-keys">
             <button class="key" type="button" id="chantPrev" data-i18n="prev">Prev</button>
             <button class="key" type="button" id="chantPlay" data-i18n="load">Load</button>
@@ -231,7 +232,7 @@
           </button>
         </div>
         <div class="build-block">
-          <p class="remind-note" id="buildLine">Build 37</p>
+          <p class="remind-note" id="buildLine">Build 38</p>
           <p class="remind-note" id="buildStatus"></p>
           <button type="button" class="remind-ics" id="buildReload" hidden>
             Reload to update
