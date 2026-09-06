@@ -1,4 +1,4 @@
-const CACHE_VERSION = "noah-protocol-v34";
+const CACHE_VERSION = "noah-protocol-v35";
 const ASSETS_TO_CACHE = [
   "./",
   "./index.html",

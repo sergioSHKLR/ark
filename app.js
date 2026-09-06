@@ -7,7 +7,7 @@ const DRIVE_SYNC_KEY = "noah-drive-synced";
 const DRIVE_FILE_NAME = "ark-journal.json";
 const DRIVE_SCOPE = "https://www.googleapis.com/auth/drive.appdata";
 const FILM_EPOCH = "2026-09-06";
-const APP_BUILD = 34;
+const APP_BUILD = 35;
 
 let lang = localStorage.getItem(LANG_KEY) === "pt" ? "pt" : "en";
 let theme = localStorage.getItem(THEME_KEY) || "system";
@@ -89,6 +89,19 @@ function t(key) {
       buildReload: "Reload to update",
       buildUnknown: "Could not check for a newer build.",
       buildOffline: "Offline. Could not check.",
+      logEmpty: "The log fills as you write. Come back tomorrow.",
+      statDays: "Days",
+      statStreak: "In a row",
+      statChars: "Characters",
+      slotPray: "Prayer",
+      slotReading: "Reading",
+      slotForum: "The Forum",
+      slotTongue: "The tongue",
+      slotWife: "The marriage",
+      slotTable: "The table",
+      slotWork: "The hands",
+      slotNight: "Closing",
+      slotPassage: "Passage",
     },
     pt: {
       filmFoot: "Assista primeiro. Depois ore e leia.",
@@ -120,6 +133,19 @@ function t(key) {
       buildReload: "Recarregar para atualizar",
       buildUnknown: "Não deu para checar se há versão nova.",
       buildOffline: "Sem rede. Não deu para checar.",
+      logEmpty: "O diário enche quando você escreve. Volte amanhã.",
+      statDays: "Dias",
+      statStreak: "Seguidos",
+      statChars: "Caracteres",
+      slotPray: "Oração",
+      slotReading: "Leitura",
+      slotForum: "O Fórum",
+      slotTongue: "A língua",
+      slotWife: "O casamento",
+      slotTable: "A mesa",
+      slotWork: "As mãos",
+      slotNight: "Encerramento",
+      slotPassage: "Passagem",
     },
   };
   return (pack[lang] && pack[lang][key]) || pack.en[key] || key;
@@ -236,6 +262,7 @@ function loadJournal() {
 function saveJournal(data) {
   localStorage.setItem(STORE, JSON.stringify(data));
   scheduleDriveSync();
+  renderLog();
 }
 
 let driveToken = "";
@@ -469,6 +496,7 @@ function bindJournalRefresh() {
     const slot = area.getAttribute("data-slot");
     if (document.activeElement !== area) area.value = day.notes[slot] || "";
   });
+  renderLog();
 }
 
 async function connectDrive() {
@@ -544,6 +572,168 @@ function showPane(name) {
   document.querySelectorAll(".nav-bar button").forEach((b) => {
     b.classList.toggle("active", b.getAttribute("data-pane") === name);
   });
+  if (name === "log") renderLog();
+}
+
+const SLOT_KEY = {
+  pray: "slotPray",
+  reading: "slotReading",
+  forum: "slotForum",
+  tongue: "slotTongue",
+  wife: "slotWife",
+  table: "slotTable",
+  work: "slotWork",
+  night: "slotNight",
+};
+
+function esc(s) {
+  return String(s)
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;");
+}
+
+function allDays() {
+  const data = loadJournal();
+  return Object.keys(data)
+    .filter((k) => /^\d{4}-\d{2}-\d{2}$/.test(k))
+    .sort()
+    .reverse()
+    .map((date) => {
+      const d = data[date] || {};
+      return {
+        date: date,
+        checks: d.checks || {},
+        notes: d.notes || {},
+      };
+    });
+}
+
+function noteChars(d) {
+  return Object.values(d.notes || {}).reduce(
+    (n, text) => n + String(text || "").length,
+    0,
+  );
+}
+
+function dayUsed(d) {
+  if (noteChars(d) > 0) return true;
+  return Object.values(d.checks || {}).some(Boolean);
+}
+
+function shiftDate(key, delta) {
+  const p = key.split("-").map(Number);
+  const dt = new Date(p[0], p[1] - 1, p[2]);
+  dt.setDate(dt.getDate() + delta);
+  return (
+    dt.getFullYear() +
+    "-" +
+    String(dt.getMonth() + 1).padStart(2, "0") +
+    "-" +
+    String(dt.getDate()).padStart(2, "0")
+  );
+}
+
+function countStreak(used) {
+  const set = {};
+  used.forEach((k) => {
+    set[k] = true;
+  });
+  let start = todayKey();
+  if (!set[start]) start = shiftDate(start, -1);
+  let n = 0;
+  let k = start;
+  while (set[k]) {
+    n++;
+    k = shiftDate(k, -1);
+  }
+  return n;
+}
+
+function formatDay(key) {
+  const p = key.split("-").map(Number);
+  return new Date(p[0], p[1] - 1, p[2]).toLocaleDateString(
+    lang === "pt" ? "pt-BR" : "en-GB",
+    { weekday: "short", day: "numeric", month: "short", year: "numeric" },
+  );
+}
+
+function readingForDay(dateKey) {
+  const list = typeof READINGS !== "undefined" ? READINGS : [];
+  if (!list.length) return null;
+  return list[hashStr(dateKey) % list.length];
+}
+
+function renderLog() {
+  const stats = document.getElementById("logStats");
+  const list = document.getElementById("logList");
+  if (!stats || !list) return;
+  const days = allDays();
+  const used = days.filter(dayUsed);
+  const chars = days.reduce((n, d) => n + noteChars(d), 0);
+  const streak = countStreak(used.map((d) => d.date));
+  const loc = lang === "pt" ? "pt-BR" : "en-GB";
+  stats.innerHTML =
+    '<div class="stat"><b>' +
+    used.length +
+    "</b><span>" +
+    t("statDays") +
+    "</span></div>" +
+    '<div class="stat"><b>' +
+    streak +
+    "</b><span>" +
+    t("statStreak") +
+    "</span></div>" +
+    '<div class="stat"><b>' +
+    chars.toLocaleString(loc) +
+    "</b><span>" +
+    t("statChars") +
+    "</span></div>";
+  if (!used.length) {
+    list.innerHTML = '<p class="log-empty">' + t("logEmpty") + "</p>";
+    return;
+  }
+  list.innerHTML = used
+    .map((d) => {
+      const reading = readingForDay(d.date);
+      const body = Object.keys(SLOT_KEY)
+        .map((slot) => {
+          const note = (d.notes && d.notes[slot]) || "";
+          if (!note.trim()) return "";
+          return (
+            '<div class="log-entry"><div class="k">' +
+            t(SLOT_KEY[slot]) +
+            "</div><p>" +
+            esc(note) +
+            "</p></div>"
+          );
+        })
+        .join("");
+      const extra =
+        lang === "pt" && reading && typeof READING_PT !== "undefined"
+          ? READING_PT[reading.id]
+          : null;
+      const src = reading
+        ? '<div class="log-entry"><div class="k">' +
+          t("slotPassage") +
+          "</div><p>" +
+          esc(extra && extra.src ? extra.src : reading.src) +
+          "</p></div>"
+        : "";
+      return (
+        '<details class="log-day"><summary>' +
+        formatDay(d.date) +
+        ' <span class="meta">· ' +
+        noteChars(d).toLocaleString(loc) +
+        " " +
+        t("statChars").toLowerCase() +
+        "</span></summary>" +
+        src +
+        body +
+        "</details>"
+      );
+    })
+    .join("");
 }
 
 const REMIND_KEY = "noah-reminders-v1";
@@ -820,6 +1010,7 @@ function bindSettings() {
       applyDriveLabels();
       applyBuildLabels();
       checkBuild();
+      renderLog();
     });
   });
   document.querySelectorAll("[data-theme-choice]").forEach((b) => {
@@ -919,6 +1110,7 @@ bindDrive();
 bindReminders();
 initFilm();
 renderReading();
+renderLog();
 checkBuild();
 
 try {
