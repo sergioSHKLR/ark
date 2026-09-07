@@ -7,9 +7,10 @@ const DRIVE_SYNC_KEY = "noah-drive-synced";
 const DRIVE_FILE_NAME = "ark-journal.json";
 const DRIVE_SCOPE = "https://www.googleapis.com/auth/drive.appdata";
 const FILM_EPOCH = "2026-09-06";
-const APP_BUILD = 55;
+const APP_BUILD = 56;
 const DAY_TZ = "America/Sao_Paulo";
 const DRIVE_CONSENT_KEY = "noah-drive-consented";
+const QUOTE_SHIFTS = ["morning", "day", "night"];
 
 let lang = localStorage.getItem(LANG_KEY) === "pt" ? "pt" : "en";
 let theme = localStorage.getItem(THEME_KEY) || "system";
@@ -64,18 +65,8 @@ function t(key) {
     en: {
       subtitle: "The Noah Protocol",
       filmHead: "Today's film",
-      filmFoot: "Watch first. Then pray and read.",
+      filmFoot: "Watch first. Then the prayer.",
       filmCaption: "English picture. Turn on captions.",
-      namePray: "Pray",
-      nameRead: "Read",
-      passMat6: "Matthew 6:6–13 · the inner room",
-      passMat26: "Matthew 26:38–39 · Gethsemane",
-      passProv4: "Proverbs 4:23",
-      passAmos: "Amos 5:13",
-      passRom18: "Romans 12:17–18",
-      passEcc4: "Ecclesiastes 4:9–12",
-      passProv17: "Proverbs 17:1",
-      passTh4: "1 Thessalonians 4:11–12",
       desk: "Desk",
       deskLead: "Latin chant while you work. No English, no Portuguese, no drums. Local files replace YouTube when you add them.",
       chantRest: "Chant at rest",
@@ -85,11 +76,6 @@ function t(key) {
       play: "Play",
       pause: "Pause",
       next: "Next",
-      nameForum: "Stay out of the Forum",
-      nameTongue: "Hold the tongue",
-      nameWife: "Keep the marriage off the campaign",
-      nameTable: "Keep the election off the table",
-      nameWork: "Work with your hands",
       closing: "Closing notes",
       noiseWhite: "White noise",
       noiseRain: "Rain",
@@ -105,6 +91,8 @@ function t(key) {
       navNight: "Night",
       navLog: "Log",
       navAria: "The day",
+      slotMorning: "Morning",
+      slotDay: "Day",
       slotPray: "Prayer",
       slotReading: "Reading",
       slotForum: "The Forum",
@@ -112,18 +100,18 @@ function t(key) {
       slotWife: "The marriage",
       slotTable: "The table",
       slotWork: "The hands",
-      slotNight: "Closing",
+      slotNight: "Night",
       slotPassage: "Passage",
       remindHead: "Bells",
       remindNote: "Set a time for morning, day, and night. While this app is open it can ring. Add the calendar file so the phone still rings when the app is closed.",
       remindEnable: "Enable",
       remindIcs: "Add to phone calendar",
       "remindTitle-morning": "Ark · Morning",
-      "remindBody-morning": "Pray, read, write. Then go out.",
+      "remindBody-morning": "Film, prayer, one passage. Then go out.",
       "remindTitle-day": "Ark · Day",
-      "remindBody-day": "Stay out of the Forum. Keep the house.",
+      "remindBody-day": "Keep the course. One passage.",
       "remindTitle-night": "Ark · Night",
-      "remindBody-night": "Close the day. A few true sentences, then quiet.",
+      "remindBody-night": "One passage. A few true sentences, then quiet.",
       settingsTitle: "Settings",
       settingsBtn: "Settings",
       settingsLang: "Language",
@@ -156,18 +144,8 @@ function t(key) {
     pt: {
       subtitle: "O Protocolo de Noé",
       filmHead: "O filme de hoje",
-      filmFoot: "Assista primeiro. Depois ore e leia.",
+      filmFoot: "Assista primeiro. Depois a oração.",
       filmCaption: "Vídeo em inglês. Ligue as legendas.",
-      namePray: "Orar",
-      nameRead: "Ler",
-      passMat6: "Mateus 6:6–13 · o quarto interior",
-      passMat26: "Mateus 26:38–39 · Getsêmani",
-      passProv4: "Provérbios 4:23",
-      passAmos: "Amós 5:13",
-      passRom18: "Romanos 12:17–18",
-      passEcc4: "Eclesiastes 4:9–12",
-      passProv17: "Provérbios 17:1",
-      passTh4: "1 Tessalonicenses 4:11–12",
       desk: "Mesa",
       deskLead: "Canto em latim enquanto você trabalha. Sem inglês, sem português, sem tambores. Arquivos locais substituem o YouTube quando você os adiciona.",
       chantRest: "Canto em pausa",
@@ -177,11 +155,6 @@ function t(key) {
       play: "Tocar",
       pause: "Pausar",
       next: "Próximo",
-      nameForum: "Fique fora do Fórum",
-      nameTongue: "Guarde a língua",
-      nameWife: "O casamento fora da campanha",
-      nameTable: "A eleição fora da mesa",
-      nameWork: "Trabalhe com as mãos",
       closing: "Notas de encerramento",
       noiseWhite: "Ruído branco",
       noiseRain: "Chuva",
@@ -197,6 +170,8 @@ function t(key) {
       navNight: "Noite",
       navLog: "Diário",
       navAria: "O dia",
+      slotMorning: "Manhã",
+      slotDay: "Dia",
       slotPray: "Oração",
       slotReading: "Leitura",
       slotForum: "O Fórum",
@@ -204,18 +179,18 @@ function t(key) {
       slotWife: "O casamento",
       slotTable: "A mesa",
       slotWork: "As mãos",
-      slotNight: "Encerramento",
+      slotNight: "Noite",
       slotPassage: "Passagem",
       remindHead: "Sinos",
       remindNote: "Marque um horário para manhã, dia e noite. Com o aplicativo aberto, ele pode tocar. Adicione o arquivo de calendário para o telefone tocar mesmo com o aplicativo fechado.",
       remindEnable: "Ativar",
       remindIcs: "Adicionar ao calendário do telefone",
       "remindTitle-morning": "Arca · Manhã",
-      "remindBody-morning": "Ore, leia, escreva. Depois saia.",
+      "remindBody-morning": "Filme, oração, uma passagem. Depois saia.",
       "remindTitle-day": "Arca · Dia",
-      "remindBody-day": "Fora do Fórum. Guarde a casa.",
+      "remindBody-day": "Mantenha o rumo. Uma passagem.",
       "remindTitle-night": "Arca · Noite",
-      "remindBody-night": "Feche o dia. Algumas frases verdadeiras, depois silêncio.",
+      "remindBody-night": "Uma passagem. Algumas frases verdadeiras, depois silêncio.",
       settingsTitle: "Configurações",
       settingsBtn: "Configurações",
       settingsLang: "Idioma",
@@ -270,21 +245,42 @@ function applyLang() {
   renderQuote();
 }
 
-function pickQuote() {
+function pickShiftQuotes(dateKey) {
   const list = typeof QUOTES !== "undefined" ? QUOTES : [];
-  if (!list.length) return null;
-  return list[hashStr(todayKey() + ":q") % list.length];
+  const n = list.length;
+  const out = {};
+  if (!n) return out;
+  const key = dateKey || todayKey();
+  const used = [];
+  QUOTE_SHIFTS.forEach(function (shift) {
+    let i = hashStr(key + ":" + shift) % n;
+    let guard = 0;
+    while (used.indexOf(i) !== -1 && guard < n) {
+      i = (i + 1) % n;
+      guard++;
+    }
+    used.push(i);
+    out[shift] = list[i];
+  });
+  return out;
+}
+
+function quoteLoc(q) {
+  if (!q) return null;
+  return lang === "pt" && q.pt ? q.pt : q;
 }
 
 function renderQuote() {
-  const q = pickQuote();
+  const picked = pickShiftQuotes();
   document.querySelectorAll("[data-quote]").forEach(function (el) {
+    const shift = el.getAttribute("data-quote");
+    const q = (shift && picked[shift]) || null;
     if (!q) {
       el.hidden = true;
       return;
     }
     el.hidden = false;
-    const loc = lang === "pt" && q.pt ? q.pt : q;
+    const loc = quoteLoc(q);
     const src = el.querySelector(".daily-quote-src");
     const text = el.querySelector(".daily-quote-text");
     if (src) src.textContent = loc.src || "";
@@ -1173,6 +1169,9 @@ function showPane(name) {
 }
 
 const SLOT_KEY = {
+  morning: "slotMorning",
+  day: "slotDay",
+  night: "slotNight",
   pray: "slotPray",
   reading: "slotReading",
   forum: "slotForum",
@@ -1180,7 +1179,6 @@ const SLOT_KEY = {
   wife: "slotWife",
   table: "slotTable",
   work: "slotWork",
-  night: "slotNight",
 };
 
 function esc(s) {
@@ -1255,12 +1253,6 @@ function formatDay(key) {
   );
 }
 
-function readingForDay(dateKey) {
-  const list = typeof READINGS !== "undefined" ? READINGS : [];
-  if (!list.length) return null;
-  return list[hashStr(dateKey) % list.length];
-}
-
 function renderLog() {
   const stats = document.getElementById("logStats");
   const list = document.getElementById("logList");
@@ -1292,9 +1284,32 @@ function renderLog() {
   }
   list.innerHTML = used
     .map((d) => {
-      const reading = readingForDay(d.date);
+      const quotes = pickShiftQuotes(d.date);
+      const shiftSeen = {};
+      const passages = QUOTE_SHIFTS.map(function (shift) {
+        shiftSeen[shift] = true;
+        const q = quoteLoc(quotes[shift]);
+        const note = (d.notes && d.notes[shift]) || "";
+        let html = "";
+        if (q && q.src)
+          html +=
+            '<div class="log-entry"><div class="k">' +
+            t(SLOT_KEY[shift]) +
+            "</div><p>" +
+            esc(q.src) +
+            "</p></div>";
+        if (note.trim())
+          html +=
+            '<div class="log-entry"><div class="k">' +
+            t(SLOT_KEY[shift]) +
+            "</div><p>" +
+            esc(note) +
+            "</p></div>";
+        return html;
+      }).join("");
       const body = Object.keys(SLOT_KEY)
         .map((slot) => {
+          if (shiftSeen[slot]) return "";
           const note = (d.notes && d.notes[slot]) || "";
           if (!note.trim()) return "";
           return (
@@ -1306,17 +1321,6 @@ function renderLog() {
           );
         })
         .join("");
-      const extra =
-        lang === "pt" && reading && typeof READING_PT !== "undefined"
-          ? READING_PT[reading.id]
-          : null;
-      const src = reading
-        ? '<div class="log-entry"><div class="k">' +
-          t("slotPassage") +
-          "</div><p>" +
-          esc(extra && extra.src ? extra.src : reading.src) +
-          "</p></div>"
-        : "";
       return (
         '<details class="log-day"><summary>' +
         formatDay(d.date) +
@@ -1325,7 +1329,7 @@ function renderLog() {
         " " +
         t("statChars").toLowerCase() +
         "</span></summary>" +
-        src +
+        passages +
         body +
         "</details>"
       );
@@ -1604,7 +1608,6 @@ function bindSettings() {
         x.classList.toggle("active", x.getAttribute("data-lang") === lang);
       });
       renderFilm();
-      renderReading();
       if (openPassageKey) openScripture(openPassageKey, openPassageSlot);
       renderChant(chantPlaying);
       syncMediaLabels();
@@ -1996,7 +1999,6 @@ bindPassages();
 })();
 syncMediaLabels();
 initFilm();
-renderReading();
 renderLog();
 checkBuild();
 

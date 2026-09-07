@@ -171,15 +171,6 @@ const QUOTES = [
     },
   },
   {
-    id: "ecc-4-9",
-    src: "Ecclesiastes 4:9–10",
-    text: "Two are better than one; because they have a good reward for their labour. For if they fall, the one will lift up his fellow.",
-    pt: {
-      src: "Eclesiastes 4:9–10",
-      text: "Melhor é serem dois do que um, porque têm melhor paga do seu trabalho. Porque se um cair, o outro levanta o seu companheiro.",
-    },
-  },
-  {
     id: "mic-6-8",
     src: "Micah 6:8",
     text: "He hath shewed thee, O man, what is good; and what doth the Lord require of thee, but to do justly, and to love mercy, and to walk humbly with thy God?",
@@ -591,6 +582,384 @@ const QUOTES = [
     pt: {
       src: "Sêneca · Cartas 13",
       text: "Há mais coisas que nos assustam do que nos ferem. Sofremos mais na imaginação do que na realidade.",
+    },
+  },
+  {
+    id: "john-17-16",
+    src: "John 17:14–16",
+    text: "I have given them thy word; and the world hath hated them, because they are not of the world, even as I am not of the world. I pray not that thou shouldest take them out of the world, but that thou shouldest keep them from the evil. They are not of the world, even as I am not of the world.",
+    pt: {
+      src: "João 17:14–16",
+      text: "Eu dei-lhes a tua palavra, e o mundo os odiou, porque não são do mundo, assim como eu não sou do mundo. Não peço que os tires do mundo, mas que os livres do mal. Não são do mundo, como eu do mundo não sou.",
+    },
+  },
+  {
+    id: "john-15-19",
+    src: "John 15:19",
+    text: "If ye were of the world, the world would love his own: but because ye are not of the world, but I have chosen you out of the world, therefore the world hateth you.",
+    pt: {
+      src: "João 15:19",
+      text: "Se vós fósseis do mundo, o mundo amaria o que era seu, mas porque não sois do mundo, antes eu vos escolhi do mundo, por isso é que o mundo vos odeia.",
+    },
+  },
+  {
+    id: "john-2-15",
+    src: "1 John 2:15–17",
+    text: "Love not the world, neither the things that are in the world. If any man love the world, the love of the Father is not in him. And the world passeth away, and the lust thereof: but he that doeth the will of God abideth for ever.",
+    pt: {
+      src: "1 João 2:15–17",
+      text: "Não ameis o mundo, nem o que no mundo há. Se alguém ama o mundo, o amor do Pai não está nele. E o mundo passa, e a sua concupiscência; mas aquele que faz a vontade de Deus permanece para sempre.",
+    },
+  },
+  {
+    id: "jas-4-4",
+    src: "James 4:4",
+    text: "Know ye not that the friendship of the world is enmity with God? whosoever therefore will be a friend of the world is the enemy of God.",
+    pt: {
+      src: "Tiago 4:4",
+      text: "Não sabeis vós que a amizade do mundo é inimizade contra Deus? Portanto, qualquer que quiser ser amigo do mundo constitui-se inimigo de Deus.",
+    },
+  },
+  {
+    id: "gal-1-10",
+    src: "Galatians 1:10",
+    text: "For do I now persuade men, or God? or do I seek to please men? for if I yet pleased men, I should not be the servant of Christ.",
+    pt: {
+      src: "Gálatas 1:10",
+      text: "Porque persuado eu agora a homens ou a Deus? ou procuro agradar a homens? Se estivesse ainda agradando aos homens, não seria servo de Cristo.",
+    },
+  },
+  {
+    id: "gal-6-5",
+    src: "Galatians 6:4–5",
+    text: "But let every man prove his own work, and then shall he have rejoicing in himself alone, and not in another. For every man shall bear his own burden.",
+    pt: {
+      src: "Gálatas 6:4–5",
+      text: "Mas prove cada um a sua própria obra, e terá glória só em si mesmo, e não noutro. Porque cada qual levará a sua própria carga.",
+    },
+  },
+  {
+    id: "rom-14-12",
+    src: "Romans 14:12",
+    text: "So then every one of us shall give account of himself to God.",
+    pt: {
+      src: "Romanos 14:12",
+      text: "De maneira que cada um de nós dará conta de si mesmo a Deus.",
+    },
+  },
+  {
+    id: "prov-29-25",
+    src: "Proverbs 29:25",
+    text: "The fear of man bringeth a snare: but whoso putteth his trust in the Lord shall be safe.",
+    pt: {
+      src: "Provérbios 29:25",
+      text: "O temor do homem lança um laço, mas o que confia no Senhor está seguro.",
+    },
+  },
+  {
+    id: "ps-118-8",
+    src: "Psalm 118:8",
+    text: "It is better to trust in the Lord than to put confidence in man.",
+    pt: {
+      src: "Salmo 118:8",
+      text: "Melhor é confiar no Senhor do que confiar no homem.",
+    },
+  },
+  {
+    id: "jer-17-5",
+    src: "Jeremiah 17:5, 7",
+    text: "Cursed be the man that trusteth in man, and maketh flesh his arm, and whose heart departeth from the Lord. Blessed is the man that trusteth in the Lord, and whose hope the Lord is.",
+    pt: {
+      src: "Jeremias 17:5, 7",
+      text: "Maldito o homem que confia no homem, e faz da carne o seu braço, e aparta o seu coração do Senhor. Bendito o homem que confia no Senhor, e cuja esperança é o Senhor.",
+    },
+  },
+  {
+    id: "col-2-8",
+    src: "Colossians 2:8",
+    text: "Beware lest any man spoil you through philosophy and vain deceit, after the tradition of men, after the rudiments of the world, and not after Christ.",
+    pt: {
+      src: "Colossenses 2:8",
+      text: "Tende cuidado, para que ninguém vos faça presa sua, por meio de filosofias e vãs sutilezas, segundo a tradição dos homens, segundo os rudimentos do mundo, e não segundo Cristo.",
+    },
+  },
+  {
+    id: "cor-2-5",
+    src: "1 Corinthians 2:5",
+    text: "That your faith should not stand in the wisdom of men, but in the power of God.",
+    pt: {
+      src: "1 Coríntios 2:5",
+      text: "Para que a vossa fé não se apoiasse em sabedoria dos homens, mas no poder de Deus.",
+    },
+  },
+  {
+    id: "matt-7-14",
+    src: "Matthew 7:13–14",
+    text: "Enter ye in at the strait gate: for wide is the gate, and broad is the way, that leadeth to destruction, and many there be which go in thereat: because strait is the gate, and narrow is the way, which leadeth unto life, and few there be that find it.",
+    pt: {
+      src: "Mateus 7:13–14",
+      text: "Entrai pela porta estreita; porque larga é a porta, e espaçoso o caminho que conduz à perdição, e muitos são os que entram por ela; e porque estreita é a porta, e apertado o caminho que leva à vida, e poucos há que a encontrem.",
+    },
+  },
+  {
+    id: "matt-6-33",
+    src: "Matthew 6:33",
+    text: "But seek ye first the kingdom of God, and his righteousness; and all these things shall be added unto you.",
+    pt: {
+      src: "Mateus 6:33",
+      text: "Mas buscai primeiro o reino de Deus, e a sua justiça, e todas estas coisas vos serão acrescentadas.",
+    },
+  },
+  {
+    id: "heb-12-1",
+    src: "Hebrews 12:1–2",
+    text: "Let us run with patience the race that is set before us, looking unto Jesus the author and finisher of our faith.",
+    pt: {
+      src: "Hebreus 12:1–2",
+      text: "Corramos com paciência a carreira que nos está proposta, olhando para Jesus, autor e consumador da fé.",
+    },
+  },
+  {
+    id: "phil-3-14",
+    src: "Philippians 3:13–14",
+    text: "This one thing I do, forgetting those things which are behind, and reaching forth unto those things which are before, I press toward the mark for the prize of the high calling of God in Christ Jesus.",
+    pt: {
+      src: "Filipenses 3:13–14",
+      text: "Uma coisa faço, e é que, esquecendo-me das coisas que atrás ficam, e avançando para as que estão diante de mim, prossigo para o alvo, pelo prêmio da soberana vocação de Deus em Cristo Jesus.",
+    },
+  },
+  {
+    id: "luke-9-62",
+    src: "Luke 9:62",
+    text: "No man, having put his hand to the plough, and looking back, is fit for the kingdom of God.",
+    pt: {
+      src: "Lucas 9:62",
+      text: "Ninguém, que lança mão do arado e olha para trás, é apto para o reino de Deus.",
+    },
+  },
+  {
+    id: "tim-4-7",
+    src: "2 Timothy 4:7",
+    text: "I have fought a good fight, I have finished my course, I have kept the faith.",
+    pt: {
+      src: "2 Timóteo 4:7",
+      text: "Combati o bom combate, acabei a carreira, guardei a fé.",
+    },
+  },
+  {
+    id: "ps-1-1",
+    src: "Psalm 1:1–2",
+    text: "Blessed is the man that walketh not in the counsel of the ungodly, nor standeth in the way of sinners, nor sitteth in the seat of the scornful. But his delight is in the law of the Lord; and in his law doth he meditate day and night.",
+    pt: {
+      src: "Salmo 1:1–2",
+      text: "Bem-aventurado o homem que não anda segundo o conselho dos ímpios, nem se detém no caminho dos pecadores, nem se assenta na roda dos escarnecedores. Antes tem o seu prazer na lei do Senhor, e na sua lei medita de dia e de noite.",
+    },
+  },
+  {
+    id: "ps-4-8",
+    src: "Psalm 4:8",
+    text: "I will both lay me down in peace, and sleep: for thou, Lord, only makest me dwell in safety.",
+    pt: {
+      src: "Salmo 4:8",
+      text: "Em paz também me deitarei e dormirei, porque só tu, Senhor, me fazes habitar em segurança.",
+    },
+  },
+  {
+    id: "ps-62-5",
+    src: "Psalm 62:5",
+    text: "My soul, wait thou only upon God; for my expectation is from him.",
+    pt: {
+      src: "Salmo 62:5",
+      text: "A minha alma espera somente em Deus; dele vem a minha esperança.",
+    },
+  },
+  {
+    id: "isa-30-15",
+    src: "Isaiah 30:15",
+    text: "In returning and rest shall ye be saved; in quietness and in confidence shall be your strength.",
+    pt: {
+      src: "Isaías 30:15",
+      text: "Em vos converterdes e em sossegardes, estaria a vossa salvação; no sossego e na confiança estaria a vossa força.",
+    },
+  },
+  {
+    id: "isa-2-22",
+    src: "Isaiah 2:22",
+    text: "Cease ye from man, whose breath is in his nostrils: for wherein is he to be accounted of?",
+    pt: {
+      src: "Isaías 2:22",
+      text: "Deixai-vos do homem, cujo fôlego está no seu nariz; porque em que se deve ele estimar?",
+    },
+  },
+  {
+    id: "john-5-44",
+    src: "John 5:44",
+    text: "How can ye believe, which receive honour one of another, and seek not the honour that cometh from God only?",
+    pt: {
+      src: "João 5:44",
+      text: "Como podeis vós crer, recebendo honra uns dos outros, e não buscando a honra que vem só de Deus?",
+    },
+  },
+  {
+    id: "cor-10-5",
+    src: "2 Corinthians 10:5",
+    text: "Casting down imaginations, and every high thing that exalteth itself against the knowledge of God, and bringing into captivity every thought to the obedience of Christ.",
+    pt: {
+      src: "2 Coríntios 10:5",
+      text: "Destruindo os conselhos, e toda a altivez que se levanta contra o conhecimento de Deus, e levando cativo todo o entendimento à obediência de Cristo.",
+    },
+  },
+  {
+    id: "aur-others",
+    src: "Marcus Aurelius · Meditations 3.4",
+    text: "Do not waste the remainder of your life in thoughts about others. You lose the opportunity of doing something else when you have such thoughts.",
+    pt: {
+      src: "Marco Aurélio · Meditações 3.4",
+      text: "Não desperdice o que resta da vida em pensamentos sobre os outros. Você perde a ocasião de fazer outra coisa enquanto pensa assim.",
+    },
+  },
+  {
+    id: "aur-opinion",
+    src: "Marcus Aurelius · Meditations 4.7",
+    text: "Take away your opinion, and there is taken away the complaint, 'I have been harmed.' Take away the complaint, and the harm is gone.",
+    pt: {
+      src: "Marco Aurélio · Meditações 4.7",
+      text: "Tire a opinião, e some a queixa: 'fui ferido'. Tire a queixa, e o dano some.",
+    },
+  },
+  {
+    id: "sen-crowd",
+    src: "Seneca · Letters 7",
+    text: "You ask what you should especially avoid. Crowd. I never come back home with the same character I went out with.",
+    pt: {
+      src: "Sêneca · Cartas 7",
+      text: "Pergunta o que deve evitar sobretudo. A turba. Nunca volto para casa com o mesmo caráter com que saí.",
+    },
+  },
+  {
+    id: "epi-fool",
+    src: "Epictetus · Enchiridion 22",
+    text: "If you want to improve, be content to be thought foolish and stupid with regard to external things.",
+    pt: {
+      src: "Epicteto · Enquirídio 22",
+      text: "Se você quer melhorar, aceite ser tido por tolo e ignorante nas coisas externas.",
+    },
+  },
+  {
+    id: "epi-silent",
+    src: "Epictetus · Enchiridion 33",
+    text: "Be silent for the most part, or say only what is necessary, and in few words.",
+    pt: {
+      src: "Epicteto · Enquirídio 33",
+      text: "Cale-se na maior parte do tempo, ou diga só o necessário, e em poucas palavras.",
+    },
+  },
+  {
+    id: "kempis-alone",
+    src: "Thomas à Kempis · Imitation of Christ 1.20",
+    text: "The greatest saints avoided the company of men when they could, and chose rather to live to God in secret.",
+    pt: {
+      src: "Tomás de Kempis · Imitação de Cristo 1.20",
+      text: "Os maiores santos evitavam a companhia dos homens quando podiam, e preferiam viver para Deus em segredo.",
+    },
+  },
+  {
+    id: "kempis-peace",
+    src: "Thomas à Kempis · Imitation of Christ 2.3",
+    text: "First keep peace with yourself; then you can also bring peace to others.",
+    pt: {
+      src: "Tomás de Kempis · Imitação de Cristo 2.3",
+      text: "Guarde primeiro a paz consigo mesmo; depois você também poderá levá-la aos outros.",
+    },
+  },
+  {
+    id: "pascal-room",
+    src: "Blaise Pascal · Pensées",
+    text: "All of humanity's problems stem from man's inability to sit quietly in a room alone.",
+    pt: {
+      src: "Blaise Pascal · Pensamentos",
+      text: "Todos os problemas da humanidade vêm da incapacidade do homem de ficar quieto num quarto, sozinho.",
+    },
+  },
+  {
+    id: "kierkegaard-crowd",
+    src: "Søren Kierkegaard · The Crowd Is Untruth",
+    text: "The crowd is untruth. The truth can neither be communicated nor be received without some degree of solitude.",
+    pt: {
+      src: "Søren Kierkegaard · A multidão é a inverdade",
+      text: "A multidão é a inverdade. A verdade não se comunica nem se recebe sem algum grau de solidão.",
+    },
+  },
+  {
+    id: "boethius",
+    src: "Boethius · Consolation of Philosophy",
+    text: "Nothing is miserable unless you think it so; and on the other hand, nothing brings happiness unless you are content with it.",
+    pt: {
+      src: "Boécio · Consolação da Filosofia",
+      text: "Nada é miserável a não ser que você o julgue assim; e nada traz felicidade a não ser que você se contente com isso.",
+    },
+  },
+  {
+    id: "frankl-attitude",
+    src: "Viktor Frankl · Man's Search for Meaning",
+    text: "Everything can be taken from a man but one thing: the last of the human freedoms — to choose one's attitude in any given set of circumstances.",
+    pt: {
+      src: "Viktor Frankl · Em busca de sentido",
+      text: "Tudo se pode tirar de um homem, menos uma coisa: a última das liberdades humanas — escolher a própria atitude diante de qualquer circunstância.",
+    },
+  },
+  {
+    id: "frankl-change",
+    src: "Viktor Frankl · Man's Search for Meaning",
+    text: "When we are no longer able to change a situation, we are challenged to change ourselves.",
+    pt: {
+      src: "Viktor Frankl · Em busca de sentido",
+      text: "Quando já não podemos mudar uma situação, somos desafiados a mudar a nós mesmos.",
+    },
+  },
+  {
+    id: "lewis-aim",
+    src: "C. S. Lewis · Mere Christianity",
+    text: "Aim at Heaven and you will get earth 'thrown in': aim at earth and you will get neither.",
+    pt: {
+      src: "C. S. Lewis · Cristianismo puro e simples",
+      text: "Mire o céu e a terra virá de acréscimo. Mire a terra e não ficará com nenhum dos dois.",
+    },
+  },
+  {
+    id: "solz-lie",
+    src: "Aleksandr Solzhenitsyn · Live Not by Lies",
+    text: "Let the lie come into the world, even let it triumph. But not through me.",
+    pt: {
+      src: "Aleksandr Soljenítsin · Não viva pela mentira",
+      text: "Que a mentira entre no mundo, que até triunfe. Mas não por mim.",
+    },
+  },
+  {
+    id: "teresa-nada",
+    src: "Teresa of Ávila · Nada te turbe",
+    text: "Let nothing disturb you, let nothing frighten you, all things are passing away: God never changes. Patience obtains all things. Whoever has God lacks nothing; God alone suffices.",
+    pt: {
+      src: "Teresa de Ávila · Nada te turbe",
+      text: "Nada te turbe, nada te espante, tudo passa, Deus não muda. A paciência tudo alcança. Quem a Deus tem, nada lhe falta; só Deus basta.",
+    },
+  },
+  {
+    id: "augustine-rest",
+    src: "Augustine · Confessions 1.1",
+    text: "You have made us for yourself, O Lord, and our heart is restless until it rests in you.",
+    pt: {
+      src: "Agostinho · Confissões 1.1",
+      text: "Fizeste-nos para ti, Senhor, e o nosso coração anda inquieto enquanto não descansa em ti.",
+    },
+  },
+  {
+    id: "chesterton-church",
+    src: "G. K. Chesterton",
+    text: "We do not want a church that will move with the world. We want a church that will move the world.",
+    pt: {
+      src: "G. K. Chesterton",
+      text: "Não queremos uma igreja que se mova com o mundo. Queremos uma igreja que mova o mundo.",
     },
   },
 ];

@@ -42,45 +42,16 @@
             <p>And lead us not into temptation, but deliver us from evil: For thine is the kingdom, and the power, and the glory, for ever. Amen.</p>
           </div>
         </div>
-        <div class="daily-quote" data-quote>
+        <div class="daily-quote" data-quote="morning">
           <p class="daily-quote-src"></p>
           <p class="daily-quote-text"></p>
         </div>
-        <article class="act">
-          <label class="act-head">
-            <input type="checkbox" data-check="pray" />
-            <span class="act-name"><span class="n">1</span> <span data-i18n="namePray">Pray</span></span>
-          </label>
-          <div class="act-body">
-            <button class="passage" type="button" data-passage="mat6" data-slot="pray" data-i18n="passMat6" onclick="openScripture('mat6','pray')">Matthew 6:6–13 · the inner room</button>
-            <button class="passage" type="button" data-passage="mat26" data-slot="pray" data-i18n="passMat26" onclick="openScripture('mat26','pray')">Matthew 26:38–39 · Gethsemane</button>
-            <label class="note-block">
-              <textarea class="note" data-slot="pray" rows="4"></textarea>
-            </label>
-          </div>
-        </article>
-        <article class="act">
-          <label class="act-head">
-            <input type="checkbox" data-check="reading" />
-            <span class="act-name"><span class="n">2</span> <span data-i18n="nameRead">Read</span></span>
-          </label>
-          <div class="act-body">
-            <button
-              class="passage"
-              type="button"
-              id="dailyReadingBtn"
-              data-passage="daily"
-              data-slot="reading"
-              onclick="openScripture('daily','reading')"
-            ></button>
-            <label class="note-block">
-              <textarea class="note" data-slot="reading" rows="4"></textarea>
-            </label>
-          </div>
-        </article>
+        <label class="note-block">
+          <textarea class="note" data-slot="morning" rows="4"></textarea>
+        </label>
       </section>
       <section class="pane" id="pane-day" hidden>
-        <div class="daily-quote" data-quote>
+        <div class="daily-quote" data-quote="day">
           <p class="daily-quote-src"></p>
           <p class="daily-quote-text"></p>
         </div>
@@ -96,45 +67,12 @@
           </div>
           <p class="desk-foot" id="chantFoot"></p>
         </div>
-        <article class="act">
-          <label class="act-head"><input type="checkbox" data-check="forum" /><span class="act-name"><span class="n">3</span> <span data-i18n="nameForum">Stay out of the Forum</span></span></label>
-          <div class="act-body">
-            <button class="passage" type="button" data-passage="prov4" data-slot="forum" data-i18n="passProv4" onclick="openScripture('prov4','forum')">Proverbs 4:23</button>
-            <label class="note-block"><textarea class="note" data-slot="forum" rows="3"></textarea></label>
-          </div>
-        </article>
-        <article class="act">
-          <label class="act-head"><input type="checkbox" data-check="tongue" /><span class="act-name"><span class="n">4</span> <span data-i18n="nameTongue">Hold the tongue</span></span></label>
-          <div class="act-body">
-            <button class="passage" type="button" data-passage="amos5" data-slot="tongue" data-i18n="passAmos" onclick="openScripture('amos5','tongue')">Amos 5:13</button>
-            <button class="passage" type="button" data-passage="rom18" data-slot="tongue" data-i18n="passRom18" onclick="openScripture('rom18','tongue')">Romans 12:17–18</button>
-            <label class="note-block"><textarea class="note" data-slot="tongue" rows="3"></textarea></label>
-          </div>
-        </article>
-        <article class="act">
-          <label class="act-head"><input type="checkbox" data-check="wife" /><span class="act-name"><span class="n">5</span> <span data-i18n="nameWife">Keep the marriage off the campaign</span></span></label>
-          <div class="act-body">
-            <button class="passage" type="button" data-passage="ecc4" data-slot="wife" data-i18n="passEcc4" onclick="openScripture('ecc4','wife')">Ecclesiastes 4:9–12</button>
-            <label class="note-block"><textarea class="note" data-slot="wife" rows="3"></textarea></label>
-          </div>
-        </article>
-        <article class="act">
-          <label class="act-head"><input type="checkbox" data-check="table" /><span class="act-name"><span class="n">6</span> <span data-i18n="nameTable">Keep the election off the table</span></span></label>
-          <div class="act-body">
-            <button class="passage" type="button" data-passage="prov17" data-slot="table" data-i18n="passProv17" onclick="openScripture('prov17','table')">Proverbs 17:1</button>
-            <label class="note-block"><textarea class="note" data-slot="table" rows="3"></textarea></label>
-          </div>
-        </article>
-        <article class="act">
-          <label class="act-head"><input type="checkbox" data-check="work" /><span class="act-name"><span class="n">7</span> <span data-i18n="nameWork">Work with your hands</span></span></label>
-          <div class="act-body">
-            <button class="passage" type="button" data-passage="th4" data-slot="work" data-i18n="passTh4" onclick="openScripture('th4','work')">1 Thessalonians 4:11–12</button>
-            <label class="note-block"><textarea class="note" data-slot="work" rows="3"></textarea></label>
-          </div>
-        </article>
+        <label class="note-block">
+          <textarea class="note" data-slot="day" rows="4"></textarea>
+        </label>
       </section>
       <section class="pane" id="pane-night" hidden>
-        <div class="daily-quote" data-quote>
+        <div class="daily-quote" data-quote="night">
           <p class="daily-quote-src"></p>
           <p class="daily-quote-text"></p>
         </div>
@@ -238,7 +176,7 @@
           </button>
         </div>
         <div class="build-block">
-          <p class="remind-note" id="buildLine">Build 55</p>
+          <p class="remind-note" id="buildLine">Build 56</p>
           <p class="remind-note" id="buildStatus"></p>
           <button type="button" class="remind-ics" id="buildReload" hidden>
             Reload to update
