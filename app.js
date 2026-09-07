@@ -7,7 +7,7 @@ const DRIVE_SYNC_KEY = "noah-drive-synced";
 const DRIVE_FILE_NAME = "ark-journal.json";
 const DRIVE_SCOPE = "https://www.googleapis.com/auth/drive.appdata";
 const FILM_EPOCH = "2026-09-06";
-const APP_BUILD = 49;
+const APP_BUILD = 50;
 const DAY_TZ = "America/Sao_Paulo";
 const DRIVE_CONSENT_KEY = "noah-drive-consented";
 
@@ -73,16 +73,6 @@ function t(key) {
       bodyPray: "Phone face down, behind a closed door — not for anyone to see. If you are afraid, say so. Ask that this cup pass if it can, and that you will do today's duty if it will not. Ten honest minutes beat an hour in the chat groups.",
       nameRead: "Read",
       bodyRead: "One passage for this calendar day — scripture, or a stoic older than the panic. Read it through. Copy a sentence if you need to. Carry that sentence into the street.",
-      thought: "Today's thought",
-      phPray: "The prayer you actually prayed.",
-      phRead: "The sentence you will carry.",
-      phForum: "The groups I will not open.",
-      phTongue: "The relative I will not correct.",
-      phWife: "The vow with her today.",
-      phTable: "How lunch stays a meal.",
-      phWork: "The work of your hands today.",
-      phNight: "What I kept. Whom I did not antagonize. What I release. One gratitude.",
-      phModal: "Write after you have read.",
       passMat6: "Matthew 6:6–13 · the inner room",
       passMat26: "Matthew 26:38–39 · Gethsemane",
       passProv4: "Proverbs 4:23",
@@ -190,16 +180,6 @@ function t(key) {
       bodyPray: "Celular virado para baixo, atrás de uma porta fechada — sem ninguém ver. Se você tem medo, diga. Peça que este cálice passe, se puder, e que você cumpra o dever do dia se não puder. Dez minutos honestos valem mais do que uma hora nos grupos.",
       nameRead: "Ler",
       bodyRead: "Uma passagem para este dia do calendário — escritura, ou um estoico mais antigo do que o pânico. Leia até o fim. Copie uma frase se precisar. Leve essa frase para a rua.",
-      thought: "Pensamento de hoje",
-      phPray: "A oração que você de fato fez.",
-      phRead: "A frase que você vai levar.",
-      phForum: "Os grupos que eu não vou abrir.",
-      phTongue: "O parente que eu não vou corrigir.",
-      phWife: "O combinado com ela, hoje.",
-      phTable: "Como o almoço continua refeição.",
-      phWork: "O trabalho das suas mãos hoje.",
-      phNight: "O que eu guardei. A quem eu não antagonizei. O que eu solto. Uma gratidão.",
-      phModal: "Escreva depois de ter lido.",
       passMat6: "Mateus 6:6–13 · o quarto interior",
       passMat26: "Mateus 26:38–39 · Getsêmani",
       passProv4: "Provérbios 4:23",
