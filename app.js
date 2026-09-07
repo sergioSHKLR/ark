@@ -7,7 +7,7 @@ const DRIVE_SYNC_KEY = "noah-drive-synced";
 const DRIVE_FILE_NAME = "ark-journal.json";
 const DRIVE_SCOPE = "https://www.googleapis.com/auth/drive.appdata";
 const FILM_EPOCH = "2026-09-06";
-const APP_BUILD = 53;
+const APP_BUILD = 54;
 const DAY_TZ = "America/Sao_Paulo";
 const DRIVE_CONSENT_KEY = "noah-drive-consented";
 
@@ -66,13 +66,8 @@ function t(key) {
       filmHead: "Today's film",
       filmFoot: "Watch first. Then pray and read.",
       filmCaption: "English picture. Turn on captions.",
-      arkTitle: "The mental ark",
-      ark1: "The church in Rome under Nero could not vote the emperor out. They kept a lamp in the house, a marriage at peace, and a mouth that did not chase every piece of news. Noah did not drain the flood. He built through it.",
-      ark2: "You have a duty they did not: a vote. Cast it when the day comes. Until then, do not live inside the campaign. Around you, a loud majority talks like you — and family who do not. The first tempts you to perform. The second tests this house. This morning: pray, read, write — then go out.",
       namePray: "Pray",
-      bodyPray: "Phone face down, behind a closed door — not for anyone to see. If you are afraid, say so. Ask that this cup pass if it can, and that you will do today's duty if it will not. Ten honest minutes beat an hour in the chat groups.",
       nameRead: "Read",
-      bodyRead: "One passage for this calendar day — scripture, or a stoic older than the panic. Read it through. Copy a sentence if you need to. Carry that sentence into the street.",
       passMat6: "Matthew 6:6–13 · the inner room",
       passMat26: "Matthew 26:38–39 · Gethsemane",
       passProv4: "Proverbs 4:23",
@@ -81,8 +76,6 @@ function t(key) {
       passEcc4: "Ecclesiastes 4:9–12",
       passProv17: "Proverbs 17:1",
       passTh4: "1 Thessalonians 4:11–12",
-      dayTitle: "The rule of the day",
-      dayLede: "You vote. You are not a commentator. One sober act at the ballot box is not forty days of talk. Strangers will decide the country. This house will be decided by whether you showed up as a husband, and whether a relative still had a place at the table.",
       desk: "Desk",
       deskLead: "Latin chant while you work. No English, no Portuguese, no drums. Local files replace YouTube when you add them.",
       chantRest: "Chant at rest",
@@ -93,24 +86,16 @@ function t(key) {
       pause: "Pause",
       next: "Next",
       nameForum: "Stay out of the Forum",
-      bodyForum: "The election does not need a morning briefing. Mute the groups. Leave the pundits closed. If you need a date, look it up once. What the crowd cheers — even the crowd that agrees with you — is not your food.",
       nameTongue: "Hold the tongue",
-      bodyTongue: "The harder silence is not with strangers. It is with family who already know where you stand. A loud majority makes the next remark feel like courage. It is usually only noise. You will not convert an uncle at lunch. Courtesy is not surrender.",
       nameWife: "Keep the marriage off the campaign",
-      bodyWife: "She does not need a summary of the election. She needs you unhooked from the groups. Name the strain. Agree that this house is not a rally, and that neither of you will use the other as a weapon at lunch.",
       nameTable: "Keep the election off the table",
-      bodyTable: "Sunday lunch will try to become a debate. Let it fail. Pass the rice. Be briefly boring. You may love people who will mark a different ballot. A joke that cuts is still a cut.",
       nameWork: "Work with your hands",
-      bodyWork: "The itch for one more clip is the Forum again. Spend that energy on the body, a skill, a page, this marriage. Be tired tonight from what you kept, not from what you forwarded.",
-      nightTitle: "Close the day",
-      nightLede: "Close as they closed it: a few true sentences, then quiet. Did you keep the house? Did you leave a relative in peace? Let go of the argument you still want to win. Tomorrow the ballots and the groups will still be there. You do not have to sleep inside them.",
       closing: "Closing notes",
       noiseWhite: "White noise",
       noiseRain: "Rain",
       noiseOcean: "Ocean",
       noiseCrickets: "Crickets",
       logTitle: "The log",
-      logLede: "Not a score. Proof that you kept showing up — days on the ark, words you actually wrote, a streak only you can see.",
       logEmpty: "The log fills as you write. Come back tomorrow.",
       statDays: "Days",
       statStreak: "In a row",
@@ -173,13 +158,8 @@ function t(key) {
       filmHead: "O filme de hoje",
       filmFoot: "Assista primeiro. Depois ore e leia.",
       filmCaption: "Vídeo em inglês. Ligue as legendas.",
-      arkTitle: "A arca mental",
-      ark1: "A igreja em Roma, sob Nero, não podia tirar o imperador no voto. Guardavam uma lâmpada em casa, um casamento em paz, e uma boca que não corria atrás de cada notícia. Noé não esgotou o dilúvio. Construiu no meio dele.",
-      ark2: "Você tem um dever que eles não tinham: o voto. Use-o no dia da eleição. Até lá, não viva dentro da campanha. Ao seu redor, uma maioria barulhenta fala como você — e parentes que não. A primeira tenta você a se exibir. A segunda prova esta casa. Esta manhã: ore, leia, escreva — depois saia.",
       namePray: "Orar",
-      bodyPray: "Celular virado para baixo, atrás de uma porta fechada — sem ninguém ver. Se você tem medo, diga. Peça que este cálice passe, se puder, e que você cumpra o dever do dia se não puder. Dez minutos honestos valem mais do que uma hora nos grupos.",
       nameRead: "Ler",
-      bodyRead: "Uma passagem para este dia do calendário — escritura, ou um estoico mais antigo do que o pânico. Leia até o fim. Copie uma frase se precisar. Leve essa frase para a rua.",
       passMat6: "Mateus 6:6–13 · o quarto interior",
       passMat26: "Mateus 26:38–39 · Getsêmani",
       passProv4: "Provérbios 4:23",
@@ -188,8 +168,6 @@ function t(key) {
       passEcc4: "Eclesiastes 4:9–12",
       passProv17: "Provérbios 17:1",
       passTh4: "1 Tessalonicenses 4:11–12",
-      dayTitle: "A regra do dia",
-      dayLede: "Você vota. Você não é comentarista. Um ato sóbrio na urna não é quarenta dias de comentário. O país será decidido por milhões de desconhecidos. Esta casa será decidida por você ter se apresentado como marido, e por um parente ainda ter lugar à mesa.",
       desk: "Mesa",
       deskLead: "Canto em latim enquanto você trabalha. Sem inglês, sem português, sem tambores. Arquivos locais substituem o YouTube quando você os adiciona.",
       chantRest: "Canto em pausa",
@@ -200,24 +178,16 @@ function t(key) {
       pause: "Pausar",
       next: "Próximo",
       nameForum: "Fique fora do Fórum",
-      bodyForum: "A eleição não precisa de um resumo de manhã. Silencie os grupos. Deixe os comentaristas fechados. Se precisar de uma data, procure uma vez. O que a multidão aplaude — mesmo a que concorda com você — não é o seu pão.",
       nameTongue: "Guarde a língua",
-      bodyTongue: "O silêncio mais difícil não é com estranhos. É com parentes que já sabem de que lado você está. Uma maioria barulhenta faz o próximo comentário parecer coragem. Em geral é só ruído. Você não converte um tio no almoço. Cortesia não é rendição.",
       nameWife: "O casamento fora da campanha",
-      bodyWife: "Ela não precisa de um resumo da eleição. Precisa de você desligado dos grupos. Diga a tensão em voz alta. Combinem que esta casa não é comício, e que nenhum usa o outro como arma no almoço.",
       nameTable: "A eleição fora da mesa",
-      bodyTable: "O almoço de domingo vai tentar virar debate. Deixe falhar. Passe o arroz. Seja um pouco chato. Você pode amar quem vai votar diferente. Uma piada que só corta ainda é um corte.",
       nameWork: "Trabalhe com as mãos",
-      bodyWork: "A vontade de abrir mais um vídeo é o Fórum de novo. Gaste essa energia no corpo, num ofício, numa página, neste casamento. Canse-se esta noite do que você guardou, não do que encaminhou.",
-      nightTitle: "Feche o dia",
-      nightLede: "Feche como eles fechavam: algumas frases verdadeiras, depois silêncio. Você guardou a casa? Deixou um parente em paz? Solte o argumento que você ainda quer ganhar. Amanhã as urnas e os grupos continuam. Você não precisa dormir dentro deles.",
       closing: "Notas de encerramento",
       noiseWhite: "Ruído branco",
       noiseRain: "Chuva",
       noiseOcean: "Oceano",
       noiseCrickets: "Grilos",
       logTitle: "O diário",
-      logLede: "Não é um placar. É prova de que você continuou aparecendo — dias na arca, palavras que você de fato escreveu, uma sequência só sua.",
       logEmpty: "O diário enche quando você escreve. Volte amanhã.",
       statDays: "Dias",
       statStreak: "Seguidos",
@@ -297,6 +267,29 @@ function applyLang() {
     if (key) el.setAttribute("aria-label", t(key));
   });
   renderOurFather();
+  renderQuote();
+}
+
+function pickQuote() {
+  const list = typeof QUOTES !== "undefined" ? QUOTES : [];
+  if (!list.length) return null;
+  return list[hashStr(todayKey() + ":q") % list.length];
+}
+
+function renderQuote() {
+  const q = pickQuote();
+  document.querySelectorAll("[data-quote]").forEach(function (el) {
+    if (!q) {
+      el.hidden = true;
+      return;
+    }
+    el.hidden = false;
+    const loc = lang === "pt" && q.pt ? q.pt : q;
+    const src = el.querySelector(".daily-quote-src");
+    const text = el.querySelector(".daily-quote-text");
+    if (src) src.textContent = loc.src || "";
+    if (text) text.textContent = loc.text || "";
+  });
 }
 
 function renderOurFather() {
