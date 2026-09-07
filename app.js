@@ -397,10 +397,14 @@ function renderFilm() {
   mount.innerHTML = "";
   if (!id) return;
   const iframe = document.createElement("iframe");
+  const start = Number(film.start) || 0;
+  const end = Number(film.end) || 0;
   iframe.src =
     "https://www.youtube-nocookie.com/embed/" +
     id +
     "?rel=0&modestbranding=1&playsinline=1&fs=1&iv_load_policy=3" +
+    (start > 0 ? "&start=" + start : "") +
+    (end > start ? "&end=" + end : "") +
     (usePt ? "" : "&cc_load_policy=1&cc_lang_pref=en");
   iframe.allow =
     "accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share; fullscreen";
