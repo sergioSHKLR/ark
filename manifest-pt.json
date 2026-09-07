@@ -1,16 +1,20 @@
 {
-  "id": "./",
+  "id": "https://sergioshklr.github.io/ark/",
   "name": "Arca",
   "short_name": "Arca",
   "start_url": "./",
   "scope": "./",
   "display": "standalone",
+  "display_override": ["standalone", "browser"],
   "orientation": "portrait",
   "dir": "ltr",
   "lang": "pt-BR",
   "categories": ["education"],
   "prefer_related_applications": false,
-  "related_applications": [],
+  "handle_links": "preferred",
+  "launch_handler": {
+    "client_mode": "navigate-existing"
+  },
   "background_color": "#f3ead6",
   "theme_color": "#000000",
   "description": "Rito diário: fé, trabalho, casa fechada ao ruído.",

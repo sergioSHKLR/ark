@@ -1,4 +1,4 @@
-const CACHE_VERSION = "noah-protocol-v50";
+const CACHE_VERSION = "noah-protocol-v51";
 const ASSETS_TO_CACHE = [
   "./",
   "./index.html",
@@ -28,7 +28,14 @@ const ASSETS_TO_CACHE = [
 
 self.addEventListener("install", (evt) => {
   evt.waitUntil(
-    caches.open(CACHE_VERSION).then((cache) => cache.addAll(ASSETS_TO_CACHE)).then(() => self.skipWaiting())
+    caches
+      .open(CACHE_VERSION)
+      .then((cache) =>
+        Promise.all(
+          ASSETS_TO_CACHE.map((url) => cache.add(url).catch(function () {})),
+        ),
+      )
+      .then(() => self.skipWaiting()),
   );
 });
 
@@ -56,7 +63,13 @@ self.addEventListener("fetch", (evt) => {
         }
         return resp;
       })
-      .catch(() => caches.match(evt.request).then((cached) => cached || caches.match("./index.html")))
+      .catch(() =>
+        caches.match(evt.request).then((cached) => {
+          if (cached) return cached;
+          if (evt.request.mode === "navigate") return caches.match("./index.html");
+          return undefined;
+        }),
+      )
   );
 });
 
