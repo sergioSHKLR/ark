@@ -124,15 +124,15 @@ const READING_PT = {
     text: "Não há homem tão afortunado que não haja junto dele quem se alegre em vê-lo cair. Irar-te-ás então com aquele cuja natureza é fazer isso? Tão bem irar-te-ias com a figueira por dar suco. Lembra-te de que és homem, e romano, e que estas coisas te aconteceram.",
   },
   "sen-short": {
-    src: "Séneca · Da brevidade da vida",
+    src: "Sêneca · Da brevidade da vida",
     text: "Não é que tenhamos pouco tempo, é que desperdiçamos muito. A vida é bastante longa, e foi dada com medida generosa para as maiores coisas, se toda ela for bem empregada. Mas quando se esbanja no luxo e no descuido, quando a nenhum bom fim se dedica, percebemos tarde demais que passou antes de notarmos que passava.",
   },
   "sen-7": {
-    src: "Séneca · Cartas 7",
+    src: "Sêneca · Cartas 7",
     text: "Perguntas o que deves evitar sobretudo? Digo: as multidões; pois ainda não podes confiar-te a elas em segurança. Quero que a minha vida seja minha, não um espetáculo público. Convivir com a turba faz mal; não há quem não nos torne algum vício atraente, ou no-lo imprima, ou nos contamine sem o sabermos.",
   },
   "sen-calm": {
-    src: "Séneca · Da tranquilidade",
+    src: "Sêneca · Da tranquilidade",
     text: "Estamos todos acorrentados à fortuna. Uns por cadeia frouxa e de ouro, outros por uma estreita de metal vil; mas que importa? A mesma prisão nos cerca a todos. Recolhe-te a ti mesmo, quanto puderes. Junta-te a quem te faça melhor. O processo é mútuo: os homens aprendem enquanto ensinam.",
   },
   "ecc-1": {

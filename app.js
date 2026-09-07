@@ -7,7 +7,7 @@ const DRIVE_SYNC_KEY = "noah-drive-synced";
 const DRIVE_FILE_NAME = "ark-journal.json";
 const DRIVE_SCOPE = "https://www.googleapis.com/auth/drive.appdata";
 const FILM_EPOCH = "2026-09-06";
-const APP_BUILD = 45;
+const APP_BUILD = 46;
 
 let lang = localStorage.getItem(LANG_KEY) === "pt" ? "pt" : "en";
 let theme = localStorage.getItem(THEME_KEY) || "system";
@@ -40,8 +40,7 @@ function applyAppName() {
   if (word) word.textContent = name;
   const settingsBtn = document.getElementById("settingsBtn");
   if (settingsBtn) settingsBtn.setAttribute("aria-label", t("settingsBtn"));
-  const sub = document.querySelector(".subtitle");
-  if (sub) sub.textContent = t("subtitle");
+  applyLang();
   applyBuildLabels();
   renderDateLine();
   const apple = document.querySelector(
@@ -61,17 +60,101 @@ applyAppName();
 function t(key) {
   const pack = {
     en: {
-      filmFoot: "Watch first. Then pray and read.",
-      filmCaption: "English picture. Captions on.",
-      settingsDrive: "Google Drive",
-      settingsBtn: "Settings",
       subtitle: "The Noah Protocol",
+      filmHead: "Today's film",
+      filmFoot: "Watch first. Then pray and read.",
+      filmCaption: "English picture. Turn on captions.",
+      arkTitle: "The mental ark",
+      ark1: "The church in Rome under Nero could not vote the emperor out. They kept a lamp in the house, a marriage at peace, and a mouth that did not chase every piece of news. Noah did not drain the flood. He built through it.",
+      ark2: "You have a duty they did not: a vote. Cast it when the day comes. Until then, do not live inside the campaign. Around you, a loud majority talks like you — and family who do not. The first tempts you to perform. The second tests this house. This morning: pray, read, write — then go out.",
+      namePray: "Pray",
+      bodyPray: "Phone face down, behind a closed door — not for anyone to see. If you are afraid, say so. Ask that this cup pass if it can, and that you will do today's duty if it will not. Ten honest minutes beat an hour in the chat groups.",
+      nameRead: "Read",
+      bodyRead: "One passage for this calendar day — scripture, or a stoic older than the panic. Read it through. Copy a sentence if you need to. Carry that sentence into the street.",
+      thought: "Today's thought",
+      phPray: "The prayer you actually prayed.",
+      phRead: "The sentence you will carry.",
+      phForum: "The groups I will not open.",
+      phTongue: "The relative I will not correct.",
+      phWife: "The vow with her today.",
+      phTable: "How lunch stays a meal.",
+      phWork: "The work of your hands today.",
+      phNight: "What I kept. Whom I did not antagonize. What I release. One gratitude.",
+      phModal: "Write after you have read.",
+      passMat6: "Matthew 6:6–13 · the inner room",
+      passMat26: "Matthew 26:38–39 · Gethsemane",
+      passProv4: "Proverbs 4:23",
+      passAmos: "Amos 5:13",
+      passRom18: "Romans 12:17–18",
+      passEcc4: "Ecclesiastes 4:9–12",
+      passProv17: "Proverbs 17:1",
+      passTh4: "1 Thessalonians 4:11–12",
+      dayTitle: "The rule of the day",
+      dayLede: "You vote. You are not a commentator. One sober act at the ballot box is not forty days of talk. Strangers will decide the country. This house will be decided by whether you showed up as a husband, and whether a relative still had a place at the table.",
+      desk: "Desk",
+      deskLead: "Latin chant while you work. No English, no Portuguese, no drums. Local files replace YouTube when you add them.",
+      chantRest: "Chant at rest",
+      chantLocal: "Playing local files from audio/",
+      chantYt: "YouTube (temporary). Add audio/playlist.json to go offline.",
+      prev: "Prev",
+      play: "Play",
+      pause: "Pause",
+      next: "Next",
+      nameForum: "Stay out of the Forum",
+      bodyForum: "The election does not need a morning briefing. Mute the groups. Leave the pundits closed. If you need a date, look it up once. What the crowd cheers — even the crowd that agrees with you — is not your food.",
+      nameTongue: "Hold the tongue",
+      bodyTongue: "The harder silence is not with strangers. It is with family who already know where you stand. A loud majority makes the next remark feel like courage. It is usually only noise. You will not convert an uncle at lunch. Courtesy is not surrender.",
+      nameWife: "Keep the marriage off the campaign",
+      bodyWife: "She does not need a summary of the election. She needs you unhooked from the groups. Name the strain. Agree that this house is not a rally, and that neither of you will use the other as a weapon at lunch.",
+      nameTable: "Keep the election off the table",
+      bodyTable: "Sunday lunch will try to become a debate. Let it fail. Pass the rice. Be briefly boring. You may love people who will mark a different ballot. A joke that cuts is still a cut.",
+      nameWork: "Work with your hands",
+      bodyWork: "The itch for one more clip is the Forum again. Spend that energy on the body, a skill, a page, this marriage. Be tired tonight from what you kept, not from what you forwarded.",
+      nightTitle: "Close the day",
+      nightLede: "Close as they closed it: a few true sentences, then quiet. Did you keep the house? Did you leave a relative in peace? Let go of the argument you still want to win. Tomorrow the ballots and the groups will still be there. You do not have to sleep inside them.",
+      closing: "Closing notes",
+      noiseWhite: "White noise",
+      noiseRain: "Rain",
+      noiseOcean: "Ocean",
+      noiseCrickets: "Crickets",
+      logTitle: "The log",
+      logLede: "Not a score. Proof that you kept showing up — days on the ark, words you actually wrote, a streak only you can see.",
+      logEmpty: "The log fills as you write. Come back tomorrow.",
+      statDays: "Days",
+      statStreak: "In a row",
+      statChars: "Characters",
+      navMorning: "Morning",
+      navDay: "Day",
+      navNight: "Night",
+      navLog: "Log",
+      navAria: "The day",
+      slotPray: "Prayer",
+      slotReading: "Reading",
+      slotForum: "The Forum",
+      slotTongue: "The tongue",
+      slotWife: "The marriage",
+      slotTable: "The table",
+      slotWork: "The hands",
+      slotNight: "Closing",
+      slotPassage: "Passage",
+      remindHead: "Bells",
+      remindNote: "Set a time for morning, day, and night. While this app is open it can ring. Add the calendar file so the phone still rings when the app is closed.",
+      remindEnable: "Enable",
+      remindIcs: "Add to phone calendar",
       "remindTitle-morning": "Ark · Morning",
       "remindBody-morning": "Pray, read, write. Then go out.",
       "remindTitle-day": "Ark · Day",
       "remindBody-day": "Stay out of the Forum. Keep the house.",
       "remindTitle-night": "Ark · Night",
       "remindBody-night": "Close the day. A few true sentences, then quiet.",
+      settingsTitle: "Settings",
+      settingsBtn: "Settings",
+      settingsLang: "Language",
+      settingsTheme: "Theme",
+      themeSystem: "System",
+      themeLight: "Light",
+      themeDark: "Dark",
+      settingsDrive: "Google Drive",
       driveHint:
         "Private journal file (ark-journal.json) in Drive app data — it will not appear in My Drive. After Connect or Sync now, the line below should say Synced with a time.",
       driveClient: "OAuth client ID",
@@ -90,64 +173,76 @@ function t(key) {
       buildReload: "Reload to update",
       buildUnknown: "Could not check for a newer build.",
       buildOffline: "Offline. Could not check.",
-      chantRest: "Chant at rest",
-      chantLocal: "Playing local files from audio/",
-      chantYt: "YouTube (temporary). Add audio/playlist.json to go offline.",
-      play: "Play",
-      pause: "Pause",
-      logEmpty: "The log fills as you write. Come back tomorrow.",
-      statDays: "Days",
-      statStreak: "In a row",
-      statChars: "Characters",
-      slotPray: "Prayer",
-      slotReading: "Reading",
-      slotForum: "The Forum",
-      slotTongue: "The tongue",
-      slotWife: "The marriage",
-      slotTable: "The table",
-      slotWork: "The hands",
-      slotNight: "Closing",
-      slotPassage: "Passage",
     },
     pt: {
-      filmFoot: "Assista primeiro. Depois ore e leia.",
-      filmCaption: "Imagem em ingl\u00eas. Legendas ligadas.",
-      settingsDrive: "Google Drive",
-      settingsBtn: "Configurações",
       subtitle: "O Protocolo de Noé",
-      "remindTitle-morning": "Arca · Manhã",
-      "remindBody-morning": "Ora, lê, escreve. Depois sai.",
-      "remindTitle-day": "Arca · Dia",
-      "remindBody-day": "Fora do Fórum. Guarda a casa.",
-      "remindTitle-night": "Arca · Noite",
-      "remindBody-night": "Fecha o dia. Umas frases verdadeiras, depois silêncio.",
-      driveHint:
-        "Arquivo privado (ark-journal.json) nos dados do app no Drive — não aparece em Meu Drive. Depois de Conectar ou Sincronizar agora, a linha abaixo deve dizer Sincronizado com um horário.",
-      driveClient: "Client ID OAuth",
-      driveConnect: "Conectar Drive",
-      driveSync: "Sincronizar agora",
-      driveSignOut: "Sair",
-      driveOff: "Não conectado.",
-      driveOn: "Conectado. Sincroniza depois de escrever, ou toque em Sincronizar agora.",
-      driveNeedId: "Cole primeiro um client ID OAuth da Web.",
-      driveNeedGis: "Não deu para carregar o login Google.",
-      driveOk: "Sincronizado.",
-      driveErr: "A sincronização falhou.",
-      buildLabel: "Versão",
-      buildCurrent: "Esta cópia está atualizada.",
-      buildUpdate: "Há uma versão mais nova no servidor.",
-      buildReload: "Recarregar para atualizar",
-      buildUnknown: "Não deu para checar se há versão nova.",
-      buildOffline: "Sem rede. Não deu para checar.",
-      chantRest: "Canto em descanso",
+      filmHead: "O filme de hoje",
+      filmFoot: "Assista primeiro. Depois ore e leia.",
+      filmCaption: "Vídeo em inglês. Ligue as legendas.",
+      arkTitle: "A arca mental",
+      ark1: "A igreja em Roma, sob Nero, não podia tirar o imperador no voto. Guardavam uma lâmpada em casa, um casamento em paz, e uma boca que não corria atrás de cada notícia. Noé não esgotou o dilúvio. Construiu no meio dele.",
+      ark2: "Você tem um dever que eles não tinham: o voto. Use-o no dia da eleição. Até lá, não viva dentro da campanha. Ao seu redor, uma maioria barulhenta fala como você — e parentes que não. A primeira tenta você a se exibir. A segunda prova esta casa. Esta manhã: ore, leia, escreva — depois saia.",
+      namePray: "Orar",
+      bodyPray: "Celular virado para baixo, atrás de uma porta fechada — sem ninguém ver. Se você tem medo, diga. Peça que este cálice passe, se puder, e que você cumpra o dever do dia se não puder. Dez minutos honestos valem mais do que uma hora nos grupos.",
+      nameRead: "Ler",
+      bodyRead: "Uma passagem para este dia do calendário — escritura, ou um estoico mais antigo do que o pânico. Leia até o fim. Copie uma frase se precisar. Leve essa frase para a rua.",
+      thought: "Pensamento de hoje",
+      phPray: "A oração que você de fato fez.",
+      phRead: "A frase que você vai levar.",
+      phForum: "Os grupos que eu não vou abrir.",
+      phTongue: "O parente que eu não vou corrigir.",
+      phWife: "O combinado com ela, hoje.",
+      phTable: "Como o almoço continua refeição.",
+      phWork: "O trabalho das suas mãos hoje.",
+      phNight: "O que eu guardei. A quem eu não antagonizei. O que eu solto. Uma gratidão.",
+      phModal: "Escreva depois de ter lido.",
+      passMat6: "Mateus 6:6–13 · o quarto interior",
+      passMat26: "Mateus 26:38–39 · Getsêmani",
+      passProv4: "Provérbios 4:23",
+      passAmos: "Amós 5:13",
+      passRom18: "Romanos 12:17–18",
+      passEcc4: "Eclesiastes 4:9–12",
+      passProv17: "Provérbios 17:1",
+      passTh4: "1 Tessalonicenses 4:11–12",
+      dayTitle: "A regra do dia",
+      dayLede: "Você vota. Você não é comentarista. Um ato sóbrio na urna não é quarenta dias de comentário. O país será decidido por milhões de desconhecidos. Esta casa será decidida por você ter se apresentado como marido, e por um parente ainda ter lugar à mesa.",
+      desk: "Mesa",
+      deskLead: "Canto em latim enquanto você trabalha. Sem inglês, sem português, sem tambores. Arquivos locais substituem o YouTube quando você os adiciona.",
+      chantRest: "Canto em pausa",
       chantLocal: "Reproduzindo arquivos locais em audio/",
       chantYt: "YouTube (provisório). Coloque audio/playlist.json para ficar offline.",
+      prev: "Anterior",
       play: "Tocar",
-      pause: "Pausa",
+      pause: "Pausar",
+      next: "Próximo",
+      nameForum: "Fique fora do Fórum",
+      bodyForum: "A eleição não precisa de um resumo de manhã. Silencie os grupos. Deixe os comentaristas fechados. Se precisar de uma data, procure uma vez. O que a multidão aplaude — mesmo a que concorda com você — não é o seu pão.",
+      nameTongue: "Guarde a língua",
+      bodyTongue: "O silêncio mais difícil não é com estranhos. É com parentes que já sabem de que lado você está. Uma maioria barulhenta faz o próximo comentário parecer coragem. Em geral é só ruído. Você não converte um tio no almoço. Cortesia não é rendição.",
+      nameWife: "O casamento fora da campanha",
+      bodyWife: "Ela não precisa de um resumo da eleição. Precisa de você desligado dos grupos. Diga a tensão em voz alta. Combinem que esta casa não é comício, e que nenhum usa o outro como arma no almoço.",
+      nameTable: "A eleição fora da mesa",
+      bodyTable: "O almoço de domingo vai tentar virar debate. Deixe falhar. Passe o arroz. Seja um pouco chato. Você pode amar quem vai votar diferente. Uma piada que só corta ainda é um corte.",
+      nameWork: "Trabalhe com as mãos",
+      bodyWork: "A vontade de abrir mais um vídeo é o Fórum de novo. Gaste essa energia no corpo, num ofício, numa página, neste casamento. Canse-se esta noite do que você guardou, não do que encaminhou.",
+      nightTitle: "Feche o dia",
+      nightLede: "Feche como eles fechavam: algumas frases verdadeiras, depois silêncio. Você guardou a casa? Deixou um parente em paz? Solte o argumento que você ainda quer ganhar. Amanhã as urnas e os grupos continuam. Você não precisa dormir dentro deles.",
+      closing: "Notas de encerramento",
+      noiseWhite: "Ruído branco",
+      noiseRain: "Chuva",
+      noiseOcean: "Oceano",
+      noiseCrickets: "Grilos",
+      logTitle: "O diário",
+      logLede: "Não é um placar. É prova de que você continuou aparecendo — dias na arca, palavras que você de fato escreveu, uma sequência só sua.",
       logEmpty: "O diário enche quando você escreve. Volte amanhã.",
       statDays: "Dias",
       statStreak: "Seguidos",
       statChars: "Caracteres",
+      navMorning: "Manhã",
+      navDay: "Dia",
+      navNight: "Noite",
+      navLog: "Diário",
+      navAria: "O dia",
       slotPray: "Oração",
       slotReading: "Leitura",
       slotForum: "O Fórum",
@@ -157,9 +252,71 @@ function t(key) {
       slotWork: "As mãos",
       slotNight: "Encerramento",
       slotPassage: "Passagem",
+      remindHead: "Sinos",
+      remindNote: "Marque um horário para manhã, dia e noite. Com o aplicativo aberto, ele pode tocar. Adicione o arquivo de calendário para o telefone tocar mesmo com o aplicativo fechado.",
+      remindEnable: "Ativar",
+      remindIcs: "Adicionar ao calendário do telefone",
+      "remindTitle-morning": "Arca · Manhã",
+      "remindBody-morning": "Ore, leia, escreva. Depois saia.",
+      "remindTitle-day": "Arca · Dia",
+      "remindBody-day": "Fora do Fórum. Guarde a casa.",
+      "remindTitle-night": "Arca · Noite",
+      "remindBody-night": "Feche o dia. Algumas frases verdadeiras, depois silêncio.",
+      settingsTitle: "Configurações",
+      settingsBtn: "Configurações",
+      settingsLang: "Idioma",
+      settingsTheme: "Tema",
+      themeSystem: "Sistema",
+      themeLight: "Claro",
+      themeDark: "Escuro",
+      settingsDrive: "Google Drive",
+      driveHint:
+        "Arquivo privado (ark-journal.json) nos dados do app no Drive — não aparece em Meu Drive. Depois de Conectar ou Sincronizar agora, a linha abaixo deve dizer Sincronizado com um horário.",
+      driveClient: "Client ID OAuth",
+      driveConnect: "Conectar Drive",
+      driveSync: "Sincronizar agora",
+      driveSignOut: "Sair",
+      driveOff: "Não conectado.",
+      driveOn: "Conectado. Sincronize depois de escrever, ou toque em Sincronizar agora.",
+      driveNeedId: "Cole primeiro um client ID OAuth da Web.",
+      driveNeedGis: "Não foi possível carregar o login Google.",
+      driveOk: "Sincronizado.",
+      driveErr: "A sincronização falhou.",
+      buildLabel: "Versão",
+      buildCurrent: "Esta cópia está atualizada.",
+      buildUpdate: "Há uma versão mais nova no servidor.",
+      buildReload: "Recarregar para atualizar",
+      buildUnknown: "Não foi possível verificar se há versão nova.",
+      buildOffline: "Sem rede. Não foi possível verificar.",
     },
   };
   return (pack[lang] && pack[lang][key]) || pack.en[key] || key;
+}
+
+function applyLang() {
+  document.documentElement.lang = lang === "pt" ? "pt-BR" : "en";
+  document.documentElement.setAttribute("dir", "ltr");
+  document.querySelectorAll("[data-i18n]").forEach(function (el) {
+    if (el.id === "chantPlay" || el.id === "audioActionBtn") return;
+    const key = el.getAttribute("data-i18n");
+    if (!key) return;
+    el.textContent = t(key);
+  });
+  document.querySelectorAll("[data-i18n-placeholder]").forEach(function (el) {
+    const key = el.getAttribute("data-i18n-placeholder");
+    if (key) el.placeholder = t(key);
+  });
+  document.querySelectorAll("[data-i18n-aria]").forEach(function (el) {
+    const key = el.getAttribute("data-i18n-aria");
+    if (key) el.setAttribute("aria-label", t(key));
+  });
+}
+
+function syncMediaLabels() {
+  const chantBtn = document.getElementById("chantPlay");
+  if (chantBtn) chantBtn.textContent = t(chantPlaying ? "pause" : "play");
+  const noiseBtn = document.getElementById("audioActionBtn");
+  if (noiseBtn) noiseBtn.textContent = t(noisePlaying ? "pause" : "play");
 }
 
 function hashStr(s) {
@@ -235,9 +392,13 @@ function renderFilm() {
   iframe.src =
     "https://www.youtube-nocookie.com/embed/" +
     id +
-    "?rel=0&modestbranding=1&playsinline=1&iv_load_policy=3" +
+    "?rel=0&modestbranding=1&playsinline=1&fs=1&iv_load_policy=3" +
     (usePt ? "" : "&cc_load_policy=1&cc_lang_pref=en");
-  iframe.allow = "accelerometer; encrypted-media; picture-in-picture";
+  iframe.allow =
+    "accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share; fullscreen";
+  iframe.setAttribute("allowfullscreen", "");
+  iframe.setAttribute("webkitallowfullscreen", "");
+  iframe.setAttribute("mozallowfullscreen", "");
   iframe.referrerPolicy = "strict-origin-when-cross-origin";
   iframe.title = titleEl.textContent;
   mount.appendChild(iframe);
@@ -1267,6 +1428,7 @@ function bindSettings() {
       renderReading();
       if (openPassageKey) openScripture(openPassageKey, openPassageSlot);
       renderChant(chantPlaying);
+      syncMediaLabels();
       applyDriveLabels();
       applyBuildLabels();
       checkBuild();
@@ -1632,6 +1794,7 @@ bindPassages();
       }
     });
 })();
+syncMediaLabels();
 initFilm();
 renderReading();
 renderLog();
