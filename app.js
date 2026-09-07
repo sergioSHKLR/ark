@@ -7,7 +7,9 @@ const DRIVE_SYNC_KEY = "noah-drive-synced";
 const DRIVE_FILE_NAME = "ark-journal.json";
 const DRIVE_SCOPE = "https://www.googleapis.com/auth/drive.appdata";
 const FILM_EPOCH = "2026-09-06";
-const APP_BUILD = 46;
+const APP_BUILD = 47;
+const DAY_TZ = "America/Sao_Paulo";
+const DRIVE_CONSENT_KEY = "noah-drive-consented";
 
 let lang = localStorage.getItem(LANG_KEY) === "pt" ? "pt" : "en";
 let theme = localStorage.getItem(THEME_KEY) || "system";
@@ -156,7 +158,9 @@ function t(key) {
       themeDark: "Dark",
       settingsDrive: "Google Drive",
       driveHint:
-        "Private journal file (ark-journal.json) in Drive app data — it will not appear in My Drive. After Connect or Sync now, the line below should say Synced with a time.",
+        "Private journal in Drive app data — it will not appear in My Drive. Connect once on each device. Notes upload when you tap Sync now, or when you leave the page. After a sync, the line below shows a time and how many days came through.",
+      driveEmpty:
+        "Synced, but no notes came through. On the phone, reload this update and tap Sync now first. Then sync here.",
       driveClient: "OAuth client ID",
       driveConnect: "Connect Drive",
       driveSync: "Sync now",
@@ -271,7 +275,9 @@ function t(key) {
       themeDark: "Escuro",
       settingsDrive: "Google Drive",
       driveHint:
-        "Arquivo privado (ark-journal.json) nos dados do app no Drive — não aparece em Meu Drive. Depois de Conectar ou Sincronizar agora, a linha abaixo deve dizer Sincronizado com um horário.",
+        "Diário privado nos dados do app no Drive — não aparece em Meu Drive. Conecte uma vez em cada aparelho. As notas sobem quando você toca em Sincronizar agora, ou quando sai da página. Depois de sincronizar, a linha abaixo mostra o horário e quantos dias chegaram.",
+      driveEmpty:
+        "Sincronizado, mas nenhuma nota chegou. No celular, recarregue esta atualização e toque em Sincronizar agora. Depois sincronize aqui.",
       driveClient: "Client ID OAuth",
       driveConnect: "Conectar Drive",
       driveSync: "Sincronizar agora",
@@ -415,15 +421,29 @@ async function initFilm() {
   renderFilm();
 }
 
-function todayKey() {
-  const d = new Date();
-  return (
-    d.getFullYear() +
-    "-" +
-    String(d.getMonth() + 1).padStart(2, "0") +
-    "-" +
-    String(d.getDate()).padStart(2, "0")
-  );
+function todayKey(d) {
+  const dt = d || new Date();
+  try {
+    const parts = new Intl.DateTimeFormat("en-CA", {
+      timeZone: DAY_TZ,
+      year: "numeric",
+      month: "2-digit",
+      day: "2-digit",
+    }).formatToParts(dt);
+    const get = (type) => {
+      const p = parts.find((x) => x.type === type);
+      return p ? p.value : "";
+    };
+    return get("year") + "-" + get("month") + "-" + get("day");
+  } catch (e) {
+    return (
+      dt.getFullYear() +
+      "-" +
+      String(dt.getMonth() + 1).padStart(2, "0") +
+      "-" +
+      String(dt.getDate()).padStart(2, "0")
+    );
+  }
 }
 
 function loadJournal() {
@@ -443,6 +463,8 @@ function saveJournal(data) {
 let driveToken = "";
 let driveSyncTimer = 0;
 let tokenClient = null;
+let driveBusy = false;
+let driveAgain = false;
 
 function driveClientId() {
   const input = document.getElementById("driveClientId");
@@ -473,9 +495,38 @@ function formatSyncAt() {
   });
 }
 
+function journalStats(data) {
+  const days = Object.keys(data || {})
+    .filter((k) => /^\d{4}-\d{2}-\d{2}$/.test(k))
+    .map((date) => ({
+      date: date,
+      checks: (data[date] && data[date].checks) || {},
+      notes: (data[date] && data[date].notes) || {},
+    }));
+  const used = days.filter(dayUsed);
+  const chars = days.reduce((n, d) => n + noteChars(d), 0);
+  return { days: used.length, chars: chars };
+}
+
 function markDriveOk() {
   const when = formatSyncAt();
-  setDriveStatus(when ? t("driveOk") + " " + when : t("driveOk"));
+  const stats = journalStats(loadJournal());
+  if (!stats.days && !stats.chars) {
+    setDriveStatus(t("driveEmpty"));
+    return;
+  }
+  const loc = lang === "pt" ? "pt-BR" : "en-GB";
+  const bit =
+    stats.days +
+    " " +
+    t("statDays").toLowerCase() +
+    " · " +
+    stats.chars.toLocaleString(loc) +
+    " " +
+    t("statChars").toLowerCase();
+  setDriveStatus(
+    (when ? t("driveOk") + " " + when : t("driveOk")) + " · " + bit,
+  );
 }
 
 function applyDriveLabels() {
@@ -516,21 +567,17 @@ function driveHeaders() {
   return { Authorization: "Bearer " + driveToken };
 }
 
-async function driveFindFile() {
-  const cached = localStorage.getItem(DRIVE_FILE_KEY);
-  if (cached) return cached;
+async function driveListJournals() {
   const q = encodeURIComponent("name='" + DRIVE_FILE_NAME + "'");
   const res = await fetch(
     "https://www.googleapis.com/drive/v3/files?spaces=appDataFolder&q=" +
       q +
-      "&fields=files(id,name)",
+      "&fields=files(id,name,modifiedTime,size)&pageSize=50",
     { headers: driveHeaders() },
   );
   if (!res.ok) throw new Error("list");
   const data = await res.json();
-  const id = data.files && data.files[0] && data.files[0].id;
-  if (id) localStorage.setItem(DRIVE_FILE_KEY, id);
-  return id || "";
+  return (data.files || []).filter((f) => f && f.id);
 }
 
 async function driveDownload(id) {
@@ -538,14 +585,19 @@ async function driveDownload(id) {
     "https://www.googleapis.com/drive/v3/files/" + id + "?alt=media",
     { headers: driveHeaders() },
   );
-  if (res.status === 404) return {};
+  if (res.status === 404) return null;
   if (!res.ok) throw new Error("get");
   const text = await res.text();
+  if (!String(text).trim()) return {};
+  let parsed;
   try {
-    return JSON.parse(text);
+    parsed = JSON.parse(text);
   } catch (e) {
-    return {};
+    throw new Error("parse");
   }
+  if (!parsed || typeof parsed !== "object" || Array.isArray(parsed))
+    throw new Error("shape");
+  return parsed;
 }
 
 async function driveUpload(payload, fileId) {
@@ -564,6 +616,10 @@ async function driveUpload(payload, fileId) {
         body: body,
       },
     );
+    if (res.status === 404) {
+      localStorage.removeItem(DRIVE_FILE_KEY);
+      return driveUpload(payload, "");
+    }
     if (!res.ok) throw new Error("patch");
     return fileId;
   }
@@ -602,14 +658,20 @@ async function driveUpload(payload, fileId) {
   return created.id;
 }
 
-function mergeNotes(a, b, preferB) {
-  const out = Object.assign({}, a || {});
-  Object.keys(b || {}).forEach((slot) => {
-    const bv = b[slot] || "";
-    const av = out[slot] || "";
-    if (!av) out[slot] = bv;
-    else if (!bv) return;
-    else out[slot] = preferB ? bv : av;
+function noteText(v) {
+  return v == null ? "" : String(v);
+}
+
+function mergeNotes(older, newer) {
+  const out = {};
+  const keys = new Set(
+    Object.keys(older || {}).concat(Object.keys(newer || {})),
+  );
+  keys.forEach((slot) => {
+    const a = noteText(older && older[slot]);
+    const b = noteText(newer && newer[slot]);
+    if (a.trim() && b.trim()) out[slot] = b;
+    else out[slot] = a.trim() ? a : b;
   });
   return out;
 }
@@ -617,7 +679,9 @@ function mergeNotes(a, b, preferB) {
 function mergeJournals(local, remote) {
   const out = {};
   const keys = new Set(
-    Object.keys(local || {}).concat(Object.keys(remote || {})),
+    Object.keys(local || {})
+      .concat(Object.keys(remote || {}))
+      .filter((k) => /^\d{4}-\d{2}-\d{2}$/.test(k)),
   );
   keys.forEach((day) => {
     const L = local[day] || { checks: {}, notes: {}, updatedAt: "" };
@@ -627,23 +691,58 @@ function mergeJournals(local, remote) {
     const older = preferLocal ? R : L;
     out[day] = {
       checks: Object.assign({}, older.checks || {}, newer.checks || {}),
-      notes: mergeNotes(older.notes, newer.notes, true),
+      notes: mergeNotes(older.notes, newer.notes),
       updatedAt: newer.updatedAt || older.updatedAt || "",
     };
   });
   return out;
 }
 
-async function syncDrive() {
-  if (!driveToken) throw new Error("auth");
+async function syncDriveOnce() {
   const local = loadJournal();
-  const fileId = await driveFindFile();
-  const remote = fileId ? await driveDownload(fileId) : {};
+  const files = await driveListJournals();
+  let remote = {};
+  const live = [];
+  for (let i = 0; i < files.length; i++) {
+    const part = await driveDownload(files[i].id);
+    if (part === null) continue;
+    live.push(files[i]);
+    remote = mergeJournals(remote, part);
+  }
   const merged = mergeJournals(local, remote);
-  await driveUpload(merged, fileId);
+  let canonical = "";
+  const cached = localStorage.getItem(DRIVE_FILE_KEY);
+  if (cached && live.some((f) => f.id === cached)) canonical = cached;
+  else if (live.length) canonical = live[0].id;
+  canonical = await driveUpload(merged, canonical);
+  for (let i = 0; i < live.length; i++) {
+    if (live[i].id !== canonical) {
+      try {
+        await driveUpload(merged, live[i].id);
+      } catch (e) {}
+    }
+  }
   saveJournalSilent(merged);
   localStorage.setItem(DRIVE_SYNC_KEY, new Date().toISOString());
+  localStorage.setItem(DRIVE_CONSENT_KEY, "1");
   bindJournalRefresh();
+}
+
+async function syncDrive() {
+  if (!driveToken) throw new Error("auth");
+  if (driveBusy) {
+    driveAgain = true;
+    return;
+  }
+  driveBusy = true;
+  try {
+    do {
+      driveAgain = false;
+      await syncDriveOnce();
+    } while (driveAgain);
+  } finally {
+    driveBusy = false;
+  }
 }
 
 function saveJournalSilent(data) {
@@ -657,7 +756,15 @@ function scheduleDriveSync() {
     syncDrive()
       .then(() => markDriveOk())
       .catch(() => setDriveStatus(t("driveErr")));
-  }, 2500);
+  }, 1200);
+}
+
+function flushDriveSync() {
+  if (!driveToken) return;
+  clearTimeout(driveSyncTimer);
+  syncDrive()
+    .then(() => markDriveOk())
+    .catch(() => setDriveStatus(t("driveErr")));
 }
 
 function bindJournalRefresh() {
@@ -674,39 +781,58 @@ function bindJournalRefresh() {
   renderLog();
 }
 
-async function connectDrive() {
+function onDriveToken(resp, fromSilent) {
+  if (resp && resp.access_token) {
+    driveToken = resp.access_token;
+    localStorage.setItem(DRIVE_CONSENT_KEY, "1");
+    setDriveStatus(t("driveOn"));
+    syncDrive()
+      .then(() => markDriveOk())
+      .catch(() => setDriveStatus(t("driveErr")));
+    return;
+  }
+  if (!fromSilent) setDriveStatus(t("driveErr"));
+}
+
+async function ensureTokenClient() {
   const id = driveClientId();
-  if (!id) {
-    setDriveStatus(t("driveNeedId"));
-    return;
-  }
+  if (!id) throw new Error("id");
   localStorage.setItem(DRIVE_CLIENT_KEY, id);
-  try {
-    await loadGis();
-  } catch (e) {
-    setDriveStatus(t("driveNeedGis"));
-    return;
-  }
+  await loadGis();
+  if (tokenClient && tokenClient._arkId === id) return tokenClient;
   tokenClient = google.accounts.oauth2.initTokenClient({
     client_id: id,
     scope: DRIVE_SCOPE,
-    callback: (resp) => {
-      if (resp && resp.access_token) {
-        driveToken = resp.access_token;
-        setDriveStatus(t("driveOn"));
-        syncDrive()
-          .then(() => markDriveOk())
-          .catch(() => setDriveStatus(t("driveErr")));
-      } else setDriveStatus(t("driveErr"));
-    },
+    callback: (resp) => onDriveToken(resp, false),
+    error_callback: function () {},
   });
-  tokenClient.requestAccessToken({ prompt: driveToken ? "" : "consent" });
+  tokenClient._arkId = id;
+  return tokenClient;
+}
+
+async function connectDrive(silent) {
+  const id = driveClientId();
+  if (!id) {
+    if (!silent) setDriveStatus(t("driveNeedId"));
+    return;
+  }
+  try {
+    await ensureTokenClient();
+  } catch (e) {
+    if (!silent) setDriveStatus(t("driveNeedGis"));
+    return;
+  }
+  tokenClient.callback = (resp) => onDriveToken(resp, !!silent);
+  tokenClient.requestAccessToken({
+    prompt: silent || driveToken ? "" : "consent",
+  });
 }
 
 function signOutDrive() {
   const done = () => {
     driveToken = "";
     localStorage.removeItem(DRIVE_FILE_KEY);
+    localStorage.removeItem(DRIVE_CONSENT_KEY);
     setDriveStatus(t("driveOff"));
   };
   if (driveToken && window.google && google.accounts && google.accounts.oauth2) {
@@ -728,16 +854,25 @@ function bindDrive() {
   const conn = document.getElementById("driveConnect");
   const sync = document.getElementById("driveSync");
   const out = document.getElementById("driveSignOut");
-  if (conn) conn.addEventListener("click", connectDrive);
+  if (conn) conn.addEventListener("click", () => connectDrive(false));
   if (sync)
     sync.addEventListener("click", () => {
-      if (!driveToken) return connectDrive();
+      if (!driveToken) return connectDrive(false);
       syncDrive()
         .then(() => markDriveOk())
         .catch(() => setDriveStatus(t("driveErr")));
     });
   if (out) out.addEventListener("click", signOutDrive);
+  document.addEventListener("visibilitychange", () => {
+    if (document.hidden) flushDriveSync();
+  });
+  window.addEventListener("pagehide", flushDriveSync);
   applyDriveLabels();
+  if (
+    localStorage.getItem(DRIVE_CONSENT_KEY) === "1" ||
+    localStorage.getItem(DRIVE_FILE_KEY)
+  )
+    connectDrive(true);
 }
 
 const YT_CHANT = [
@@ -1722,7 +1857,29 @@ function dayOrdinalEn(n) {
 }
 
 function formatLongDate(d) {
-  const day = d.getDate();
+  let day = d.getDate();
+  let month = d.getMonth();
+  let year = d.getFullYear();
+  try {
+    const parts = new Intl.DateTimeFormat("en-US", {
+      timeZone: DAY_TZ,
+      day: "numeric",
+      month: "numeric",
+      year: "numeric",
+    }).formatToParts(d);
+    const get = (type) => {
+      const p = parts.find((x) => x.type === type);
+      return p ? Number(p.value) : NaN;
+    };
+    const tzDay = get("day");
+    const tzMonth = get("month");
+    const tzYear = get("year");
+    if (tzDay && tzMonth && tzYear) {
+      day = tzDay;
+      month = tzMonth - 1;
+      year = tzYear;
+    }
+  } catch (e) {}
   const monthsEn = [
     "first",
     "second",
@@ -1751,8 +1908,6 @@ function formatLongDate(d) {
     "décimo primeiro",
     "décimo segundo",
   ];
-  const year = d.getFullYear();
-  const month = d.getMonth();
   if (lang === "pt")
     return (
       "O " +
