@@ -7,7 +7,7 @@ const DRIVE_SYNC_KEY = "noah-drive-synced";
 const DRIVE_FILE_NAME = "ark-journal.json";
 const DRIVE_SCOPE = "https://www.googleapis.com/auth/drive.appdata";
 const FILM_EPOCH = "2026-09-06";
-const APP_BUILD = 48;
+const APP_BUILD = 49;
 const DAY_TZ = "America/Sao_Paulo";
 const DRIVE_CONSENT_KEY = "noah-drive-consented";
 
@@ -316,6 +316,28 @@ function applyLang() {
     const key = el.getAttribute("data-i18n-aria");
     if (key) el.setAttribute("aria-label", t(key));
   });
+  renderOurFather();
+}
+
+function renderOurFather() {
+  const pack =
+    typeof OUR_FATHER !== "undefined" && OUR_FATHER[lang]
+      ? OUR_FATHER[lang]
+      : typeof OUR_FATHER !== "undefined"
+        ? OUR_FATHER.en
+        : null;
+  if (!pack) return;
+  const head = document.getElementById("ourFatherHead");
+  const src = document.getElementById("ourFatherSrc");
+  const text = document.getElementById("ourFatherText");
+  if (head) head.textContent = pack.head;
+  if (src) src.textContent = pack.src;
+  if (text)
+    text.innerHTML = pack.lines
+      .map(function (line) {
+        return "<p>" + line + "</p>";
+      })
+      .join("");
 }
 
 function syncMediaLabels() {

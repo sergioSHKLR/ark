@@ -64,3 +64,28 @@ const SCRIPTURE = {
     },
   },
 };
+
+const OUR_FATHER = {
+  en: {
+    head: "Our Father",
+    src: "Matthew 6:9–13",
+    lines: [
+      "Our Father which art in heaven, Hallowed be thy name.",
+      "Thy kingdom come. Thy will be done in earth, as it is in heaven.",
+      "Give us this day our daily bread.",
+      "And forgive us our debts, as we forgive our debtors.",
+      "And lead us not into temptation, but deliver us from evil: For thine is the kingdom, and the power, and the glory, for ever. Amen.",
+    ],
+  },
+  pt: {
+    head: "Pai Nosso",
+    src: "Mateus 6:9–13",
+    lines: [
+      "Pai nosso, que estás nos céus, santificado seja o teu nome.",
+      "Venha o teu reino. Seja feita a tua vontade, tanto na terra como no céu.",
+      "O pão nosso de cada dia nos dá hoje.",
+      "E perdoa-nos as nossas dívidas, assim como nós perdoamos aos nossos devedores.",
+      "E não nos induzas à tentação, mas livra-nos do mal; porque teu é o reino, e o poder, e a glória, para sempre. Amém.",
+    ],
+  },
+};
