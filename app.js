@@ -7,7 +7,7 @@ const DRIVE_SYNC_KEY = "noah-drive-synced";
 const DRIVE_FILE_NAME = "ark-journal.json";
 const DRIVE_SCOPE = "https://www.googleapis.com/auth/drive.appdata";
 const FILM_EPOCH = "2026-09-06";
-const APP_BUILD = 52;
+const APP_BUILD = 53;
 const DAY_TZ = "America/Sao_Paulo";
 const DRIVE_CONSENT_KEY = "noah-drive-consented";
 
