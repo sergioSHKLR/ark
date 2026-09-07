@@ -7,10 +7,9 @@ const DRIVE_SYNC_KEY = "noah-drive-synced";
 const DRIVE_FILE_NAME = "ark-journal.json";
 const DRIVE_SCOPE = "https://www.googleapis.com/auth/drive.appdata";
 const FILM_EPOCH = "2026-09-06";
-const APP_BUILD = 56;
+const APP_BUILD = 57;
 const DAY_TZ = "America/Sao_Paulo";
 const DRIVE_CONSENT_KEY = "noah-drive-consented";
-const QUOTE_SHIFTS = ["morning", "day", "night"];
 
 let lang = localStorage.getItem(LANG_KEY) === "pt" ? "pt" : "en";
 let theme = localStorage.getItem(THEME_KEY) || "system";
@@ -77,6 +76,9 @@ function t(key) {
       pause: "Pause",
       next: "Next",
       closing: "Closing notes",
+      notePh: "Your thoughts",
+      keepHead: "Keep",
+      closeHead: "Close",
       noiseWhite: "White noise",
       noiseRain: "Rain",
       noiseOcean: "Ocean",
@@ -107,11 +109,11 @@ function t(key) {
       remindEnable: "Enable",
       remindIcs: "Add to phone calendar",
       "remindTitle-morning": "Ark · Morning",
-      "remindBody-morning": "Film, prayer, one passage. Then go out.",
+      "remindBody-morning": "Film, prayer, today's lesson. Then go out.",
       "remindTitle-day": "Ark · Day",
-      "remindBody-day": "Keep the course. One passage.",
+      "remindBody-day": "Keep the lesson. One act.",
       "remindTitle-night": "Ark · Night",
-      "remindBody-night": "One passage. A few true sentences, then quiet.",
+      "remindBody-night": "Close. One question, then quiet.",
       settingsTitle: "Settings",
       settingsBtn: "Settings",
       settingsLang: "Language",
@@ -156,6 +158,9 @@ function t(key) {
       pause: "Pausar",
       next: "Próximo",
       closing: "Notas de encerramento",
+      notePh: "Seus pensamentos",
+      keepHead: "Guarde",
+      closeHead: "Feche",
       noiseWhite: "Ruído branco",
       noiseRain: "Chuva",
       noiseOcean: "Oceano",
@@ -186,11 +191,11 @@ function t(key) {
       remindEnable: "Ativar",
       remindIcs: "Adicionar ao calendário do telefone",
       "remindTitle-morning": "Arca · Manhã",
-      "remindBody-morning": "Filme, oração, uma passagem. Depois saia.",
+      "remindBody-morning": "Filme, oração, a lição de hoje. Depois saia.",
       "remindTitle-day": "Arca · Dia",
-      "remindBody-day": "Mantenha o rumo. Uma passagem.",
+      "remindBody-day": "Guarde a lição. Um ato.",
       "remindTitle-night": "Arca · Noite",
-      "remindBody-night": "Uma passagem. Algumas frases verdadeiras, depois silêncio.",
+      "remindBody-night": "Feche. Uma pergunta, depois silêncio.",
       settingsTitle: "Configurações",
       settingsBtn: "Configurações",
       settingsLang: "Idioma",
@@ -242,27 +247,39 @@ function applyLang() {
     if (key) el.setAttribute("aria-label", t(key));
   });
   renderOurFather();
-  renderQuote();
+  renderLesson();
 }
 
-function pickShiftQuotes(dateKey) {
-  const list = typeof QUOTES !== "undefined" ? QUOTES : [];
-  const n = list.length;
-  const out = {};
-  if (!n) return out;
+function pickLesson(dateKey) {
+  const list = typeof LESSONS !== "undefined" ? LESSONS : [];
+  if (!list.length) return null;
   const key = dateKey || todayKey();
-  const used = [];
-  QUOTE_SHIFTS.forEach(function (shift) {
-    let i = hashStr(key + ":" + shift) % n;
-    let guard = 0;
-    while (used.indexOf(i) !== -1 && guard < n) {
-      i = (i + 1) % n;
-      guard++;
-    }
-    used.push(i);
-    out[shift] = list[i];
-  });
-  return out;
+  const a = Date.parse(FILM_EPOCH + "T00:00:00Z");
+  const b = Date.parse(key + "T00:00:00Z");
+  if (isNaN(a) || isNaN(b)) return list[0];
+  const days = Math.max(0, Math.round((b - a) / 86400000));
+  return list[days % list.length];
+}
+
+function lessonLoc(lesson) {
+  if (!lesson) return null;
+  if (lang === "pt" && lesson.pt)
+    return {
+      title: lesson.pt.title || lesson.title,
+      teach: lesson.pt.teach || lesson.teach,
+      keep: lesson.pt.keep || lesson.keep,
+      close: lesson.pt.close || lesson.close,
+    };
+  return lesson;
+}
+
+function lessonWitness(lesson) {
+  if (!lesson || !lesson.witness) return null;
+  const list = typeof QUOTES !== "undefined" ? QUOTES : [];
+  for (let i = 0; i < list.length; i++) {
+    if (list[i].id === lesson.witness) return list[i];
+  }
+  return null;
 }
 
 function quoteLoc(q) {
@@ -270,22 +287,25 @@ function quoteLoc(q) {
   return lang === "pt" && q.pt ? q.pt : q;
 }
 
-function renderQuote() {
-  const picked = pickShiftQuotes();
-  document.querySelectorAll("[data-quote]").forEach(function (el) {
-    const shift = el.getAttribute("data-quote");
-    const q = (shift && picked[shift]) || null;
-    if (!q) {
-      el.hidden = true;
-      return;
-    }
-    el.hidden = false;
-    const loc = quoteLoc(q);
-    const src = el.querySelector(".daily-quote-src");
-    const text = el.querySelector(".daily-quote-text");
-    if (src) src.textContent = loc.src || "";
-    if (text) text.textContent = loc.text || "";
-  });
+function setText(id, value) {
+  const el = document.getElementById(id);
+  if (el) el.textContent = value || "";
+}
+
+function renderLesson() {
+  const lesson = pickLesson();
+  const loc = lessonLoc(lesson);
+  const wit = quoteLoc(lessonWitness(lesson));
+  const morning = document.getElementById("lessonMorning");
+  if (morning) morning.hidden = !loc;
+  setText("lessonTitle", loc ? loc.title : "");
+  setText("lessonTeach", loc ? loc.teach : "");
+  setText("lessonSrc", wit ? wit.src : "");
+  setText("lessonText", wit ? wit.text : "");
+  setText("lessonKeep", loc ? loc.keep : "");
+  setText("lessonClose", loc ? loc.close : "");
+  const box = document.getElementById("lessonWitness");
+  if (box) box.hidden = !wit;
 }
 
 function renderOurFather() {
@@ -1284,29 +1304,32 @@ function renderLog() {
   }
   list.innerHTML = used
     .map((d) => {
-      const quotes = pickShiftQuotes(d.date);
-      const shiftSeen = {};
-      const passages = QUOTE_SHIFTS.map(function (shift) {
-        shiftSeen[shift] = true;
-        const q = quoteLoc(quotes[shift]);
-        const note = (d.notes && d.notes[shift]) || "";
-        let html = "";
-        if (q && q.src)
-          html +=
-            '<div class="log-entry"><div class="k">' +
-            t(SLOT_KEY[shift]) +
-            "</div><p>" +
-            esc(q.src) +
-            "</p></div>";
-        if (note.trim())
-          html +=
+      const lesson = pickLesson(d.date);
+      const pack = lessonLoc(lesson);
+      const wit = quoteLoc(lessonWitness(lesson));
+      const shiftSeen = { morning: true, day: true, night: true };
+      let passages = "";
+      if (pack && pack.title)
+        passages +=
+          '<div class="log-entry"><div class="k">' +
+          t("slotPassage") +
+          "</div><p>" +
+          esc(pack.title) +
+          (wit && wit.src ? " · " + esc(wit.src) : "") +
+          "</p></div>";
+      passages += ["morning", "day", "night"]
+        .map(function (shift) {
+          const note = (d.notes && d.notes[shift]) || "";
+          if (!note.trim()) return "";
+          return (
             '<div class="log-entry"><div class="k">' +
             t(SLOT_KEY[shift]) +
             "</div><p>" +
             esc(note) +
-            "</p></div>";
-        return html;
-      }).join("");
+            "</p></div>"
+          );
+        })
+        .join("");
       const body = Object.keys(SLOT_KEY)
         .map((slot) => {
           if (shiftSeen[slot]) return "";

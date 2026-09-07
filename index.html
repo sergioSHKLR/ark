@@ -42,18 +42,22 @@
             <p>And lead us not into temptation, but deliver us from evil: For thine is the kingdom, and the power, and the glory, for ever. Amen.</p>
           </div>
         </div>
-        <div class="daily-quote" data-quote="morning">
-          <p class="daily-quote-src"></p>
-          <p class="daily-quote-text"></p>
+        <div class="lesson" id="lessonMorning">
+          <h3 class="lesson-title" id="lessonTitle"></h3>
+          <p class="lesson-teach" id="lessonTeach"></p>
+          <div class="daily-quote" id="lessonWitness">
+            <p class="daily-quote-src" id="lessonSrc"></p>
+            <p class="daily-quote-text" id="lessonText"></p>
+          </div>
         </div>
         <label class="note-block">
-          <textarea class="note" data-slot="morning" rows="4"></textarea>
+          <textarea class="note" data-slot="morning" rows="4" data-i18n-placeholder="notePh"></textarea>
         </label>
       </section>
       <section class="pane" id="pane-day" hidden>
-        <div class="daily-quote" data-quote="day">
-          <p class="daily-quote-src"></p>
-          <p class="daily-quote-text"></p>
+        <div class="lesson lesson-keep">
+          <h3 data-i18n="keepHead">Keep</h3>
+          <p id="lessonKeep"></p>
         </div>
         <div class="desk">
           <h3 data-i18n="desk">Desk</h3>
@@ -68,17 +72,17 @@
           <p class="desk-foot" id="chantFoot"></p>
         </div>
         <label class="note-block">
-          <textarea class="note" data-slot="day" rows="4"></textarea>
+          <textarea class="note" data-slot="day" rows="4" data-i18n-placeholder="notePh"></textarea>
         </label>
       </section>
       <section class="pane" id="pane-night" hidden>
-        <div class="daily-quote" data-quote="night">
-          <p class="daily-quote-src"></p>
-          <p class="daily-quote-text"></p>
+        <div class="lesson lesson-close">
+          <h3 data-i18n="closeHead">Close</h3>
+          <p id="lessonClose"></p>
         </div>
         <label class="note-block">
           <span data-i18n="closing">Closing notes</span>
-          <textarea class="note night" data-slot="night" rows="8"></textarea>
+          <textarea class="note night" data-slot="night" rows="8" data-i18n-placeholder="notePh"></textarea>
         </label>
         <div class="sleep-row">
           <select id="noiseSelect" class="select-input">
@@ -121,7 +125,7 @@
         </div>
         <div class="modal-body" id="mBody"></div>
         <label class="note-block modal-note">
-          <textarea class="note" id="modalNote" rows="4"></textarea>
+          <textarea class="note" id="modalNote" rows="4" data-i18n-placeholder="notePh"></textarea>
         </label>
       </div>
     </div>
@@ -176,7 +180,7 @@
           </button>
         </div>
         <div class="build-block">
-          <p class="remind-note" id="buildLine">Build 56</p>
+          <p class="remind-note" id="buildLine">Build 57</p>
           <p class="remind-note" id="buildStatus"></p>
           <button type="button" class="remind-ics" id="buildReload" hidden>
             Reload to update
@@ -187,6 +191,7 @@
     <script src="drive-config.js"></script>
     <script src="readings.js"></script>
     <script src="quotes.js"></script>
+    <script src="lessons.js"></script>
     <script src="scriptures.js"></script>
     <script src="app.js"></script>
   </body>

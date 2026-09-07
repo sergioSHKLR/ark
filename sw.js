@@ -1,4 +1,4 @@
-const CACHE_VERSION = "noah-protocol-v56";
+const CACHE_VERSION = "noah-protocol-v57";
 const ASSETS_TO_CACHE = [
   "./",
   "./index.html",
@@ -6,6 +6,7 @@ const ASSETS_TO_CACHE = [
   "./app.js",
   "./readings.js",
   "./quotes.js",
+  "./lessons.js",
   "./scriptures.js",
   "./drive-config.js",
   "./films.json",
