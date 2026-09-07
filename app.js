@@ -7,7 +7,7 @@ const DRIVE_SYNC_KEY = "noah-drive-synced";
 const DRIVE_FILE_NAME = "ark-journal.json";
 const DRIVE_SCOPE = "https://www.googleapis.com/auth/drive.appdata";
 const FILM_EPOCH = "2026-09-06";
-const APP_BUILD = 54;
+const APP_BUILD = 55;
 const DAY_TZ = "America/Sao_Paulo";
 const DRIVE_CONSENT_KEY = "noah-drive-consented";
 
@@ -912,6 +912,37 @@ function sizeChantWave() {
   if (c.height !== h) c.height = h;
 }
 
+function chantBarCount(width) {
+  return Math.max(28, Math.min(52, Math.floor(width / 12)));
+}
+
+function chantBarLevels(n) {
+  const levels = new Float32Array(n);
+  if (!chantPlaying) return levels;
+  if (chantAnalyser && chantLoaded && chantMode === "local") {
+    const buf = new Uint8Array(chantAnalyser.frequencyBinCount);
+    chantAnalyser.getByteFrequencyData(buf);
+    const usable = Math.max(n, Math.floor(buf.length * 0.42));
+    for (let i = 0; i < n; i++) {
+      const a = Math.floor((i / n) * usable);
+      const b = Math.max(a + 1, Math.floor(((i + 1) / n) * usable));
+      let sum = 0;
+      for (let k = a; k < b; k++) sum += buf[k];
+      levels[i] = sum / (b - a) / 255;
+    }
+    return levels;
+  }
+  const t = Date.now() / 1000;
+  for (let i = 0; i < n; i++) {
+    const pos = i / Math.max(1, n - 1);
+    const band = Math.exp(-Math.pow((pos - 0.16) / 0.4, 2));
+    const slow = 0.5 + 0.5 * Math.sin(t * 0.58 + i * 0.29);
+    const pulse = 0.5 + 0.5 * Math.sin(t * 1.41 + i * 0.87);
+    levels[i] = Math.max(0.04, band * (0.22 + 0.52 * slow + 0.26 * pulse));
+  }
+  return levels;
+}
+
 function drawChantWave() {
   const c = document.getElementById("chantWave");
   if (!c) return;
@@ -920,42 +951,49 @@ function drawChantWave() {
   if (!ctx) return;
   const w = c.width;
   const h = c.height;
-  ctx.clearRect(0, 0, w, h);
+  const mid = h / 2;
   const style = getComputedStyle(document.body);
-  ctx.strokeStyle = (style.getPropertyValue("--ink") || "#2a2118").trim();
-  ctx.globalAlpha = chantPlaying ? 0.85 : 0.35;
-  ctx.lineWidth = Math.max(1, w / 420);
+  const ink = (style.getPropertyValue("--ink") || "#2a2118").trim();
+  const gold = (style.getPropertyValue("--gold-deep") || "#6a5228").trim();
+  ctx.clearRect(0, 0, w, h);
+  ctx.globalAlpha = chantPlaying ? 0.55 : 0.7;
+  ctx.strokeStyle = ink;
+  ctx.lineWidth = Math.max(1, w / 640);
   ctx.beginPath();
-  if (chantAnalyser && chantLoaded && chantMode === "local") {
-    const buf = new Uint8Array(chantAnalyser.fftSize);
-    chantAnalyser.getByteTimeDomainData(buf);
-    for (let i = 0; i < buf.length; i++) {
-      const x = (i / (buf.length - 1)) * w;
-      const y = (buf[i] / 255) * h;
-      if (i) ctx.lineTo(x, y);
-      else ctx.moveTo(x, y);
-    }
-  } else {
-    const t = Date.now() / 900;
-    const amp = chantPlaying ? 0.2 : 0.045;
-    const steps = 80;
-    for (let i = 0; i <= steps; i++) {
-      const x = (i / steps) * w;
-      const y =
-        h / 2 +
-        Math.sin(t + i * 0.28) * h * amp +
-        Math.sin(t * 0.37 + i * 0.11) * h * amp * 0.55;
-      if (i) ctx.lineTo(x, y);
-      else ctx.moveTo(x, y);
-    }
-  }
+  ctx.moveTo(0, mid);
+  ctx.lineTo(w, mid);
   ctx.stroke();
+  if (chantPlaying) {
+    const n = chantBarCount(w);
+    const levels = chantBarLevels(n);
+    const gap = Math.max(1, w / 320);
+    const slot = w / n;
+    const barW = Math.max(1, slot - gap);
+    ctx.fillStyle = gold;
+    ctx.globalAlpha = 0.92;
+    for (let i = 0; i < n; i++) {
+      const amp = Math.max(0, levels[i]) * (h * 0.42);
+      const x = i * slot + (slot - barW) / 2;
+      ctx.fillRect(x, mid - amp, barW, Math.max(ctx.lineWidth, amp * 2));
+    }
+    ctx.globalAlpha = 1;
+    chantWaveRaf = requestAnimationFrame(drawChantWave);
+    return;
+  }
   ctx.globalAlpha = 1;
-  chantWaveRaf = requestAnimationFrame(drawChantWave);
+  chantWaveRaf = 0;
 }
 
 function startChantWave() {
   if (chantWaveRaf) return;
+  drawChantWave();
+}
+
+function haltChantWave() {
+  if (chantWaveRaf) {
+    cancelAnimationFrame(chantWaveRaf);
+    chantWaveRaf = 0;
+  }
   drawChantWave();
 }
 
@@ -987,6 +1025,7 @@ function pauseChant() {
   else chantYtCommand("pauseVideo");
   chantPlaying = false;
   updateChantButton();
+  haltChantWave();
 }
 
 function playChant() {
@@ -1001,12 +1040,14 @@ function playChant() {
     audio.play().catch(function () {});
     chantPlaying = true;
     updateChantButton();
+    startChantWave();
     return;
   }
   if (iframe && iframe.src) {
     chantYtCommand("playVideo");
     chantPlaying = true;
     updateChantButton();
+    startChantWave();
     return;
   }
   renderChant(true);
@@ -1021,7 +1062,8 @@ function hookChantAnalyser(audio) {
     if (chantAudioCtx.state === "suspended") chantAudioCtx.resume();
     const src = chantAudioCtx.createMediaElementSource(audio);
     chantAnalyser = chantAudioCtx.createAnalyser();
-    chantAnalyser.fftSize = 256;
+    chantAnalyser.fftSize = 512;
+    chantAnalyser.smoothingTimeConstant = 0.78;
     src.connect(chantAnalyser);
     chantAnalyser.connect(chantAudioCtx.destination);
   } catch (e) {
@@ -1114,6 +1156,9 @@ async function initChant() {
       if (chantPlaying) pauseChant();
       else playChant();
     });
+  window.addEventListener("resize", function () {
+    if (!chantWaveRaf) drawChantWave();
+  });
   renderChant(false);
 }
 
@@ -1578,6 +1623,7 @@ function bindSettings() {
         x.classList.toggle("active", x.getAttribute("data-theme-choice") === theme);
       });
       applyTheme();
+      if (!chantWaveRaf) drawChantWave();
     });
   });
 }
