@@ -1,4 +1,4 @@
-const CACHE_VERSION = "noah-protocol-v47";
+const CACHE_VERSION = "noah-protocol-v48";
 const ASSETS_TO_CACHE = [
   "./",
   "./index.html",
@@ -10,6 +10,9 @@ const ASSETS_TO_CACHE = [
   "./films.json",
   "./manifest.json",
   "./manifest-pt.json",
+  "./play.html",
+  "./icons/shortcut-chant-96.png",
+  "./icons/shortcut-chant-192.png",
   "./icons/favicon.svg",
   "./icons/favicon.ico",
   "./icons/icon-192.png",

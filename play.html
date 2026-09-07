@@ -1,0 +1,26 @@
+<!doctype html>
+<html lang="en" dir="ltr">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+    <title>Chant</title>
+    <link rel="icon" href="icons/shortcut-chant-192.png" type="image/png" />
+    <link rel="apple-touch-icon" href="icons/shortcut-chant-192.png" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-title" content="Chant" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black" />
+    <meta name="theme-color" content="#000000" />
+    <link rel="stylesheet" href="app.css" />
+  </head>
+  <body>
+    <script>
+      try {
+        if (localStorage.getItem("noah-lang") === "pt") {
+          document.title = "Canto";
+          document.documentElement.lang = "pt-BR";
+        }
+      } catch (e) {}
+      location.replace("./?pane=day&play=chant");
+    </script>
+  </body>
+</html>
