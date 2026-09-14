@@ -5,11 +5,13 @@ const DRIVE_FILE_KEY = "noah-drive-file-id";
 const DRIVE_SYNC_KEY = "noah-drive-synced";
 const DRIVE_FILE_NAME = "ark-journal.json";
 let DRIVE_SCOPE = typeof SCOPE_FILE !== "undefined" ? SCOPE_FILE : "https://www.googleapis.com/auth/drive.file https://www.googleapis.com/auth/drive.appdata";
-const APP_BUILD = 58;
+const APP_BUILD = 59;
 const DRIVE_CONSENT_KEY = "noah-drive-consented";
 
 let driveToken = "";
 let driveEscalated = false;
+let driveAuthBusy = false;
+let drivePromptConsent = false;
 let theme = localStorage.getItem(THEME_KEY) || "system";
 if (theme !== "light" && theme !== "dark") theme = "system";
 let filmList = [];
@@ -261,6 +263,8 @@ function driveClientId() {
 function setDriveStatus(msg) {
   const el = document.getElementById("driveStatus");
   if (el) el.textContent = msg || "";
+  const gate = document.getElementById("connectStatus");
+  if (gate) gate.textContent = msg || "";
 }
 
 function formatSyncAt() {
@@ -548,12 +552,16 @@ function bindJournalRefresh() {
 }
 
 function handleDriveSetupError(err) {
-  if (!driveEscalated && typeof driveNeedsWiderScope === "function" && driveNeedsWiderScope(err)) {
-    driveEscalated = true;
-    DRIVE_SCOPE = SCOPE_FULL;
-    tokenClient = null;
+  driveAuthBusy = false;
+  if (typeof driveNeedsWiderScope === "function" && driveNeedsWiderScope(err)) {
+    drivePromptConsent = true;
+    if (driveEscalated) {
+      DRIVE_SCOPE = SCOPE_FULL;
+      tokenClient = null;
+    } else driveEscalated = true;
     driveToken = "";
-    connectDrive(false);
+    setDriveStatus(t("driveNeedConsent"));
+    showConnectGate();
     return;
   }
   setDriveStatus(t("driveErr"));
@@ -568,8 +576,10 @@ function onJournalReady() {
 }
 
 function onDriveToken(resp, fromSilent) {
+  driveAuthBusy = false;
   if (resp && resp.access_token) {
     driveToken = resp.access_token;
+    drivePromptConsent = false;
     localStorage.setItem(DRIVE_CONSENT_KEY, "1");
     setDriveStatus(t("driveOnSave"));
     ensureDriveJournal()
@@ -601,7 +611,10 @@ async function ensureTokenClient() {
     client_id: id,
     scope: DRIVE_SCOPE,
     callback: (resp) => onDriveToken(resp, false),
-    error_callback: function () {},
+    error_callback: function () {
+      driveAuthBusy = false;
+      if (!driveToken) showConnectGate();
+    },
   });
   tokenClient._arkId = id;
   tokenClient._arkScope = DRIVE_SCOPE;
@@ -614,6 +627,7 @@ async function connectDrive(silent) {
     if (!silent) setDriveStatus(t("driveNeedId"));
     return;
   }
+  if (driveAuthBusy) return;
   try {
     await ensureTokenClient();
   } catch (e) {
@@ -621,9 +635,14 @@ async function connectDrive(silent) {
     return;
   }
   tokenClient.callback = (resp) => onDriveToken(resp, !!silent);
-  tokenClient.requestAccessToken({
-    prompt: silent || driveToken ? "" : "consent",
-  });
+  const prompt = !silent && drivePromptConsent ? "consent" : "";
+  driveAuthBusy = true;
+  try {
+    tokenClient.requestAccessToken({ prompt: prompt });
+  } catch (e) {
+    driveAuthBusy = false;
+    if (!silent) setDriveStatus(t("driveNeedGis"));
+  }
 }
 
 function signOutDrive() {
@@ -1555,10 +1574,11 @@ function saveOffice(pane) {
         driveNeedsWiderScope(err)
       ) {
         driveEscalated = true;
+        drivePromptConsent = true;
         DRIVE_SCOPE = SCOPE_FULL;
         tokenClient = null;
-        driveToken = "";
-        connectDrive(false);
+        if (meta) meta.textContent = t("driveNeedConsent");
+        setDriveStatus(t("driveNeedConsent"));
         return;
       }
       if (meta) meta.textContent = t("driveErr");

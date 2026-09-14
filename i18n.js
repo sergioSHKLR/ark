@@ -128,7 +128,8 @@ const I18N = {
     closed: "closed",
     driveHintFolder:
       "Journal in your Drive folder Devotional_Journal, sheet Devotional_Entries. Connect once on each device. Notes upload when you tap Save during an open office — never after the window closes.",
-    driveOnSave: "Connected. Save during an open office. Sync now restores the log from the sheet.",
+    driveOnSave: "Connected. Save during an open office. Sync now restores the log from Drive.",
+    driveNeedConsent: "Google needs a new Drive permission. Tap Connect Drive once.",
     savedOk: "Saved.",
     attachNone: "No file chosen.",
     attachNamed: "Attached: {name}",
@@ -251,7 +252,8 @@ const I18N = {
     closed: "fechado",
     driveHintFolder:
       "Diário na pasta Devotional_Journal do seu Drive, planilha Devotional_Entries. Conecte uma vez em cada aparelho. As notas sobem quando você toca em Guardar durante um ofício aberto — nunca depois que a janela fecha.",
-    driveOnSave: "Conectado. Guarde durante um ofício aberto. Sincronizar agora restaura o diário da planilha.",
+    driveOnSave: "Conectado. Guarde durante um ofício aberto. Sincronizar agora restaura o diário do Drive.",
+    driveNeedConsent: "O Google pede uma nova permissão do Drive. Toque em Conectar Drive uma vez.",
     savedOk: "Guardado.",
     attachNone: "Nenhum arquivo.",
     attachNamed: "Anexo: {name}",
