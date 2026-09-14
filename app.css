@@ -73,23 +73,26 @@ textarea.note{display:block;width:100%;min-height:6.2rem;resize:vertical;backgro
 .closed-foot{font-size:0.95rem;font-style:italic;color:var(--ink-soft);border-top:1px solid var(--rule);padding-top:0.85rem;margin:0}
 .entry-block{margin:0 0 1.35rem}
 .entry-block>span{display:block;font-size:0.7rem;letter-spacing:0.16em;text-transform:uppercase;color:var(--gold-deep);margin-bottom:0.3rem;text-align:center}
-.entry-keys{display:grid;grid-template-columns:1fr 1fr;gap:0.5rem;margin-top:0.65rem}
+.entry-media{display:grid;grid-template-columns:1fr 1fr 1fr;gap:0.45rem;margin-top:0.65rem}
+.entry-media .key{width:100%;flex:none;font-size:0.62rem}
+.entry-keys{display:grid;grid-template-columns:1fr 1fr;gap:0.5rem;margin-top:0.5rem}
 .entry-keys .key{width:100%;flex:none}
 .key.ghost{background:var(--paper);color:var(--ink);border:1px solid var(--rule)}
+.key.is-recording{background:var(--rubric);color:var(--paper);border-color:var(--rubric)}
 .attach-name,.window-meta{font-style:italic;color:var(--ink-soft);text-align:center;margin-top:0.5rem;font-size:0.92rem;min-height:1.2em}
-.share-row{display:flex;justify-content:space-between;align-items:baseline;gap:0.75rem;margin-top:0.65rem}
-.share-link{appearance:none;background:none;border:0;padding:0;color:var(--rubric);font-style:italic;font-size:1rem;cursor:pointer;text-align:left}
-.marks-line{font-size:0.92rem;font-style:italic;color:var(--gold-deep);text-align:right}
+.marks-line{font-size:1.05rem;text-align:center;color:var(--gold-deep);margin-top:0.55rem;letter-spacing:0.04em}
 .share-kicker{text-align:center;font-style:italic;color:var(--rubric);margin:0 0 0.85rem}
 .share-modal-title{font-family:var(--font-display);font-style:normal;font-size:1.9rem;letter-spacing:0.02em;color:var(--ink)}
 .share-option{padding-bottom:0.75rem;margin-bottom:0.35rem;border-bottom:1px solid var(--rule)}
 .share-responses{margin:1.1rem 0 0.2rem;padding-top:0.85rem;border-top:1px solid var(--rule);text-align:center}
 .share-responses h3{font-size:0.68rem;font-weight:400;letter-spacing:0.18em;text-transform:uppercase;color:var(--gold-deep);margin:0 0 0.45rem}
-.share-responses .marks-line{display:block;text-align:center;letter-spacing:0.08em;text-transform:uppercase;font-style:normal;font-size:0.78rem}
+.share-responses .marks-line{display:block;text-align:center;letter-spacing:0.06em;font-style:normal;font-size:1.05rem}
 #shareComments:empty{display:none}
 #shareComments{margin-top:0.65rem;font-style:italic;color:var(--ink-soft);font-size:0.98rem}
 #shareComments p{margin:0 0 0.35rem}
-.share-link[hidden],.entry-block[data-locked] .entry-keys,.office-body[hidden]{display:none!important}
+.entry-block[data-locked] .entry-media,.entry-block[data-locked] [data-save],.office-body[hidden]{display:none!important}
+#shareClosed[hidden]{display:none!important}
+#shareClosed{margin:0.85rem 0 0}
 .entry-block[data-locked] textarea.note{background:var(--paper);opacity:0.92}
 .share-lead{font-size:1.05rem;font-style:italic;color:var(--rubric);margin-bottom:0.25rem}
 .share-check{display:flex;align-items:flex-start;gap:0.65rem;margin:0.85rem 0 1rem;text-align:left}

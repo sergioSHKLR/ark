@@ -5,7 +5,7 @@ const DRIVE_FILE_KEY = "noah-drive-file-id";
 const DRIVE_SYNC_KEY = "noah-drive-synced";
 const DRIVE_FILE_NAME = "ark-journal.json";
 let DRIVE_SCOPE = typeof SCOPE_FILE !== "undefined" ? SCOPE_FILE : "https://www.googleapis.com/auth/drive.file https://www.googleapis.com/auth/drive.appdata";
-const APP_BUILD = 60;
+const APP_BUILD = 61;
 const DRIVE_CONSENT_KEY = "noah-drive-consented";
 
 let driveToken = "";
@@ -1024,10 +1024,16 @@ function fillClosedCard(now) {
   body.innerHTML = "<p>" + esc(ended) + "</p><p>" + esc(opens) + "</p>";
   const foot = document.querySelector("#officeClosed .closed-foot");
   if (foot) foot.hidden = false;
+  const share = document.getElementById("shareClosed");
+  if (share) {
+    const can =
+      now.prevPeriod && periodHasEnded(now.date, now.prevPeriod, now);
+    share.hidden = !can;
+  }
 }
 
 function renderMarks() {
-  const line = t("marksLine", { amen: 0, light: 0 });
+  const line = t("marksLine", { pray: 0, heart: 0, up: 0 });
   document.querySelectorAll("[data-marks]").forEach(function (el) {
     el.textContent = line;
   });
@@ -1055,12 +1061,8 @@ function gateOfficeForm(pane, access) {
     } else meta.textContent = "";
   }
   if (share) {
-    const hasNote = !!(officeNoteText(pane) || "").trim();
-    share.hidden = !(access === "open" || (access === "past" && hasNote));
-    share.textContent =
-      access === "past" && hasNote ? t("shareReflection") : t("shareReading");
-    const row = share.closest(".share-row");
-    if (row) row.hidden = share.hidden;
+    share.hidden = !(access === "open" || access === "past");
+    share.textContent = t("shareTitle");
   }
 }
 
@@ -1510,6 +1512,132 @@ function bindJournal() {
 }
 
 const pendingFiles = { morning: null, day: null, night: null };
+let voiceRec = null;
+
+function attachKind(file) {
+  const type = (file && file.type) || "";
+  if (type.indexOf("image/") === 0) return "photo";
+  if (type.indexOf("video/") === 0) return "video";
+  if (type.indexOf("audio/") === 0) return "voice";
+  return "file";
+}
+
+function setPendingFile(pane, file) {
+  pendingFiles[pane] = file || null;
+  const label = document.getElementById("attachName-" + pane);
+  if (!label) return;
+  if (!file) {
+    label.textContent = "";
+    return;
+  }
+  const kind = attachKind(file);
+  const key =
+    kind === "photo"
+      ? "attachPhoto"
+      : kind === "video"
+        ? "attachVideo"
+        : kind === "voice"
+          ? "attachVoice"
+          : "attachNamed";
+  label.textContent = t(key, { name: file.name || "" });
+}
+
+function voiceMime() {
+  if (!window.MediaRecorder) return "";
+  const types = [
+    "audio/webm;codecs=opus",
+    "audio/webm",
+    "audio/mp4",
+    "audio/ogg",
+  ];
+  for (let i = 0; i < types.length; i++) {
+    if (MediaRecorder.isTypeSupported(types[i])) return types[i];
+  }
+  return "";
+}
+
+function voiceExt(mime) {
+  if (mime.indexOf("mp4") >= 0) return "m4a";
+  if (mime.indexOf("ogg") >= 0) return "ogg";
+  return "webm";
+}
+
+function voiceButton(pane) {
+  return document.querySelector('[data-voice="' + pane + '"]');
+}
+
+function stopVoice(keep) {
+  if (!voiceRec) return;
+  voiceRec.keep = !!keep;
+  try {
+    if (voiceRec.rec && voiceRec.rec.state !== "inactive") voiceRec.rec.stop();
+  } catch (e) {}
+}
+
+function startVoice(pane) {
+  const mime = voiceMime();
+  if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia || !mime) {
+    const input = document.getElementById("attach-audio-" + pane);
+    if (input) input.click();
+    return;
+  }
+  stopVoice(false);
+  navigator.mediaDevices
+    .getUserMedia({ audio: true })
+    .then(function (stream) {
+      const rec = new MediaRecorder(stream, { mimeType: mime });
+      const chunks = [];
+      voiceRec = { pane: pane, rec: rec, stream: stream, chunks: chunks, keep: true };
+      rec.ondataavailable = function (evt) {
+        if (evt.data && evt.data.size) chunks.push(evt.data);
+      };
+      rec.onstop = function () {
+        const keep = !voiceRec || voiceRec.keep;
+        voiceRec = null;
+        stream.getTracks().forEach(function (track) {
+          track.stop();
+        });
+        const btn = voiceButton(pane);
+        if (btn) {
+          btn.classList.remove("is-recording");
+          btn.textContent = t("voice");
+        }
+        if (!keep || !chunks.length) return;
+        const blob = new Blob(chunks, { type: mime });
+        const name =
+          "voice-" +
+          todayKey() +
+          "-" +
+          pane +
+          "." +
+          voiceExt(mime);
+        const file =
+          typeof File === "function"
+            ? new File([blob], name, { type: mime })
+            : blob;
+        if (!file.name) file.name = name;
+        setPendingFile(pane, file);
+      };
+      rec.start();
+      const btn = voiceButton(pane);
+      if (btn) {
+        btn.classList.add("is-recording");
+        btn.textContent = t("voiceStop");
+      }
+    })
+    .catch(function () {
+      const input = document.getElementById("attach-audio-" + pane);
+      if (input) input.click();
+    });
+}
+
+function toggleVoice(pane) {
+  if (voiceRec && voiceRec.pane === pane) {
+    stopVoice(true);
+    return;
+  }
+  startVoice(pane);
+}
 
 function saveOffice(pane) {
   const now = TIMENOW();
@@ -1550,6 +1678,7 @@ function saveOffice(pane) {
       j[k].updatedAt = new Date().toISOString();
       saveJournalSilent(j);
       clearDraft(k, period);
+      stopVoice(false);
       pendingFiles[pane] = null;
       const label = document.getElementById("attachName-" + pane);
       if (label) label.textContent = "";
@@ -1596,24 +1725,33 @@ function bindOfficeActions() {
       saveOffice(btn.getAttribute("data-save"));
     });
   });
-  document.querySelectorAll("[data-attach]").forEach(function (btn) {
+  document.querySelectorAll("[data-photo]").forEach(function (btn) {
     btn.addEventListener("click", function () {
-      const pane = btn.getAttribute("data-attach");
-      const input = document.getElementById("attach-" + pane);
+      const pane = btn.getAttribute("data-photo");
+      const input = document.getElementById("attach-photo-" + pane);
       if (input) input.click();
     });
   });
+  document.querySelectorAll("[data-video]").forEach(function (btn) {
+    btn.addEventListener("click", function () {
+      const pane = btn.getAttribute("data-video");
+      const input = document.getElementById("attach-video-" + pane);
+      if (input) input.click();
+    });
+  });
+  document.querySelectorAll("[data-voice]").forEach(function (btn) {
+    btn.addEventListener("click", function () {
+      toggleVoice(btn.getAttribute("data-voice"));
+    });
+  });
   ["morning", "day", "night"].forEach(function (pane) {
-    const input = document.getElementById("attach-" + pane);
-    if (!input) return;
-    input.addEventListener("change", function () {
-      pendingFiles[pane] =
-        input.files && input.files[0] ? input.files[0] : null;
-      const label = document.getElementById("attachName-" + pane);
-      if (label)
-        label.textContent = pendingFiles[pane]
-          ? t("attachNamed", { name: pendingFiles[pane].name })
-          : "";
+    ["photo", "video", "audio"].forEach(function (kind) {
+      const input = document.getElementById("attach-" + kind + "-" + pane);
+      if (!input) return;
+      input.addEventListener("change", function () {
+        const file = input.files && input.files[0] ? input.files[0] : null;
+        setPendingFile(pane, file);
+      });
     });
   });
 }
@@ -1642,6 +1780,7 @@ function tickOffice() {
   const now = TIMENOW();
   const stamp = now.date + "|" + (now.period || "gap");
   if (stamp === lastOfficeStamp) return;
+  stopVoice(false);
   const prev = lastOfficeStamp;
   lastOfficeStamp = stamp;
   if (prev && typeof dropClosedDrafts === "function") dropClosedDrafts(now);

@@ -104,7 +104,14 @@ const I18N = {
     morningHead: "Morning",
     shareTitle: "Share",
     responses: "Responses",
-    marksLine: "amen {amen} · light {light}",
+    marksLine: "🙏 {pray} · ❤️ {heart} · 👍 {up}",
+    photo: "Photo",
+    video: "Video",
+    voice: "Voice",
+    voiceStop: "Stop",
+    attachPhoto: "Photo ready.",
+    attachVideo: "Video ready.",
+    attachVoice: "Voice ready.",
     missStands: "The miss will stand in the log.",
     save: "Save",
     attach: "Attach",
@@ -236,7 +243,14 @@ const I18N = {
     morningHead: "Manhã",
     shareTitle: "Compartilhar",
     responses: "Respostas",
-    marksLine: "amém {amen} · luz {light}",
+    marksLine: "🙏 {pray} · ❤️ {heart} · 👍 {up}",
+    photo: "Foto",
+    video: "Vídeo",
+    voice: "Voz",
+    voiceStop: "Parar",
+    attachPhoto: "Foto pronta.",
+    attachVideo: "Vídeo pronto.",
+    attachVoice: "Voz pronta.",
     missStands: "A falta ficará no diário.",
     save: "Guardar",
     attach: "Anexar",
@@ -292,6 +306,8 @@ function applyLang() {
   document.documentElement.setAttribute("dir", "ltr");
   document.querySelectorAll("[data-i18n]").forEach(function (el) {
     if (el.id === "chantPlay" || el.id === "audioActionBtn") return;
+    if (el.getAttribute("data-voice") && el.classList.contains("is-recording"))
+      return;
     const key = el.getAttribute("data-i18n");
     if (!key) return;
     el.textContent = t(key);

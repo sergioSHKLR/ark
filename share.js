@@ -43,15 +43,24 @@ function sharePayload(includeNote) {
 
 function doSystemShare(includeNote) {
   const payload = sharePayload(includeNote);
+  const data = {
+    title: payload.title,
+    text: payload.text,
+  };
+  if (payload.url) data.url = payload.url;
+  const pane = sharePayload.pane;
+  const file = pane && pendingFiles[pane];
+  if (
+    file &&
+    navigator.canShare &&
+    navigator.canShare({ files: [file] })
+  )
+    data.files = [file];
   const canShare =
     navigator.share &&
-    (!navigator.canShare || navigator.canShare({ text: payload.text }));
+    (!navigator.canShare || navigator.canShare(data));
   const send = canShare
-    ? navigator.share({
-        title: payload.title,
-        text: payload.text,
-        url: payload.url,
-      })
+    ? navigator.share(data)
     : navigator.clipboard && navigator.clipboard.writeText
       ? navigator.clipboard.writeText(
           payload.title + "\n\n" + payload.text,
@@ -112,4 +121,11 @@ function bindShare() {
       openShareModal(pane, officeAccess(pane) === "past");
     });
   });
+  const closed = document.getElementById("shareClosed");
+  if (closed)
+    closed.addEventListener("click", function () {
+      const now = TIMENOW();
+      if (!now.prevPeriod) return;
+      openShareModal(periodToPane(now.prevPeriod), false);
+    });
 }

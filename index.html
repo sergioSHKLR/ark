@@ -33,6 +33,7 @@
         <h3 data-i18n="officeClosed">This office is closed.</h3>
         <div class="closed-body" id="officeClosedBody"></div>
         <p class="closed-foot" data-i18n="missStands">The miss will stand in the log.</p>
+        <button type="button" class="key connect-key" id="shareClosed" hidden data-i18n="shareTitle">Share</button>
       </div>
       <section class="pane" id="pane-morning" hidden>
         <div class="office-body">
@@ -66,17 +67,21 @@
           <div class="entry-block" data-entry="morning">
             <span data-i18n="yourEntry">Your entry</span>
             <textarea class="note" data-slot="morning" rows="4" data-i18n-placeholder="notePh"></textarea>
-            <input type="file" id="attach-morning" hidden />
+            <input type="file" id="attach-photo-morning" accept="image/*" hidden />
+            <input type="file" id="attach-video-morning" accept="video/*" hidden />
+            <input type="file" id="attach-audio-morning" accept="audio/*" hidden />
+            <div class="entry-media">
+              <button class="key ghost" type="button" data-photo="morning" data-i18n="photo">Photo</button>
+              <button class="key ghost" type="button" data-video="morning" data-i18n="video">Video</button>
+              <button class="key ghost" type="button" data-voice="morning" data-i18n="voice">Voice</button>
+            </div>
             <div class="entry-keys">
-              <button class="key ghost" type="button" data-attach="morning" data-i18n="attach">Attach</button>
               <button class="key" type="button" data-save="morning" data-i18n="save">Save</button>
+              <button class="key ghost" type="button" data-share="morning" data-i18n="shareTitle">Share</button>
             </div>
             <p class="attach-name" id="attachName-morning"></p>
             <p class="window-meta" data-window-meta="morning"></p>
-            <div class="share-row">
-              <button type="button" class="share-link" data-share="morning" data-i18n="shareReading">Share reading</button>
-              <span class="marks-line" data-marks></span>
-            </div>
+            <p class="marks-line" data-marks></p>
           </div>
         </div>
       </section>
@@ -94,17 +99,21 @@
           <div class="entry-block" data-entry="day">
             <span data-i18n="yourEntry">Your entry</span>
             <textarea class="note" data-slot="day" rows="4" data-i18n-placeholder="notePh"></textarea>
-            <input type="file" id="attach-day" hidden />
+            <input type="file" id="attach-photo-day" accept="image/*" hidden />
+            <input type="file" id="attach-video-day" accept="video/*" hidden />
+            <input type="file" id="attach-audio-day" accept="audio/*" hidden />
+            <div class="entry-media">
+              <button class="key ghost" type="button" data-photo="day" data-i18n="photo">Photo</button>
+              <button class="key ghost" type="button" data-video="day" data-i18n="video">Video</button>
+              <button class="key ghost" type="button" data-voice="day" data-i18n="voice">Voice</button>
+            </div>
             <div class="entry-keys">
-              <button class="key ghost" type="button" data-attach="day" data-i18n="attach">Attach</button>
               <button class="key" type="button" data-save="day" data-i18n="save">Save</button>
+              <button class="key ghost" type="button" data-share="day" data-i18n="shareTitle">Share</button>
             </div>
             <p class="attach-name" id="attachName-day"></p>
             <p class="window-meta" data-window-meta="day"></p>
-            <div class="share-row">
-              <button type="button" class="share-link" data-share="day" data-i18n="shareReading">Share reading</button>
-              <span class="marks-line" data-marks></span>
-            </div>
+            <p class="marks-line" data-marks></p>
           </div>
           <div class="desk">
             <h3 data-i18n="desk">Desk</h3>
@@ -130,17 +139,21 @@
           <div class="entry-block" data-entry="night">
             <span data-i18n="yourEntry">Your entry</span>
             <textarea class="note night" data-slot="night" rows="8" data-i18n-placeholder="notePh"></textarea>
-            <input type="file" id="attach-night" hidden />
+            <input type="file" id="attach-photo-night" accept="image/*" hidden />
+            <input type="file" id="attach-video-night" accept="video/*" hidden />
+            <input type="file" id="attach-audio-night" accept="audio/*" hidden />
+            <div class="entry-media">
+              <button class="key ghost" type="button" data-photo="night" data-i18n="photo">Photo</button>
+              <button class="key ghost" type="button" data-video="night" data-i18n="video">Video</button>
+              <button class="key ghost" type="button" data-voice="night" data-i18n="voice">Voice</button>
+            </div>
             <div class="entry-keys">
-              <button class="key ghost" type="button" data-attach="night" data-i18n="attach">Attach</button>
               <button class="key" type="button" data-save="night" data-i18n="save">Save</button>
+              <button class="key ghost" type="button" data-share="night" data-i18n="shareTitle">Share</button>
             </div>
             <p class="attach-name" id="attachName-night"></p>
             <p class="window-meta" data-window-meta="night"></p>
-            <div class="share-row">
-              <button type="button" class="share-link" data-share="night" data-i18n="shareReading">Share reading</button>
-              <span class="marks-line" data-marks></span>
-            </div>
+            <p class="marks-line" data-marks></p>
           </div>
           <div class="sleep-row">
             <select id="noiseSelect" class="select-input">
@@ -275,7 +288,7 @@
           </button>
         </div>
         <div class="build-block">
-          <p class="remind-note" id="buildLine">Build 60</p>
+          <p class="remind-note" id="buildLine">Build 61</p>
           <p class="remind-note" id="buildStatus"></p>
           <button type="button" class="remind-ics" id="buildReload" hidden>
             Reload to update
