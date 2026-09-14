@@ -1,17 +1,15 @@
 const STORE = "noah-journal-v2";
-const LANG_KEY = "noah-lang";
 const THEME_KEY = "noah-theme";
 const DRIVE_CLIENT_KEY = "noah-drive-client-id";
 const DRIVE_FILE_KEY = "noah-drive-file-id";
 const DRIVE_SYNC_KEY = "noah-drive-synced";
 const DRIVE_FILE_NAME = "ark-journal.json";
-const DRIVE_SCOPE = "https://www.googleapis.com/auth/drive.appdata";
-const FILM_EPOCH = "2026-09-06";
-const APP_BUILD = 57;
-const DAY_TZ = "America/Sao_Paulo";
+let DRIVE_SCOPE = typeof SCOPE_FILE !== "undefined" ? SCOPE_FILE : "https://www.googleapis.com/auth/drive.file https://www.googleapis.com/auth/drive.appdata";
+const APP_BUILD = 58;
 const DRIVE_CONSENT_KEY = "noah-drive-consented";
 
-let lang = localStorage.getItem(LANG_KEY) === "pt" ? "pt" : "en";
+let driveToken = "";
+let driveEscalated = false;
 let theme = localStorage.getItem(THEME_KEY) || "system";
 if (theme !== "light" && theme !== "dark") theme = "system";
 let filmList = [];
@@ -59,253 +57,41 @@ function applyAppName() {
 }
 applyAppName();
 
-function t(key) {
-  const pack = {
-    en: {
-      subtitle: "The Noah Protocol",
-      filmHead: "Today's film",
-      filmFoot: "Watch first. Then the prayer.",
-      filmCaption: "English picture. Turn on captions.",
-      desk: "Desk",
-      deskLead: "Latin chant while you work. No English, no Portuguese, no drums. Local files replace YouTube when you add them.",
-      chantRest: "Chant at rest",
-      chantLocal: "Playing local files from audio/",
-      chantYt: "YouTube (temporary). Add audio/playlist.json to go offline.",
-      prev: "Prev",
-      play: "Play",
-      pause: "Pause",
-      next: "Next",
-      closing: "Closing notes",
-      notePh: "Your thoughts",
-      keepHead: "Keep",
-      closeHead: "Close",
-      noiseWhite: "White noise",
-      noiseRain: "Rain",
-      noiseOcean: "Ocean",
-      noiseCrickets: "Crickets",
-      logTitle: "The log",
-      logEmpty: "The log fills as you write. Come back tomorrow.",
-      statDays: "Days",
-      statStreak: "In a row",
-      statChars: "Characters",
-      navMorning: "Morning",
-      navDay: "Day",
-      navNight: "Night",
-      navLog: "Log",
-      navAria: "The day",
-      slotMorning: "Morning",
-      slotDay: "Day",
-      slotPray: "Prayer",
-      slotReading: "Reading",
-      slotForum: "The Forum",
-      slotTongue: "The tongue",
-      slotWife: "The marriage",
-      slotTable: "The table",
-      slotWork: "The hands",
-      slotNight: "Night",
-      slotPassage: "Passage",
-      remindHead: "Bells",
-      remindNote: "Set a time for morning, day, and night. While this app is open it can ring. Add the calendar file so the phone still rings when the app is closed.",
-      remindEnable: "Enable",
-      remindIcs: "Add to phone calendar",
-      "remindTitle-morning": "Ark · Morning",
-      "remindBody-morning": "Film, prayer, today's lesson. Then go out.",
-      "remindTitle-day": "Ark · Day",
-      "remindBody-day": "Keep the lesson. One act.",
-      "remindTitle-night": "Ark · Night",
-      "remindBody-night": "Close. One question, then quiet.",
-      settingsTitle: "Settings",
-      settingsBtn: "Settings",
-      settingsLang: "Language",
-      settingsTheme: "Theme",
-      themeSystem: "System",
-      themeLight: "Light",
-      themeDark: "Dark",
-      settingsDrive: "Google Drive",
-      driveHint:
-        "Private journal in Drive app data — it will not appear in My Drive. Connect once on each device. Notes upload when you tap Sync now, or when you leave the page. After a sync, the line below shows a time and how many days came through.",
-      driveEmpty:
-        "Synced, but no notes came through. On the phone, reload this update and tap Sync now first. Then sync here.",
-      driveClient: "OAuth client ID",
-      driveConnect: "Connect Drive",
-      driveSync: "Sync now",
-      driveSignOut: "Sign out",
-      driveOff: "Not connected.",
-      driveOn: "Connected. Sync after you write, or tap Sync now.",
-      driveNeedId: "Paste a Web OAuth client ID first.",
-      driveNeedGis: "Could not load Google sign-in.",
-      driveOk: "Synced.",
-      driveErr: "Sync failed.",
-      buildLabel: "Build",
-      buildCurrent: "This copy is up to date.",
-      buildUpdate: "A newer build is on the server.",
-      buildReload: "Reload to update",
-      buildUnknown: "Could not check for a newer build.",
-      buildOffline: "Offline. Could not check.",
-    },
-    pt: {
-      subtitle: "O Protocolo de Noé",
-      filmHead: "O filme de hoje",
-      filmFoot: "Assista primeiro. Depois a oração.",
-      filmCaption: "Vídeo em inglês. Ligue as legendas.",
-      desk: "Mesa",
-      deskLead: "Canto em latim enquanto você trabalha. Sem inglês, sem português, sem tambores. Arquivos locais substituem o YouTube quando você os adiciona.",
-      chantRest: "Canto em pausa",
-      chantLocal: "Reproduzindo arquivos locais em audio/",
-      chantYt: "YouTube (provisório). Coloque audio/playlist.json para ficar offline.",
-      prev: "Anterior",
-      play: "Tocar",
-      pause: "Pausar",
-      next: "Próximo",
-      closing: "Notas de encerramento",
-      notePh: "Seus pensamentos",
-      keepHead: "Guarde",
-      closeHead: "Feche",
-      noiseWhite: "Ruído branco",
-      noiseRain: "Chuva",
-      noiseOcean: "Oceano",
-      noiseCrickets: "Grilos",
-      logTitle: "O diário",
-      logEmpty: "O diário enche quando você escreve. Volte amanhã.",
-      statDays: "Dias",
-      statStreak: "Seguidos",
-      statChars: "Caracteres",
-      navMorning: "Manhã",
-      navDay: "Dia",
-      navNight: "Noite",
-      navLog: "Diário",
-      navAria: "O dia",
-      slotMorning: "Manhã",
-      slotDay: "Dia",
-      slotPray: "Oração",
-      slotReading: "Leitura",
-      slotForum: "O Fórum",
-      slotTongue: "A língua",
-      slotWife: "O casamento",
-      slotTable: "A mesa",
-      slotWork: "As mãos",
-      slotNight: "Noite",
-      slotPassage: "Passagem",
-      remindHead: "Sinos",
-      remindNote: "Marque um horário para manhã, dia e noite. Com o aplicativo aberto, ele pode tocar. Adicione o arquivo de calendário para o telefone tocar mesmo com o aplicativo fechado.",
-      remindEnable: "Ativar",
-      remindIcs: "Adicionar ao calendário do telefone",
-      "remindTitle-morning": "Arca · Manhã",
-      "remindBody-morning": "Filme, oração, a lição de hoje. Depois saia.",
-      "remindTitle-day": "Arca · Dia",
-      "remindBody-day": "Guarde a lição. Um ato.",
-      "remindTitle-night": "Arca · Noite",
-      "remindBody-night": "Feche. Uma pergunta, depois silêncio.",
-      settingsTitle: "Configurações",
-      settingsBtn: "Configurações",
-      settingsLang: "Idioma",
-      settingsTheme: "Tema",
-      themeSystem: "Sistema",
-      themeLight: "Claro",
-      themeDark: "Escuro",
-      settingsDrive: "Google Drive",
-      driveHint:
-        "Diário privado nos dados do app no Drive — não aparece em Meu Drive. Conecte uma vez em cada aparelho. As notas sobem quando você toca em Sincronizar agora, ou quando sai da página. Depois de sincronizar, a linha abaixo mostra o horário e quantos dias chegaram.",
-      driveEmpty:
-        "Sincronizado, mas nenhuma nota chegou. No celular, recarregue esta atualização e toque em Sincronizar agora. Depois sincronize aqui.",
-      driveClient: "Client ID OAuth",
-      driveConnect: "Conectar Drive",
-      driveSync: "Sincronizar agora",
-      driveSignOut: "Sair",
-      driveOff: "Não conectado.",
-      driveOn: "Conectado. Sincronize depois de escrever, ou toque em Sincronizar agora.",
-      driveNeedId: "Cole primeiro um client ID OAuth da Web.",
-      driveNeedGis: "Não foi possível carregar o login Google.",
-      driveOk: "Sincronizado.",
-      driveErr: "A sincronização falhou.",
-      buildLabel: "Versão",
-      buildCurrent: "Esta cópia está atualizada.",
-      buildUpdate: "Há uma versão mais nova no servidor.",
-      buildReload: "Recarregar para atualizar",
-      buildUnknown: "Não foi possível verificar se há versão nova.",
-      buildOffline: "Sem rede. Não foi possível verificar.",
-    },
-  };
-  return (pack[lang] && pack[lang][key]) || pack.en[key] || key;
-}
-
-function applyLang() {
-  document.documentElement.lang = lang === "pt" ? "pt-BR" : "en";
-  document.documentElement.setAttribute("dir", "ltr");
-  document.querySelectorAll("[data-i18n]").forEach(function (el) {
-    if (el.id === "chantPlay" || el.id === "audioActionBtn") return;
-    const key = el.getAttribute("data-i18n");
-    if (!key) return;
-    el.textContent = t(key);
-  });
-  document.querySelectorAll("[data-i18n-placeholder]").forEach(function (el) {
-    const key = el.getAttribute("data-i18n-placeholder");
-    if (key) el.placeholder = t(key);
-  });
-  document.querySelectorAll("[data-i18n-aria]").forEach(function (el) {
-    const key = el.getAttribute("data-i18n-aria");
-    if (key) el.setAttribute("aria-label", t(key));
-  });
-  renderOurFather();
-  renderLesson();
-}
-
-function pickLesson(dateKey) {
-  const list = typeof LESSONS !== "undefined" ? LESSONS : [];
-  if (!list.length) return null;
-  const key = dateKey || todayKey();
-  const a = Date.parse(FILM_EPOCH + "T00:00:00Z");
-  const b = Date.parse(key + "T00:00:00Z");
-  if (isNaN(a) || isNaN(b)) return list[0];
-  const days = Math.max(0, Math.round((b - a) / 86400000));
-  return list[days % list.length];
-}
-
-function lessonLoc(lesson) {
-  if (!lesson) return null;
-  if (lang === "pt" && lesson.pt)
-    return {
-      title: lesson.pt.title || lesson.title,
-      teach: lesson.pt.teach || lesson.teach,
-      keep: lesson.pt.keep || lesson.keep,
-      close: lesson.pt.close || lesson.close,
-    };
-  return lesson;
-}
-
-function lessonWitness(lesson) {
-  if (!lesson || !lesson.witness) return null;
-  const list = typeof QUOTES !== "undefined" ? QUOTES : [];
-  for (let i = 0; i < list.length; i++) {
-    if (list[i].id === lesson.witness) return list[i];
-  }
-  return null;
-}
-
-function quoteLoc(q) {
-  if (!q) return null;
-  return lang === "pt" && q.pt ? q.pt : q;
-}
-
 function setText(id, value) {
   const el = document.getElementById(id);
   if (el) el.textContent = value || "";
 }
 
 function renderLesson() {
-  const lesson = pickLesson();
+  const signed = !!driveToken;
+  const lesson = signed ? pickLesson() : null;
   const loc = lessonLoc(lesson);
   const wit = quoteLoc(lessonWitness(lesson));
+  const morningOk = signed && officeAccess("morning") !== "future";
+  const dayOk = signed && officeAccess("day") !== "future";
+  const nightOk = signed && officeAccess("night") !== "future";
   const morning = document.getElementById("lessonMorning");
-  if (morning) morning.hidden = !loc;
-  setText("lessonTitle", loc ? loc.title : "");
-  setText("lessonTeach", loc ? loc.teach : "");
-  setText("lessonSrc", wit ? wit.src : "");
-  setText("lessonText", wit ? wit.text : "");
-  setText("lessonKeep", loc ? loc.keep : "");
-  setText("lessonClose", loc ? loc.close : "");
+  if (morning) morning.hidden = !loc || !morningOk;
+  setText("lessonTitle", morningOk && loc ? loc.title : "");
+  setText("lessonTeach", morningOk && loc ? loc.teach : "");
+  setText("lessonSrc", morningOk && wit ? wit.src : "");
+  setText("lessonText", morningOk && wit ? wit.text : "");
+  setText("lessonKeep", dayOk && loc ? loc.keep : "");
+  setText("lessonClose", nightOk && loc ? loc.close : "");
   const box = document.getElementById("lessonWitness");
-  if (box) box.hidden = !wit;
+  if (box) box.hidden = !wit || !morningOk;
+  const film = document.getElementById("morningFilm");
+  if (film) film.hidden = !morningOk;
+  const father = document.getElementById("ourFather");
+  if (father) father.hidden = !morningOk;
+  const desk = document.querySelector("#pane-day .desk");
+  if (desk) desk.hidden = !dayOk;
+  const keep = document.querySelector("#pane-day .lesson-keep");
+  if (keep) keep.hidden = !dayOk;
+  const close = document.querySelector("#pane-night .lesson-close");
+  if (close) close.hidden = !nightOk;
+  const sleep = document.querySelector("#pane-night .sleep-row");
+  if (sleep) sleep.hidden = !nightOk;
 }
 
 function renderOurFather() {
@@ -388,6 +174,13 @@ function renderFilm() {
   const footEl = document.getElementById("filmFoot");
   const mount = document.getElementById("filmMount");
   if (!titleEl || !mount) return;
+  if (!driveToken || officeAccess("morning") === "future") {
+    titleEl.textContent = "";
+    if (refEl) refEl.textContent = "";
+    if (footEl) footEl.textContent = "";
+    mount.innerHTML = "";
+    return;
+  }
   if (!film) {
     titleEl.textContent = "";
     if (refEl) refEl.textContent = "";
@@ -436,31 +229,6 @@ async function initFilm() {
   renderFilm();
 }
 
-function todayKey(d) {
-  const dt = d || new Date();
-  try {
-    const parts = new Intl.DateTimeFormat("en-CA", {
-      timeZone: DAY_TZ,
-      year: "numeric",
-      month: "2-digit",
-      day: "2-digit",
-    }).formatToParts(dt);
-    const get = (type) => {
-      const p = parts.find((x) => x.type === type);
-      return p ? p.value : "";
-    };
-    return get("year") + "-" + get("month") + "-" + get("day");
-  } catch (e) {
-    return (
-      dt.getFullYear() +
-      "-" +
-      String(dt.getMonth() + 1).padStart(2, "0") +
-      "-" +
-      String(dt.getDate()).padStart(2, "0")
-    );
-  }
-}
-
 function loadJournal() {
   try {
     return JSON.parse(localStorage.getItem(STORE) || "{}");
@@ -471,11 +239,9 @@ function loadJournal() {
 
 function saveJournal(data) {
   localStorage.setItem(STORE, JSON.stringify(data));
-  scheduleDriveSync();
   renderLog();
 }
 
-let driveToken = "";
 let driveSyncTimer = 0;
 let tokenClient = null;
 let driveBusy = false;
@@ -546,7 +312,7 @@ function markDriveOk() {
 
 function applyDriveLabels() {
   const map = [
-    ["driveHint", "driveHint"],
+    ["driveHint", "driveHintFolder"],
     ["driveConnect", "driveConnect"],
     ["driveSync", "driveSync"],
     ["driveSignOut", "driveSignOut"],
@@ -561,7 +327,7 @@ function applyDriveLabels() {
   if (head) head.textContent = t("settingsDrive");
   if (driveToken) {
     const when = formatSyncAt();
-    setDriveStatus(when ? t("driveOn") + " " + t("driveOk") + " " + when : t("driveOn"));
+    setDriveStatus(when ? t("driveOnSave") + " " + t("driveOk") + " " + when : t("driveOnSave"));
   } else setDriveStatus(t("driveOff"));
 }
 
@@ -764,49 +530,64 @@ function saveJournalSilent(data) {
   localStorage.setItem(STORE, JSON.stringify(data));
 }
 
-function scheduleDriveSync() {
-  if (!driveToken) return;
-  clearTimeout(driveSyncTimer);
-  driveSyncTimer = setTimeout(() => {
-    syncDrive()
-      .then(() => markDriveOk())
-      .catch(() => setDriveStatus(t("driveErr")));
-  }, 1200);
-}
+function scheduleDriveSync() {}
 
 function flushDriveSync() {
-  if (!driveToken) return;
-  clearTimeout(driveSyncTimer);
-  syncDrive()
-    .then(() => markDriveOk())
-    .catch(() => setDriveStatus(t("driveErr")));
+  dropClosedDrafts();
 }
 
 function bindJournalRefresh() {
-  const data = loadJournal();
-  const day = data[todayKey()] || { checks: {}, notes: {} };
-  document.querySelectorAll("[data-check]").forEach((box) => {
-    const key = box.getAttribute("data-check");
-    box.checked = !!day.checks[key];
-  });
-  document.querySelectorAll("textarea.note[data-slot]").forEach((area) => {
-    const slot = area.getAttribute("data-slot");
-    if (document.activeElement !== area) area.value = day.notes[slot] || "";
+  ["morning", "day", "night"].forEach(function (pane) {
+    const area = document.querySelector(
+      "#pane-" + pane + " textarea.note[data-slot]",
+    );
+    if (area && document.activeElement === area) return;
+    fillEntryFromStore(pane);
   });
   renderLog();
+}
+
+function handleDriveSetupError(err) {
+  if (!driveEscalated && typeof driveNeedsWiderScope === "function" && driveNeedsWiderScope(err)) {
+    driveEscalated = true;
+    DRIVE_SCOPE = SCOPE_FULL;
+    tokenClient = null;
+    driveToken = "";
+    connectDrive(false);
+    return;
+  }
+  setDriveStatus(t("driveErr"));
+  if (!driveToken) showConnectGate();
+}
+
+function onJournalReady() {
+  hideConnectGate();
+  applyDriveLabels();
+  markDriveOk();
+  showPane(landingPane());
 }
 
 function onDriveToken(resp, fromSilent) {
   if (resp && resp.access_token) {
     driveToken = resp.access_token;
     localStorage.setItem(DRIVE_CONSENT_KEY, "1");
-    setDriveStatus(t("driveOn"));
-    syncDrive()
-      .then(() => markDriveOk())
-      .catch(() => setDriveStatus(t("driveErr")));
+    setDriveStatus(t("driveOnSave"));
+    ensureDriveJournal()
+      .then(function () {
+        return migrateAppDataOnce();
+      })
+      .then(function () {
+        return migrateLocalOnce();
+      })
+      .then(function () {
+        return restoreEntries();
+      })
+      .then(onJournalReady)
+      .catch(handleDriveSetupError);
     return;
   }
   if (!fromSilent) setDriveStatus(t("driveErr"));
+  if (!driveToken) showConnectGate();
 }
 
 async function ensureTokenClient() {
@@ -814,7 +595,8 @@ async function ensureTokenClient() {
   if (!id) throw new Error("id");
   localStorage.setItem(DRIVE_CLIENT_KEY, id);
   await loadGis();
-  if (tokenClient && tokenClient._arkId === id) return tokenClient;
+  if (tokenClient && tokenClient._arkId === id && tokenClient._arkScope === DRIVE_SCOPE)
+    return tokenClient;
   tokenClient = google.accounts.oauth2.initTokenClient({
     client_id: id,
     scope: DRIVE_SCOPE,
@@ -822,6 +604,7 @@ async function ensureTokenClient() {
     error_callback: function () {},
   });
   tokenClient._arkId = id;
+  tokenClient._arkScope = DRIVE_SCOPE;
   return tokenClient;
 }
 
@@ -846,9 +629,9 @@ async function connectDrive(silent) {
 function signOutDrive() {
   const done = () => {
     driveToken = "";
-    localStorage.removeItem(DRIVE_FILE_KEY);
     localStorage.removeItem(DRIVE_CONSENT_KEY);
     setDriveStatus(t("driveOff"));
+    showConnectGate();
   };
   if (driveToken && window.google && google.accounts && google.accounts.oauth2) {
     google.accounts.oauth2.revoke(driveToken, done);
@@ -873,19 +656,23 @@ function bindDrive() {
   if (sync)
     sync.addEventListener("click", () => {
       if (!driveToken) return connectDrive(false);
-      syncDrive()
+      restoreEntries()
         .then(() => markDriveOk())
         .catch(() => setDriveStatus(t("driveErr")));
     });
   if (out) out.addEventListener("click", signOutDrive);
+  const main = document.getElementById("connectDriveMain");
+  if (main) main.addEventListener("click", () => connectDrive(false));
   document.addEventListener("visibilitychange", () => {
     if (document.hidden) flushDriveSync();
+    else tickOffice();
   });
   window.addEventListener("pagehide", flushDriveSync);
   applyDriveLabels();
   if (
     localStorage.getItem(DRIVE_CONSENT_KEY) === "1" ||
-    localStorage.getItem(DRIVE_FILE_KEY)
+    localStorage.getItem(DRIVE_FILE_KEY) ||
+    localStorage.getItem(DRIVE_FOLDER_KEY)
   )
     connectDrive(true);
 }
@@ -1178,14 +965,126 @@ async function initChant() {
   renderChant(false);
 }
 
-function showPane(name) {
-  document.querySelectorAll(".pane").forEach((p) => {
-    p.hidden = p.id !== "pane-" + name;
+function showConnectGate() {
+  const card = document.getElementById("connectCard");
+  const closed = document.getElementById("officeClosed");
+  if (card) card.hidden = false;
+  if (closed) closed.hidden = true;
+  document.querySelectorAll(".pane").forEach(function (p) {
+    p.hidden = true;
   });
+  renderLesson();
+}
+
+function hideConnectGate() {
+  const card = document.getElementById("connectCard");
+  if (card) card.hidden = true;
+}
+
+function fillClosedCard(now) {
+  const body = document.getElementById("officeClosedBody");
+  if (!body) return;
+  const parts = [];
+  if (now.prevPeriod && now.prevEnd) {
+    parts.push(
+      t("windowEnded", {
+        period: t(periodLabelKey(now.prevPeriod)),
+        time: now.prevEnd,
+      }),
+    );
+  } else {
+    parts.push(t("officeClosed"));
+  }
+  parts.push(t("nextOffice", { time: now.nextAt }));
+  body.textContent = parts.join(" ");
+  const foot = document.querySelector("#officeClosed .closed-foot");
+  if (foot) foot.hidden = !now.prevPeriod;
+}
+
+function gateOfficeForm(pane, access) {
+  const block = document.querySelector('.entry-block[data-entry="' + pane + '"]');
+  const area = document.querySelector(
+    "#pane-" + pane + " textarea.note[data-slot]",
+  );
+  const share = document.querySelector("#pane-" + pane + " [data-share]");
+  if (block) {
+    if (access === "open") block.removeAttribute("data-locked");
+    else block.setAttribute("data-locked", "1");
+  }
+  if (area) {
+    area.disabled = access !== "open";
+    area.readOnly = access !== "open";
+  }
+  const meta = document.querySelector('[data-window-meta="' + pane + '"]');
+  if (meta) {
+    if (access === "open") {
+      const now = TIMENOW();
+      meta.textContent = t("windowCloses", { time: now.closesAt || "" });
+    } else meta.textContent = "";
+  }
+  if (share) {
+    const hasNote = !!(officeNoteText(pane) || "").trim();
+    share.hidden = !(access === "open" || (access === "past" && hasNote));
+    share.textContent =
+      access === "past" && hasNote ? t("shareReflection") : t("shareReading");
+    const row = share.closest(".share-row");
+    if (row) row.hidden = share.hidden;
+  }
+}
+
+function maybeAutofocus(pane, access) {
+  if (access !== "open") return;
+  if (!window.matchMedia || !window.matchMedia("(pointer: fine)").matches)
+    return;
+  const area = document.querySelector(
+    "#pane-" + pane + " textarea.note[data-slot]",
+  );
+  if (area && !area.disabled) area.focus();
+}
+
+function showPane(name) {
   document.querySelectorAll(".nav-bar button").forEach((b) => {
     b.classList.toggle("active", b.getAttribute("data-pane") === name);
   });
-  if (name === "log") renderLog();
+  if (!driveToken) {
+    showConnectGate();
+    return;
+  }
+  hideConnectGate();
+  const closed = document.getElementById("officeClosed");
+  if (name === "log") {
+    if (closed) closed.hidden = true;
+    document.querySelectorAll(".pane").forEach((p) => {
+      p.hidden = p.id !== "pane-log";
+    });
+    renderLog();
+    return;
+  }
+  const access = officeAccess(name);
+  const now = TIMENOW();
+  if (access === "future") {
+    document.querySelectorAll(".pane").forEach(function (p) {
+      p.hidden = true;
+    });
+    if (closed) {
+      closed.hidden = false;
+      fillClosedCard(now);
+    }
+    renderLesson();
+    return;
+  }
+  if (closed) closed.hidden = true;
+  document.querySelectorAll(".pane").forEach((p) => {
+    p.hidden = p.id !== "pane-" + name;
+  });
+  gateOfficeForm(name, access);
+  renderLesson();
+  if (name === "morning") {
+    renderOurFather();
+    renderFilm();
+  }
+  fillEntryFromStore(name);
+  maybeAutofocus(name, access);
 }
 
 const SLOT_KEY = {
@@ -1273,13 +1172,35 @@ function formatDay(key) {
   );
 }
 
+function shiftStatus(date, slot, notes, now) {
+  const period = paneToPeriod(slot);
+  const has = notes && notes[slot] && String(notes[slot]).trim();
+  if (has) return { key: "kept", label: t("kept") };
+  if (!periodHasEnded(date, period, now)) return { key: "closed", label: t("closed") };
+  return { key: "missed", label: t("missed") };
+}
+
 function renderLog() {
   const stats = document.getElementById("logStats");
   const list = document.getElementById("logList");
   if (!stats || !list) return;
+  const now = TIMENOW();
   const days = allDays();
-  const used = days.filter(dayUsed);
-  const chars = days.reduce((n, d) => n + noteChars(d), 0);
+  const byDate = {};
+  days.forEach(function (d) {
+    byDate[d.date] = d;
+  });
+  if (!byDate[now.date])
+    byDate[now.date] = { date: now.date, checks: {}, notes: {} };
+  const dates = Object.keys(byDate).sort().reverse();
+  const used = dates
+    .map(function (date) {
+      return byDate[date];
+    })
+    .filter(dayUsed);
+  const chars = dates.reduce(function (n, date) {
+    return n + noteChars(byDate[date]);
+  }, 0);
   const streak = countStreak(used.map((d) => d.date));
   const loc = lang === "pt" ? "pt-BR" : "en-GB";
   stats.innerHTML =
@@ -1298,16 +1219,27 @@ function renderLog() {
     "</b><span>" +
     t("statChars") +
     "</span></div>";
-  if (!used.length) {
-    list.innerHTML = '<p class="log-empty">' + t("logEmpty") + "</p>";
-    return;
-  }
-  list.innerHTML = used
-    .map((d) => {
+  list.innerHTML = dates
+    .map(function (date) {
+      const d = byDate[date];
       const lesson = pickLesson(d.date);
       const pack = lessonLoc(lesson);
       const wit = quoteLoc(lessonWitness(lesson));
-      const shiftSeen = { morning: true, day: true, night: true };
+      const shifts = ["morning", "day", "night"]
+        .map(function (shift) {
+          const st = shiftStatus(date, shift, d.notes, now);
+          const cls = st.key === "missed" ? "log-miss" : "";
+          return (
+            '<span class="' +
+            cls +
+            '">' +
+            t(SLOT_KEY[shift]).toLowerCase() +
+            " " +
+            st.label +
+            "</span>"
+          );
+        })
+        .join(" · ");
       let passages = "";
       if (pack && pack.title)
         passages +=
@@ -1330,31 +1262,15 @@ function renderLog() {
           );
         })
         .join("");
-      const body = Object.keys(SLOT_KEY)
-        .map((slot) => {
-          if (shiftSeen[slot]) return "";
-          const note = (d.notes && d.notes[slot]) || "";
-          if (!note.trim()) return "";
-          return (
-            '<div class="log-entry"><div class="k">' +
-            t(SLOT_KEY[slot]) +
-            "</div><p>" +
-            esc(note) +
-            "</p></div>"
-          );
-        })
-        .join("");
       return (
-        '<details class="log-day"><summary>' +
+        '<div class="log-day"><div class="log-day-head">' +
         formatDay(d.date) +
-        ' <span class="meta">· ' +
-        noteChars(d).toLocaleString(loc) +
-        " " +
-        t("statChars").toLowerCase() +
-        "</span></summary>" +
+        "</div>" +
+        '<p class="log-shifts">' +
+        shifts +
+        "</p>" +
         passages +
-        body +
-        "</details>"
+        "</div>"
       );
     })
     .join("");
@@ -1366,7 +1282,7 @@ const REMIND_PANES = ["morning", "day", "night"];
 function defaultRemind() {
   return {
     enabled: false,
-    morning: "06:00",
+    morning: "05:00",
     day: "12:00",
     night: "21:00",
     lastTick: Date.now(),
@@ -1531,33 +1447,188 @@ function bindReminders() {
   maybeFireReminders();
 }
 
-function bindJournal() {
+function officeNoteText(pane) {
+  const now = TIMENOW();
   const data = loadJournal();
-  const day = data[todayKey()] || { checks: {}, notes: {} };
-  document.querySelectorAll("[data-check]").forEach((box) => {
-    const key = box.getAttribute("data-check");
-    box.checked = !!day.checks[key];
-    box.addEventListener("change", () => {
-      const j = loadJournal();
-      const k = todayKey();
-      j[k] = j[k] || { checks: {}, notes: {} };
-      j[k].checks[key] = box.checked;
-      j[k].updatedAt = new Date().toISOString();
-      saveJournal(j);
-    });
-  });
+  const day = data[now.date] || { notes: {} };
+  const saved = (day.notes && day.notes[pane]) || "";
+  if (String(saved).trim()) return saved;
+  const area = document.querySelector(
+    "#pane-" + pane + " textarea.note[data-slot]",
+  );
+  return area ? area.value : "";
+}
+
+function fillEntryFromStore(pane) {
+  const period = paneToPeriod(pane);
+  const now = TIMENOW();
+  const area = document.querySelector(
+    "#pane-" + pane + " textarea.note[data-slot]",
+  );
+  if (!area) return;
+  const data = loadJournal();
+  const day = data[now.date] || { notes: {} };
+  const saved = (day.notes && day.notes[pane]) || "";
+  const access = officeAccess(pane, now);
+  if (access === "open") {
+    const draft = getDraft(now.date, period);
+    area.value = draft ? draft.text : saved;
+  } else area.value = saved;
+}
+
+function bindJournal() {
   document.querySelectorAll("textarea.note[data-slot]").forEach((area) => {
     const slot = area.getAttribute("data-slot");
-    area.value = day.notes[slot] || "";
     area.addEventListener("input", () => {
-      const j = loadJournal();
-      const k = todayKey();
-      j[k] = j[k] || { checks: {}, notes: {} };
-      j[k].notes[slot] = area.value;
-      j[k].updatedAt = new Date().toISOString();
-      saveJournal(j);
+      const now = TIMENOW();
+      const period = paneToPeriod(slot);
+      if (!now.open || now.period !== period) return;
+      setDraft(now.date, period, area.value);
     });
   });
+  ["morning", "day", "night"].forEach(fillEntryFromStore);
+}
+
+const pendingFiles = { morning: null, day: null, night: null };
+
+function saveOffice(pane) {
+  const now = TIMENOW();
+  const period = paneToPeriod(pane);
+  const meta = document.querySelector('[data-window-meta="' + pane + '"]');
+  if (!now.open || now.period !== period) {
+    if (meta) meta.textContent = t("thisOfficeClosed");
+    return;
+  }
+  if (!driveToken) {
+    showConnectGate();
+    return;
+  }
+  const area = document.querySelector(
+    "#pane-" + pane + " textarea.note[data-slot]",
+  );
+  const text = area ? area.value : "";
+  const file = pendingFiles[pane];
+  const folderId = localStorage.getItem(DRIVE_FOLDER_KEY);
+  const btn = document.querySelector('[data-save="' + pane + '"]');
+  if (btn) btn.disabled = true;
+  const finish = function (mediaUrl) {
+    return appendEntry([
+      new Date().toISOString(),
+      period,
+      text,
+      mediaUrl || "",
+      lang === "pt" ? "pt" : "en",
+    ]).then(function () {
+      const j = loadJournal();
+      const k = now.date;
+      j[k] = j[k] || { checks: {}, notes: {}, media: {} };
+      j[k].notes[pane] = text;
+      if (mediaUrl) {
+        j[k].media = j[k].media || {};
+        j[k].media[pane] = mediaUrl;
+      }
+      j[k].updatedAt = new Date().toISOString();
+      saveJournalSilent(j);
+      clearDraft(k, period);
+      pendingFiles[pane] = null;
+      const label = document.getElementById("attachName-" + pane);
+      if (label) label.textContent = "";
+      if (meta) meta.textContent = t("savedOk");
+      renderLog();
+      gateOfficeForm(pane, "open");
+    });
+  };
+  const chain =
+    file && folderId
+      ? uploadMultipart(file, folderId).then(function (up) {
+          const url =
+            up.webViewLink ||
+            (up.id ? "https://drive.google.com/file/d/" + up.id + "/view" : "");
+          return finish(url);
+        })
+      : finish("");
+  Promise.resolve(chain)
+    .catch(function (err) {
+      if (
+        !driveEscalated &&
+        typeof driveNeedsWiderScope === "function" &&
+        driveNeedsWiderScope(err)
+      ) {
+        driveEscalated = true;
+        DRIVE_SCOPE = SCOPE_FULL;
+        tokenClient = null;
+        driveToken = "";
+        connectDrive(false);
+        return;
+      }
+      if (meta) meta.textContent = t("driveErr");
+      setDriveStatus(t("driveErr"));
+    })
+    .then(function () {
+      if (btn) btn.disabled = false;
+    });
+}
+
+function bindOfficeActions() {
+  document.querySelectorAll("[data-save]").forEach(function (btn) {
+    btn.addEventListener("click", function () {
+      saveOffice(btn.getAttribute("data-save"));
+    });
+  });
+  document.querySelectorAll("[data-attach]").forEach(function (btn) {
+    btn.addEventListener("click", function () {
+      const pane = btn.getAttribute("data-attach");
+      const input = document.getElementById("attach-" + pane);
+      if (input) input.click();
+    });
+  });
+  ["morning", "day", "night"].forEach(function (pane) {
+    const input = document.getElementById("attach-" + pane);
+    if (!input) return;
+    input.addEventListener("change", function () {
+      pendingFiles[pane] =
+        input.files && input.files[0] ? input.files[0] : null;
+      const label = document.getElementById("attachName-" + pane);
+      if (label)
+        label.textContent = pendingFiles[pane]
+          ? t("attachNamed", { name: pendingFiles[pane].name })
+          : "";
+    });
+  });
+}
+
+function bindKeys() {
+  document.addEventListener("keydown", function (e) {
+    if (e.key === "Escape") {
+      closeModal();
+      closeSettings();
+      if (typeof closeShare === "function") closeShare();
+      return;
+    }
+    if ((e.ctrlKey || e.metaKey) && e.key === "Enter") {
+      const now = TIMENOW();
+      if (!now.open || !driveToken) return;
+      e.preventDefault();
+      saveOffice(periodToPane(now.period));
+    }
+  });
+}
+
+let lastOfficeStamp = "";
+function tickOffice() {
+  if (typeof dropClosedDrafts === "function") dropClosedDrafts();
+  const now = TIMENOW();
+  const stamp = now.date + "|" + (now.period || "gap");
+  if (stamp === lastOfficeStamp) return;
+  const prev = lastOfficeStamp;
+  lastOfficeStamp = stamp;
+  if (prev && typeof dropClosedDrafts === "function") dropClosedDrafts(now);
+  if (!driveToken) {
+    showConnectGate();
+    return;
+  }
+  const active = document.querySelector(".nav-bar button.active");
+  showPane(active ? active.getAttribute("data-pane") : landingPane(now));
 }
 
 function bindNav() {
@@ -1638,6 +1709,10 @@ function bindSettings() {
       applyBuildLabels();
       checkBuild();
       renderLog();
+      if (driveToken) {
+        const active = document.querySelector(".nav-bar button.active");
+        showPane(active ? active.getAttribute("data-pane") : landingPane());
+      }
     });
   });
   document.querySelectorAll("[data-theme-choice]").forEach((b) => {
@@ -1683,8 +1758,13 @@ function fillScriptureModal(title, html, slot) {
   openPassageSlot = slot || "";
   if (modalTa) {
     modalTa.dataset.slot = openPassageSlot;
+    const now = TIMENOW();
+    const period = paneToPeriod(openPassageSlot);
+    const open = now.open && now.period === period;
+    modalTa.disabled = !open;
+    modalTa.readOnly = !open;
     if (openPassageSlot) {
-      const day = loadJournal()[todayKey()] || { notes: {} };
+      const day = loadJournal()[now.date] || { notes: {} };
       modalTa.value = day.notes[openPassageSlot] || "";
     } else modalTa.value = "";
   }
@@ -1734,12 +1814,10 @@ function bindModalNote() {
   modalTa.addEventListener("input", () => {
     const slot = modalTa.dataset.slot;
     if (!slot) return;
-    const j = loadJournal();
-    const k = todayKey();
-    j[k] = j[k] || { checks: {}, notes: {} };
-    j[k].notes[slot] = modalTa.value;
-    j[k].updatedAt = new Date().toISOString();
-    saveJournal(j);
+    const now = TIMENOW();
+    const period = paneToPeriod(slot);
+    if (!now.open || now.period !== period) return;
+    setDraft(now.date, period, modalTa.value);
     document.querySelectorAll('textarea.note[data-slot="' + slot + '"]').forEach(
       (el) => {
         if (document.activeElement !== el) el.value = modalTa.value;
@@ -2010,6 +2088,11 @@ bindDrive();
 bindReminders();
 bindModalNote();
 bindPassages();
+bindOfficeActions();
+bindKeys();
+bindShare();
+lastOfficeStamp = TIMENOW().date + "|" + (TIMENOW().period || "gap");
+setInterval(tickOffice, 20000);
 (function bindNoise() {
   const sel = document.getElementById("noiseSelect");
   if (sel)
@@ -2035,16 +2118,23 @@ lockPortrait();
 
 function applyLaunchQuery() {
   try {
+    if (!driveToken) {
+      showConnectGate();
+      return;
+    }
     const q = new URLSearchParams(location.search);
     const pane = q.get("pane");
     const play = q.get("play");
     if (play === "chant") {
       showPane("day");
-      playChant();
-      setTimeout(function () {
-        if (!chantPlaying) playChant();
-      }, 500);
+      if (officeAccess("day") !== "future") {
+        playChant();
+        setTimeout(function () {
+          if (!chantPlaying) playChant();
+        }, 500);
+      }
     } else if (pane) showPane(pane);
+    else showPane(landingPane());
   } catch (e) {}
 }
 
