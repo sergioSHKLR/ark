@@ -5,7 +5,7 @@ const DRIVE_FILE_KEY = "noah-drive-file-id";
 const DRIVE_SYNC_KEY = "noah-drive-synced";
 const DRIVE_FILE_NAME = "ark-journal.json";
 let DRIVE_SCOPE = typeof SCOPE_FILE !== "undefined" ? SCOPE_FILE : "https://www.googleapis.com/auth/drive.file https://www.googleapis.com/auth/drive.appdata";
-const APP_BUILD = 59;
+const APP_BUILD = 60;
 const DRIVE_CONSENT_KEY = "noah-drive-consented";
 
 let driveToken = "";
@@ -78,7 +78,10 @@ function renderLesson() {
   setText("lessonTeach", morningOk && loc ? loc.teach : "");
   setText("lessonSrc", morningOk && wit ? wit.src : "");
   setText("lessonText", morningOk && wit ? wit.text : "");
+  setText("middayTitle", dayOk && loc ? loc.title : "");
+  setText("middayBody", dayOk && loc ? loc.teach : "");
   setText("lessonKeep", dayOk && loc ? loc.keep : "");
+  setText("nightTitle", nightOk && loc ? loc.title : "");
   setText("lessonClose", nightOk && loc ? loc.close : "");
   const box = document.getElementById("lessonWitness");
   if (box) box.hidden = !wit || !morningOk;
@@ -86,6 +89,8 @@ function renderLesson() {
   if (film) film.hidden = !morningOk;
   const father = document.getElementById("ourFather");
   if (father) father.hidden = !morningOk;
+  const reflect = document.getElementById("middayReflect");
+  if (reflect) reflect.hidden = !dayOk;
   const desk = document.querySelector("#pane-day .desk");
   if (desk) desk.hidden = !dayOk;
   const keep = document.querySelector("#pane-day .lesson-keep");
@@ -94,6 +99,7 @@ function renderLesson() {
   if (close) close.hidden = !nightOk;
   const sleep = document.querySelector("#pane-night .sleep-row");
   if (sleep) sleep.hidden = !nightOk;
+  renderMarks();
 }
 
 function renderOurFather() {
@@ -992,6 +998,7 @@ function showConnectGate() {
   document.querySelectorAll(".pane").forEach(function (p) {
     p.hidden = true;
   });
+  renderDateLine();
   renderLesson();
 }
 
@@ -1003,21 +1010,27 @@ function hideConnectGate() {
 function fillClosedCard(now) {
   const body = document.getElementById("officeClosedBody");
   if (!body) return;
-  const parts = [];
-  if (now.prevPeriod && now.prevEnd) {
-    parts.push(
-      t("windowEnded", {
-        period: t(periodLabelKey(now.prevPeriod)),
-        time: now.prevEnd,
-      }),
-    );
-  } else {
-    parts.push(t("officeClosed"));
-  }
-  parts.push(t("nextOffice", { time: now.nextAt }));
-  body.textContent = parts.join(" ");
+  const ended =
+    now.prevPeriod && now.prevEnd
+      ? t("windowEnded", {
+          period: t(periodLabelKey(now.prevPeriod)),
+          time: now.prevEnd,
+        })
+      : t("officeClosed");
+  const opens = t("officeOpens", {
+    period: t(periodLabelKey(now.nextPeriod)),
+    time: now.nextAt,
+  });
+  body.innerHTML = "<p>" + esc(ended) + "</p><p>" + esc(opens) + "</p>";
   const foot = document.querySelector("#officeClosed .closed-foot");
-  if (foot) foot.hidden = !now.prevPeriod;
+  if (foot) foot.hidden = false;
+}
+
+function renderMarks() {
+  const line = t("marksLine", { amen: 0, light: 0 });
+  document.querySelectorAll("[data-marks]").forEach(function (el) {
+    el.textContent = line;
+  });
 }
 
 function gateOfficeForm(pane, access) {
@@ -1070,6 +1083,7 @@ function showPane(name) {
     return;
   }
   hideConnectGate();
+  renderDateLine();
   const closed = document.getElementById("officeClosed");
   if (name === "log") {
     if (closed) closed.hidden = true;
@@ -1187,7 +1201,7 @@ function formatDay(key) {
   const p = key.split("-").map(Number);
   return new Date(p[0], p[1] - 1, p[2]).toLocaleDateString(
     lang === "pt" ? "pt-BR" : "en-GB",
-    { weekday: "short", day: "numeric", month: "short", year: "numeric" },
+    { day: "numeric", month: "short" },
   );
 }
 
@@ -1217,70 +1231,57 @@ function renderLog() {
       return byDate[date];
     })
     .filter(dayUsed);
-  const chars = dates.reduce(function (n, date) {
-    return n + noteChars(byDate[date]);
-  }, 0);
+  let kept = 0;
+  let missed = 0;
+  dates.forEach(function (date) {
+    ["morning", "day", "night"].forEach(function (shift) {
+      const st = shiftStatus(date, shift, byDate[date].notes, now);
+      if (st.key === "kept") kept++;
+      if (st.key === "missed") missed++;
+    });
+  });
   const streak = countStreak(used.map((d) => d.date));
-  const loc = lang === "pt" ? "pt-BR" : "en-GB";
   stats.innerHTML =
     '<div class="stat"><b>' +
-    used.length +
+    kept +
     "</b><span>" +
-    t("statDays") +
+    t("statKept") +
+    "</span></div>" +
+    '<div class="stat"><b>' +
+    missed +
+    "</b><span>" +
+    t("statMissed") +
     "</span></div>" +
     '<div class="stat"><b>' +
     streak +
     "</b><span>" +
     t("statStreak") +
-    "</span></div>" +
-    '<div class="stat"><b>' +
-    chars.toLocaleString(loc) +
-    "</b><span>" +
-    t("statChars") +
     "</span></div>";
   list.innerHTML = dates
     .map(function (date) {
       const d = byDate[date];
-      const lesson = pickLesson(d.date);
-      const pack = lessonLoc(lesson);
-      const wit = quoteLoc(lessonWitness(lesson));
       const shifts = ["morning", "day", "night"]
         .map(function (shift) {
           const st = shiftStatus(date, shift, d.notes, now);
           const cls = st.key === "missed" ? "log-miss" : "";
+          const name = t(periodLabelKey(paneToPeriod(shift))).toLowerCase();
           return (
             '<span class="' +
             cls +
             '">' +
-            t(SLOT_KEY[shift]).toLowerCase() +
+            name +
             " " +
             st.label +
             "</span>"
           );
         })
         .join(" · ");
-      let passages = "";
-      if (pack && pack.title)
-        passages +=
-          '<div class="log-entry"><div class="k">' +
-          t("slotPassage") +
-          "</div><p>" +
-          esc(pack.title) +
-          (wit && wit.src ? " · " + esc(wit.src) : "") +
-          "</p></div>";
-      passages += ["morning", "day", "night"]
+      const note = ["morning", "day", "night"]
         .map(function (shift) {
-          const note = (d.notes && d.notes[shift]) || "";
-          if (!note.trim()) return "";
-          return (
-            '<div class="log-entry"><div class="k">' +
-            t(SLOT_KEY[shift]) +
-            "</div><p>" +
-            esc(note) +
-            "</p></div>"
-          );
+          return ((d.notes && d.notes[shift]) || "").trim();
         })
-        .join("");
+        .filter(Boolean)
+        .join(" ");
       return (
         '<div class="log-day"><div class="log-day-head">' +
         formatDay(d.date) +
@@ -1288,7 +1289,7 @@ function renderLog() {
         '<p class="log-shifts">' +
         shifts +
         "</p>" +
-        passages +
+        (note ? '<p class="log-note">' + esc(note) + "</p>" : "") +
         "</div>"
       );
     })
@@ -1637,6 +1638,7 @@ function bindKeys() {
 let lastOfficeStamp = "";
 function tickOffice() {
   if (typeof dropClosedDrafts === "function") dropClosedDrafts();
+  renderDateLine();
   const now = TIMENOW();
   const stamp = now.date + "|" + (now.period || "gap");
   if (stamp === lastOfficeStamp) return;
@@ -2096,9 +2098,43 @@ function formatLongDate(d) {
   );
 }
 
+function formatOfficeDate(now) {
+  now = now || TIMENOW();
+  if (!driveToken) return formatLongDate(new Date());
+  const loc = lang === "pt" ? "pt-BR" : "en-GB";
+  let weekday = "";
+  let day = "";
+  let month = "";
+  try {
+    const parts = new Intl.DateTimeFormat(loc, {
+      timeZone: DAY_TZ,
+      weekday: "long",
+      day: "numeric",
+      month: "short",
+    }).formatToParts(new Date());
+    const get = function (type) {
+      const p = parts.find(function (x) {
+        return x.type === type;
+      });
+      return p ? p.value : "";
+    };
+    weekday = get("weekday");
+    day = get("day");
+    month = get("month");
+  } catch (e) {}
+  if (weekday) weekday = weekday.charAt(0).toUpperCase() + weekday.slice(1);
+  const head = [weekday, (day + " " + month).trim()].filter(Boolean).join(" · ");
+  if (now.open) {
+    const hh = String(now.hour).padStart(2, "0");
+    const mm = String(now.minute).padStart(2, "0");
+    return head + " · " + t(periodLabelKey(now.period)) + " " + hh + ":" + mm;
+  }
+  return head + " · " + t("dateClosed");
+}
+
 function renderDateLine() {
   const dateLine = document.getElementById("dateLine");
-  if (dateLine) dateLine.textContent = formatLongDate(new Date());
+  if (dateLine) dateLine.textContent = formatOfficeDate(TIMENOW());
 }
 
 bindNav();

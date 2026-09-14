@@ -31,7 +31,7 @@
       </div>
       <div class="closed-card" id="officeClosed" hidden>
         <h3 data-i18n="officeClosed">This office is closed.</h3>
-        <p class="closed-body" id="officeClosedBody"></p>
+        <div class="closed-body" id="officeClosedBody"></div>
         <p class="closed-foot" data-i18n="missStands">The miss will stand in the log.</p>
       </div>
       <section class="pane" id="pane-morning" hidden>
@@ -54,9 +54,10 @@
               <p>And lead us not into temptation, but deliver us from evil: For thine is the kingdom, and the power, and the glory, for ever. Amen.</p>
             </div>
           </div>
-          <div class="lesson" id="lessonMorning">
-            <h3 class="lesson-title" id="lessonTitle"></h3>
-            <p class="lesson-teach" id="lessonTeach"></p>
+          <div class="reading-card" id="lessonMorning">
+            <h3 data-i18n="morningHead">Morning</h3>
+            <p class="reading-title" id="lessonTitle"></p>
+            <p class="reading-body" id="lessonTeach"></p>
             <div class="daily-quote" id="lessonWitness">
               <p class="daily-quote-src" id="lessonSrc"></p>
               <p class="daily-quote-text" id="lessonText"></p>
@@ -74,27 +75,21 @@
             <p class="window-meta" data-window-meta="morning"></p>
             <div class="share-row">
               <button type="button" class="share-link" data-share="morning" data-i18n="shareReading">Share reading</button>
+              <span class="marks-line" data-marks></span>
             </div>
           </div>
         </div>
       </section>
       <section class="pane" id="pane-day" hidden>
         <div class="office-body">
-          <div class="lesson lesson-keep">
-            <h3 data-i18n="keepHead">Keep</h3>
-            <p id="lessonKeep"></p>
+          <div class="reading-card" id="middayReflect">
+            <h3 data-i18n="middayHead">Midday reflection</h3>
+            <p class="reading-title" id="middayTitle"></p>
+            <p class="reading-body" id="middayBody"></p>
           </div>
-          <div class="desk">
-            <h3 data-i18n="desk">Desk</h3>
-            <p class="desk-now" id="chantTitle" data-i18n="chantRest">Chant at rest</p>
-            <canvas class="chant-wave" id="chantWave" width="640" height="96" aria-hidden="true"></canvas>
-            <div class="chant-hidden" id="chantMount"></div>
-            <div class="desk-keys">
-              <button class="key" type="button" id="chantPrev" data-i18n="prev">Prev</button>
-              <button class="key" type="button" id="chantPlay" data-i18n="play">Play</button>
-              <button class="key" type="button" id="chantNext" data-i18n="next">Next</button>
-            </div>
-            <p class="desk-foot" id="chantFoot"></p>
+          <div class="reading-card lesson-keep">
+            <h3 data-i18n="keepHead">Keep</h3>
+            <p class="reading-body" id="lessonKeep"></p>
           </div>
           <div class="entry-block" data-entry="day">
             <span data-i18n="yourEntry">Your entry</span>
@@ -108,18 +103,32 @@
             <p class="window-meta" data-window-meta="day"></p>
             <div class="share-row">
               <button type="button" class="share-link" data-share="day" data-i18n="shareReading">Share reading</button>
+              <span class="marks-line" data-marks></span>
             </div>
+          </div>
+          <div class="desk">
+            <h3 data-i18n="desk">Desk</h3>
+            <p class="desk-now" id="chantTitle" data-i18n="chantRest">Chant at rest</p>
+            <canvas class="chant-wave" id="chantWave" width="640" height="96" aria-hidden="true"></canvas>
+            <div class="chant-hidden" id="chantMount"></div>
+            <div class="desk-keys">
+              <button class="key" type="button" id="chantPrev" data-i18n="prev">Prev</button>
+              <button class="key" type="button" id="chantPlay" data-i18n="play">Play</button>
+              <button class="key" type="button" id="chantNext" data-i18n="next">Next</button>
+            </div>
+            <p class="desk-foot" id="chantFoot"></p>
           </div>
         </div>
       </section>
       <section class="pane" id="pane-night" hidden>
         <div class="office-body">
-          <div class="lesson lesson-close">
+          <div class="reading-card lesson-close">
             <h3 data-i18n="closeHead">Close</h3>
-            <p id="lessonClose"></p>
+            <p class="reading-title" id="nightTitle"></p>
+            <p class="reading-body" id="lessonClose"></p>
           </div>
           <div class="entry-block" data-entry="night">
-            <span data-i18n="closing">Closing notes</span>
+            <span data-i18n="yourEntry">Your entry</span>
             <textarea class="note night" data-slot="night" rows="8" data-i18n-placeholder="notePh"></textarea>
             <input type="file" id="attach-night" hidden />
             <div class="entry-keys">
@@ -130,6 +139,7 @@
             <p class="window-meta" data-window-meta="night"></p>
             <div class="share-row">
               <button type="button" class="share-link" data-share="night" data-i18n="shareReading">Share reading</button>
+              <span class="marks-line" data-marks></span>
             </div>
           </div>
           <div class="sleep-row">
@@ -144,9 +154,6 @@
         </div>
       </section>
       <section class="pane" id="pane-log" hidden>
-        <div class="lede">
-          <h2 data-i18n="logTitle">The log</h2>
-        </div>
         <div class="stats" id="logStats"></div>
         <div id="logList"></div>
         <p class="log-foot" data-i18n="logReadonly">Read-only. Restore from Drive.</p>
@@ -182,11 +189,14 @@
     <div class="modal-overlay" id="shareModal" onclick="closeShare()">
       <div class="modal-box" onclick="event.stopPropagation()">
         <div class="modal-header">
-          <div class="modal-title" data-i18n="shareThisOffice">Share this office</div>
+          <div class="modal-title share-modal-title" data-i18n="shareTitle">Share</div>
           <button class="modal-close" type="button" onclick="closeShare()">×</button>
         </div>
-        <p class="share-lead" data-i18n="shareReading">Share reading</p>
-        <p class="remind-note" data-i18n="shareReadingHelp">Curriculum only. Friend needs no Google.</p>
+        <p class="share-kicker" data-i18n="shareThisOffice">Share this office</p>
+        <div class="share-option">
+          <p class="share-lead" data-i18n="shareReading">Share reading</p>
+          <p class="remind-note" data-i18n="shareReadingHelp">Curriculum only. Friend needs no Google.</p>
+        </div>
         <label class="share-check">
           <input type="checkbox" id="shareInclude" />
           <span>
@@ -196,6 +206,11 @@
           </span>
         </label>
         <button type="button" class="key connect-key" id="shareGo" data-i18n="openSystemShare">Open system share</button>
+        <div class="share-responses">
+          <h3 data-i18n="responses">Responses</h3>
+          <p class="marks-line" data-marks></p>
+          <div id="shareComments"></div>
+        </div>
         <p class="remind-note" id="shareStatus"></p>
       </div>
     </div>
@@ -260,7 +275,7 @@
           </button>
         </div>
         <div class="build-block">
-          <p class="remind-note" id="buildLine">Build 59</p>
+          <p class="remind-note" id="buildLine">Build 60</p>
           <p class="remind-note" id="buildStatus"></p>
           <button type="button" class="remind-ics" id="buildReload" hidden>
             Reload to update

@@ -50,8 +50,11 @@ function curriculumShareText(period, dateKey) {
     if (loc.teach) lines.push(loc.teach);
     if (wit && wit.text) lines.push((wit.src ? wit.src + " — " : "") + wit.text);
   } else if (period === "midday") {
+    if (loc.title) lines.push(loc.title);
+    if (loc.teach) lines.push(loc.teach);
     if (loc.keep) lines.push(loc.keep);
   } else if (period === "night") {
+    if (loc.title) lines.push(loc.title);
     if (loc.close) lines.push(loc.close);
   }
   return lines.filter(Boolean).join("\n\n");
