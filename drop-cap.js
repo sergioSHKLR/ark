@@ -9,7 +9,7 @@
       ".nav-bar button{font-family:var(--font-book);font-variant:normal;letter-spacing:.05em;font-size:1.02rem;text-transform:none}" +
       ".nav-bar button::first-letter{" +
       "font-family:var(--font-display);font-variant:normal;font-size:1.7em;" +
-      "color:var(--rubric);letter-spacing:0;margin:0 -.04em 0 0;padding:0;line-height:.9}" +
+      "color:var(--rubric);letter-spacing:0;margin:0 .08em 0 0;padding:0;line-height:.9}" +
       ".our-father-text p:first-child::first-letter," +
       ".lede p::first-letter,.reading-body::first-letter," +
       "#lessonTeach::first-letter,#middayBody::first-letter{" +
