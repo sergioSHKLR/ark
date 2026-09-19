@@ -119,15 +119,12 @@ function bindShare() {
 }
 
 window.addEventListener("load", function () {
-  if (!document.getElementById("office-year-src")) {
-    const y = document.createElement("script");
-    y.id = "office-year-src";
-    y.src = "office-year.js";
-    document.body.appendChild(y);
-  }
-  if (document.getElementById("ui63-src")) return;
-  const s = document.createElement("script");
-  s.id = "ui63-src";
-  s.src = "ui63.js";
-  document.body.appendChild(s);
+  ["office-year.js", "ui63.js", "settle-build.js"].forEach(function (src) {
+    const id = src.replace(".", "-");
+    if (document.getElementById(id)) return;
+    const s = document.createElement("script");
+    s.id = id;
+    s.src = src + "?v=64";
+    document.body.appendChild(s);
+  });
 });
