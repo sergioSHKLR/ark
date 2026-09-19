@@ -1,0 +1,67 @@
+<!doctype html>
+<html lang="pt">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Arca · Porch</title>
+  <link rel="stylesheet" href="app.css" />
+  <style>
+    body{margin:0;background:#1a1612;color:#f3ead6}
+    .wrap{max-width:26rem;margin:0 auto;padding:1.4rem 1.2rem 3rem}
+    h1{font-family:"Grenze Gotisch",serif;font-weight:400;text-align:center}
+    label{display:block;margin:.7rem 0 .25rem;font-size:.78rem;letter-spacing:.12em;text-transform:uppercase}
+    input,textarea{width:100%;box-sizing:border-box;background:#f3ead6;color:#2a2118;border:1px solid #c9b896;padding:.55rem}
+    .marks{display:flex;gap:.5rem;margin:.4rem 0 1rem}
+    .marks button{flex:1;font-size:1.3rem;min-height:2.6rem}
+    .marks button.on{outline:2px solid #7a2418}
+    .ok{text-align:center;color:#c9b896}
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <h1>Porch</h1>
+    <p class="ok">No Google needed. Name is optional.</p>
+    <form id="porch">
+      <label for="who">Name</label>
+      <input id="who" name="name" maxlength="80" placeholder="or leave blank" />
+      <label>Mark</label>
+      <div class="marks">
+        <button type="button" data-mark="pray">🙏</button>
+        <button type="button" data-mark="love">❤️</button>
+        <button type="button" data-mark="up">👍</button>
+      </div>
+      <label for="note">Word</label>
+      <textarea id="note" rows="4" maxlength="400"></textarea>
+      <button class="key connect-key" type="submit" style="width:100%;margin-top:1rem">Send</button>
+    </form>
+    <p class="ok" id="done" hidden>Kept. The house will see it on the next sync.</p>
+  </div>
+  <script>
+    var mark = "pray";
+    document.querySelectorAll("[data-mark]").forEach(function (b) {
+      b.addEventListener("click", function () {
+        mark = b.getAttribute("data-mark");
+        document.querySelectorAll("[data-mark]").forEach(function (x) {
+          x.classList.toggle("on", x === b);
+        });
+      });
+    });
+    document.querySelector("[data-mark='pray']").classList.add("on");
+    document.getElementById("porch").addEventListener("submit", function (e) {
+      e.preventDefault();
+      var row = {
+        at: new Date().toISOString(),
+        name: document.getElementById("who").value.trim() || "anon",
+        mark: mark,
+        note: document.getElementById("note").value.trim()
+      };
+      var key = "noah-porch-demo";
+      var list = [];
+      try { list = JSON.parse(localStorage.getItem(key) || "[]"); } catch (err) {}
+      list.push(row);
+      localStorage.setItem(key, JSON.stringify(list));
+      document.getElementById("done").hidden = false;
+    });
+  </script>
+</body>
+</html>

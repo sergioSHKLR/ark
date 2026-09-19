@@ -1,15 +1,20 @@
 const FORM_URL_KEY = "noah-form-url";
+const DEMO_FORM = "https://sergioshklr.github.io/ark/porch.html";
 
 function formUrlValue() {
   const input = document.getElementById("formUrl");
   const typed = input && input.value.trim();
-  return typed || localStorage.getItem(FORM_URL_KEY) || "";
+  return typed || localStorage.getItem(FORM_URL_KEY) || (localStorage.getItem("noah-demo") === "1" ? DEMO_FORM : "");
 }
 
 function bindFormUrl() {
   const input = document.getElementById("formUrl");
   if (!input) return;
-  input.value = localStorage.getItem(FORM_URL_KEY) || "";
+  input.value = localStorage.getItem(FORM_URL_KEY) || (localStorage.getItem("noah-demo") === "1" ? DEMO_FORM : "");
+  if (localStorage.getItem("noah-demo") === "1" && !localStorage.getItem(FORM_URL_KEY)) {
+    localStorage.setItem(FORM_URL_KEY, DEMO_FORM);
+    input.value = DEMO_FORM;
+  }
   input.addEventListener("change", function () {
     localStorage.setItem(FORM_URL_KEY, input.value.trim());
   });
@@ -101,7 +106,7 @@ window.addEventListener("load", function () {
     if (document.getElementById(id)) return;
     const s = document.createElement("script");
     s.id = id;
-    s.src = src + "?v=70";
+    s.src = src + "?v=71";
     document.body.appendChild(s);
   });
 });
