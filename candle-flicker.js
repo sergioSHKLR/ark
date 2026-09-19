@@ -1,14 +1,16 @@
 (function () {
   function css() {
-    if (document.getElementById("candle-flicker-css")) return;
+    if (document.getElementById("candle-flicker-css")) {
+      document.getElementById("candle-flicker-css").remove();
+    }
     const s = document.createElement("style");
     s.id = "candle-flicker-css";
     s.textContent =
       ".candle-btn{overflow:visible;z-index:4}" +
-      ".candle-flame{position:absolute;left:50%;top:6px;width:10px;height:16px;margin-left:-5px;pointer-events:none;opacity:0;border-radius:50% 50% 50% 50% / 60% 60% 40% 40%;background:radial-gradient(circle at 50% 70%, #fff6d0 0%, #ffb347 35%, #e25a12 70%, transparent 80%);box-shadow:0 0 10px 6px rgba(255,160,40,.55),0 0 22px 12px rgba(255,120,20,.28)}" +
-      ".candle-btn.is-lit .candle-flame,html[data-theme='dark'] .candle-flame{opacity:1;animation:flame-flicker .18s infinite}" +
-      "@media (prefers-color-scheme: dark){html:not([data-theme='light']) .candle-flame{opacity:1;animation:flame-flicker .18s infinite}}" +
-      "@keyframes flame-flicker{0%{transform:scaleY(1) scaleX(1) translateY(0);filter:brightness(1)}30%{transform:scaleY(1.18) scaleX(.86) translateY(-1px);filter:brightness(1.25)}55%{transform:scaleY(.88) scaleX(1.08) translateY(1px);filter:brightness(.85)}100%{transform:scaleY(1.05) scaleX(.95) translateY(0);filter:brightness(1.1)}}" +
+      ".candle-flame{position:absolute;left:50%;top:-2px;width:8px;height:12px;margin-left:-4px;pointer-events:none;opacity:0;border-radius:50% 50% 45% 45% / 62% 62% 38% 38%;background:radial-gradient(circle at 50% 72%, #fff8d8 0%, #ffc056 38%, #e06718 72%, transparent 82%);box-shadow:0 -2px 8px 4px rgba(255,176,64,.42),0 -4px 16px 8px rgba(255,140,30,.18)}" +
+      ".candle-btn.is-lit .candle-flame,html[data-theme='dark'] .candle-flame{opacity:1;animation:flame-flicker 1.15s ease-in-out infinite}" +
+      "@media (prefers-color-scheme: dark){html:not([data-theme='light']) .candle-flame{opacity:1;animation:flame-flicker 1.15s ease-in-out infinite}}" +
+      "@keyframes flame-flicker{0%{transform:translateY(0) scaleY(1) scaleX(1);filter:brightness(1)}50%{transform:translateY(-1px) scaleY(1.06) scaleX(.97);filter:brightness(1.08)}100%{transform:translateY(0) scaleY(1) scaleX(1);filter:brightness(1)}}" +
       "@media (prefers-reduced-motion: reduce){.candle-flame{animation:none!important}}";
     document.head.appendChild(s);
   }
