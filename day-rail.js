@@ -4,11 +4,6 @@
     { id: "midday", start: 12, end: 15 },
     { id: "night", start: 21, end: 24 }
   ];
-  const FILMS = {
-    morning: { id: "9_dr9njVzKM", title: "The Baptism of Jesus", ref: "Matthew 3" },
-    midday: { id: "Q0BrP8bqj0c", title: "New Testament overview", ref: "Bible Project" },
-    night: null
-  };
   const DAY_MS = 48000;
   let demoOn = false;
   let walking = false;
@@ -60,9 +55,7 @@
       ".day-rail-ticks span{position:absolute;transform:translateX(-50%)}" +
       ".day-rail-actions{display:flex;gap:.4rem;margin:.45rem 0 0;justify-content:center}" +
       ".day-rail-actions .key{flex:none;padding:.28rem .7rem;font-size:.72rem}" +
-      "#demoStage{display:none!important}" +
-      ".office-shift{transition:opacity .45s ease}" +
-      ".office-shift.is-dim{opacity:.35}";
+      "#demoStage{display:none!important}";
     document.head.appendChild(s);
   }
 
@@ -104,10 +97,7 @@
     if (!force && kind === lastKind) return;
     lastKind = kind;
     const closed = document.getElementById("officeClosed");
-    document.querySelectorAll(".pane").forEach(function (p) {
-      p.classList.add("office-shift");
-      p.hidden = true;
-    });
+    document.querySelectorAll(".pane").forEach(function (p) { p.hidden = true; });
     if (kind === "morning") {
       const p = document.getElementById("pane-morning"); if (p) p.hidden = false;
       if (closed) closed.hidden = true;
@@ -121,12 +111,10 @@
       if (closed) closed.hidden = true;
       if (typeof gateOfficeForm === "function") gateOfficeForm("night", "open");
       if (typeof applyNightOffice === "function") applyNightOffice();
-    } else {
-      if (closed) {
-        closed.hidden = false;
-        const body = document.getElementById("officeClosedBody");
-        if (body) body.textContent = "Next office " + (n.nextAt || "") + " · " + (n.nextPeriod || "");
-      }
+    } else if (closed) {
+      closed.hidden = false;
+      const body = document.getElementById("officeClosedBody");
+      if (body) body.textContent = "Next office " + (n.nextAt || "") + " · " + (n.nextPeriod || "");
     }
     if (typeof renderDateLine === "function") renderDateLine();
   }
@@ -166,7 +154,16 @@
 
   function mountRail() {
     inject();
-    if (document.getElementById("dayRail")) { paintRail(); return; }
+    if (document.getElementById("dayRail")) {
+      const actions = document.getElementById("dayRailActions");
+      if (actions) {
+        const walk = document.getElementById("railWalk");
+        const step = document.getElementById("railStep");
+        if (walk && step && walk.nextElementSibling !== step) actions.appendChild(step);
+      }
+      paintRail();
+      return;
+    }
     const box = document.createElement("div");
     box.className = "day-rail";
     box.id = "dayRail";
@@ -180,8 +177,8 @@
       '<span class="day-rail-needle" id="dayRailNeedle"></span></div>' +
       '<div class="day-rail-ticks"><span style="left:0">00</span><span style="left:20.833%">05</span><span style="left:37.5%">09</span><span style="left:50%">12</span><span style="left:62.5%">15</span><span style="left:87.5%">21</span><span style="left:100%">24</span></div>' +
       '<div class="day-rail-actions" id="dayRailActions" hidden>' +
-      '<button type="button" class="key ghost" id="railStep">+1 hour</button>' +
-      '<button type="button" class="key" id="railWalk">Walk the day</button></div>';
+      '<button type="button" class="key" id="railWalk">Walk the day</button>' +
+      '<button type="button" class="key ghost" id="railStep">+1 hour</button></div>';
     const head = document.querySelector(".masthead");
     if (head && head.parentNode) head.parentNode.insertBefore(box, head.nextSibling);
     else document.querySelector(".page").insertBefore(box, document.querySelector(".page").firstChild);
