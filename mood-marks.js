@@ -7,9 +7,10 @@
     s.id = "mood-marks-css";
     s.textContent =
       ".mood-row{display:flex;justify-content:center;gap:.55rem;margin:.55rem 0 .2rem}" +
-      ".mood-key{min-width:3.1rem;min-height:3.1rem;font-size:1.6rem;line-height:1;display:inline-flex;align-items:center;justify-content:center;border:1px solid var(--gold-deep,#6a5228);background:var(--gold,#8a6d3b);color:var(--paper,#f3ead6);padding:0;border-radius:2px}" +
-      "html[data-theme='dark'] .mood-key{background:#5a4c38;border-color:var(--gold,#c4a056)}" +
-      ".mood-key.active{outline:2px solid var(--rubric,#7a2418);outline-offset:2px;background:var(--gold-deep,#6a5228)}" +
+      ".mood-key{min-width:3.1rem;min-height:3.1rem;font-size:1.6rem;line-height:1;display:inline-flex;align-items:center;justify-content:center;border:1px solid var(--rule,#c4b089);background:var(--paper-2,#e9dcc0);color:var(--ink,#2a2118);padding:0;border-radius:2px}" +
+      "html[data-theme='dark'] .mood-key{background:#3d3428;border-color:var(--rule,#5a4c38);color:var(--ink,#eddcc0)}" +
+      ".mood-key.active{outline:2px solid var(--rubric,#7a2418);outline-offset:2px;background:#d4c4a0}" +
+      "html[data-theme='dark'] .mood-key.active{background:#4a4032}" +
       ".mood-key[data-mood='level']{font-size:1.4rem}";
     document.head.appendChild(s);
   }
