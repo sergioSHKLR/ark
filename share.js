@@ -10,11 +10,10 @@ function formUrlValue() {
 function bindFormUrl() {
   const input = document.getElementById("formUrl");
   if (!input) return;
-  input.value = localStorage.getItem(FORM_URL_KEY) || (localStorage.getItem("noah-demo") === "1" ? DEMO_FORM : "");
   if (localStorage.getItem("noah-demo") === "1" && !localStorage.getItem(FORM_URL_KEY)) {
     localStorage.setItem(FORM_URL_KEY, DEMO_FORM);
-    input.value = DEMO_FORM;
   }
+  input.value = localStorage.getItem(FORM_URL_KEY) || "";
   input.addEventListener("change", function () {
     localStorage.setItem(FORM_URL_KEY, input.value.trim());
   });
@@ -22,10 +21,7 @@ function bindFormUrl() {
 
 function closeShare() {
   const modal = document.getElementById("shareModal");
-  if (modal) {
-    modal.classList.remove("open");
-    modal.style.display = "none";
-  }
+  if (modal) { modal.classList.remove("open"); modal.style.display = "none"; }
 }
 
 function sharePayload(includeNote) {
@@ -101,12 +97,12 @@ function bindShare() {
 }
 
 window.addEventListener("load", function () {
-  ["office-year.js", "ui63.js", "settle-build.js", "onboard-pt.js", "listen-desk.js", "day-rail.js", "candle-flicker.js", "office-tidy.js"].forEach(function (src) {
+  ["office-year.js", "ui63.js", "settle-build.js", "onboard-pt.js", "listen-desk.js", "listen-lock.js", "day-rail.js", "candle-flicker.js", "office-tidy.js"].forEach(function (src) {
     const id = src.replace(".", "-");
     if (document.getElementById(id)) return;
     const s = document.createElement("script");
     s.id = id;
-    s.src = src + "?v=71";
+    s.src = src + "?v=72";
     document.body.appendChild(s);
   });
 });
