@@ -97,12 +97,12 @@ function bindShare() {
 }
 
 window.addEventListener("load", function () {
-  ["office-year.js", "ui63.js", "settle-build.js", "onboard-pt.js", "listen-desk.js", "listen-lock.js", "day-rail.js", "candle-flicker.js", "office-tidy.js", "mood-marks.js"].forEach(function (src) {
+  ["office-year.js", "ui63.js", "settle-build.js", "onboard-pt.js", "listen-desk.js", "listen-lock.js", "day-rail.js", "candle-flicker.js", "office-tidy.js", "mood-marks.js", "scroll-btn.js"].forEach(function (src) {
     const id = src.replace(".", "-");
     if (document.getElementById(id)) return;
     const s = document.createElement("script");
     s.id = id;
-    s.src = src + "?v=73";
+    s.src = src + "?v=74";
     document.body.appendChild(s);
   });
 });
