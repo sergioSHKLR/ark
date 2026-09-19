@@ -1,6 +1,22 @@
 (function () {
+  const DEMO_KEY = "noah-demo";
   const MOODS = ["blessed", "level", "heavy"];
   const GLYPH = { blessed: "\uD83D\uDD4A\uFE0F", level: "\u00B7", heavy: "\uD83E\uDEA8" };
+
+  function isDemo() {
+    try {
+      const q = new URLSearchParams(location.search).get("demo");
+      if (q === "0" || q === "off") {
+        localStorage.removeItem(DEMO_KEY);
+        return false;
+      }
+      if (q === "1" || q === "on") {
+        localStorage.setItem(DEMO_KEY, "1");
+        return true;
+      }
+    } catch (e) {}
+    return localStorage.getItem(DEMO_KEY) === "1";
+  }
 
   function injectStyle() {
     if (document.getElementById("ui63-css")) return;
@@ -24,12 +40,106 @@
       ".settings-btn{right:0;left:auto}" +
       "#pane-listen .chant-hidden{position:static;width:100%;height:auto;margin:0 0 .55rem;clip:auto;overflow:visible}" +
       "#pane-listen #chantMount{position:relative;width:100%;aspect-ratio:16/9;background:#140f0c;border:1px solid var(--rule);overflow:hidden}" +
-      "#pane-listen #chantMount iframe{width:100%;height:100%;border:0;display:block}";
+      "#pane-listen #chantMount iframe{width:100%;height:100%;border:0;display:block}" +
+      ".demo-banner{text-align:center;font-size:.72rem;letter-spacing:.14em;text-transform:uppercase;color:var(--rubric);margin:0 0 .7rem}";
     document.head.appendChild(s);
   }
 
   function signedIn() {
+    if (isDemo()) return true;
     return typeof driveToken === "string" && !!driveToken;
+  }
+
+  function shiftDate(iso, days) {
+    const p = iso.split("-").map(Number);
+    const d = new Date(p[0], p[1] - 1, p[2]);
+    d.setDate(d.getDate() + days);
+    const y = d.getFullYear();
+    const m = String(d.getMonth() + 1).padStart(2, "0");
+    const day = String(d.getDate()).padStart(2, "0");
+    return y + "-" + m + "-" + day;
+  }
+
+  function seedDemoJournal() {
+    if (typeof loadJournal !== "function" || typeof saveJournalSilent !== "function")
+      return;
+    const today = typeof todayKey === "function" ? todayKey() : new Date().toISOString().slice(0, 10);
+    const data = loadJournal();
+    const pack = {};
+    pack[shiftDate(today, -3)] = {
+      notes: { morning: "Demo morning. The hour held.", day: "Demo midday. One act.", night: "Demo night. Quiet." },
+      mood: { morning: "blessed", day: "level", night: "heavy" },
+      updatedAt: shiftDate(today, -3) + "T21:40:00",
+    };
+    pack[shiftDate(today, -2)] = {
+      notes: { morning: "Kept the film and the prayer." },
+      mood: { morning: "level" },
+      updatedAt: shiftDate(today, -2) + "T08:10:00",
+    };
+    pack[shiftDate(today, -1)] = {
+      notes: { morning: "Out the door after the lesson.", day: "Kept one tongue." },
+      mood: { morning: "blessed", day: "blessed" },
+      updatedAt: shiftDate(today, -1) + "T15:02:00",
+    };
+    pack[today] = data[today] || { notes: {}, mood: {}, updatedAt: today + "T12:00:00" };
+    Object.keys(pack).forEach(function (k) {
+      if (!data[k] || !data[k].notes || !Object.keys(data[k].notes).length)
+        data[k] = pack[k];
+    });
+    saveJournalSilent(data);
+    if (typeof renderLog === "function") renderLog();
+  }
+
+  function openDemoOffice() {
+    if (typeof driveToken === "string" && !driveToken) driveToken = "demo";
+    const gate = document.getElementById("connectCard");
+    if (gate) gate.hidden = true;
+    const closed = document.getElementById("officeClosed");
+    if (closed) closed.hidden = true;
+    document.querySelectorAll(".pane").forEach(function (p) {
+      p.hidden = p.id !== "pane-morning";
+    });
+    document.querySelectorAll("textarea.note[data-slot]").forEach(function (el) {
+      el.disabled = false;
+    });
+    if (typeof gateOfficeForm === "function") gateOfficeForm("morning", "open");
+    if (typeof hideConnectGate === "function") hideConnectGate();
+    if (typeof renderLesson === "function") renderLesson();
+    if (typeof renderFilm === "function") renderFilm();
+    if (typeof renderOurFather === "function") renderOurFather();
+    if (typeof renderLog === "function") renderLog();
+    let banner = document.getElementById("demoBanner");
+    if (!banner) {
+      banner = document.createElement("p");
+      banner.id = "demoBanner";
+      banner.className = "demo-banner";
+      const page = document.querySelector(".page");
+      if (page) page.insertBefore(banner, page.children[1] || null);
+    }
+    banner.textContent = "Demo · mock log · office open";
+  }
+
+  function addDemoToggle() {
+    const box = document.querySelector("#settingsModal .build-block");
+    if (!box || document.getElementById("demoToggle")) return;
+    const row = document.createElement("div");
+    row.className = "remind-row";
+    row.innerHTML =
+      '<label for="demoToggle">Demo</label><input type="checkbox" id="demoToggle" />';
+    box.parentNode.insertBefore(row, box);
+    const input = row.querySelector("#demoToggle");
+    input.checked = isDemo();
+    input.addEventListener("change", function () {
+      if (input.checked) {
+        localStorage.setItem(DEMO_KEY, "1");
+        seedDemoJournal();
+        openDemoOffice();
+      } else {
+        localStorage.removeItem(DEMO_KEY);
+        if (typeof driveToken === "string" && driveToken === "demo") driveToken = "";
+        location.reload();
+      }
+    });
   }
 
   function isDark() {
@@ -183,12 +293,35 @@
       revealChant();
       return;
     }
+    if (isDemo() && mode === "write") {
+      openDemoOffice();
+      return;
+    }
     if (mode === "write" && typeof landingPane === "function" && prevShow) {
       prevShow(landingPane());
       return;
     }
     if (prevShow) prevShow(name);
   };
+
+  const prevSave = typeof saveOffice === "function" ? saveOffice : null;
+  if (prevSave) {
+    window.saveOffice = function (pane) {
+      if (!isDemo()) return prevSave(pane);
+      const area = document.querySelector("#pane-" + pane + " textarea.note[data-slot]");
+      const text = area ? area.value : "";
+      const now = typeof TIMENOW === "function" ? TIMENOW() : { date: new Date().toISOString().slice(0, 10) };
+      const j = loadJournal();
+      const k = now.date;
+      j[k] = j[k] || { checks: {}, notes: {}, media: {}, mood: {} };
+      j[k].notes[pane] = text;
+      j[k].updatedAt = new Date().toISOString();
+      saveJournalSilent(j);
+      const meta = document.querySelector('[data-window-meta="' + pane + '"]');
+      if (meta) meta.textContent = typeof t === "function" ? t("savedOk") : "Saved.";
+      if (typeof renderLog === "function") renderLog();
+    };
+  }
 
   function boot() {
     injectStyle();
@@ -197,6 +330,12 @@
     ensureMood();
     retargetNav();
     applyCandle();
+    addDemoToggle();
+    if (isDemo()) {
+      seedDemoJournal();
+      openDemoOffice();
+      return;
+    }
     if (signedIn() && typeof showPane === "function") showPane("write");
   }
 
