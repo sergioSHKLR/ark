@@ -8,6 +8,7 @@
   ];
   let idx = 0;
   let playing = false;
+  let primed = false;
 
   function css() {
     if (document.getElementById("listen-desk-css")) return;
@@ -43,37 +44,64 @@
     );
   }
 
+  function iframe() {
+    return document.querySelector("#listenPlayer iframe");
+  }
+
   function command(func) {
-    const iframe = document.querySelector("#listenPlayer iframe");
-    if (iframe && iframe.contentWindow) {
-      iframe.contentWindow.postMessage(
+    const el = iframe();
+    if (el && el.contentWindow) {
+      el.contentWindow.postMessage(
         JSON.stringify({ event: "command", func: func, args: [] }),
         "*"
       );
     }
   }
 
-  function paint(autoplay) {
+  function load(autoplay) {
     const item = LIST[idx];
     const title = document.getElementById("listenTitle");
     const frame = document.getElementById("listenPlayer");
     if (title) title.textContent = item.title;
     if (!frame) return;
-    const iframe = frame.querySelector("iframe");
-    if (iframe && iframe.getAttribute("data-yt") === item.yt && !autoplay) return;
+    const el = iframe();
+    if (el && el.getAttribute("data-yt") === item.yt) return;
+    primed = false;
     frame.innerHTML =
       '<iframe data-yt="' +
       item.yt +
       '" src="' +
       src(item.yt, !!autoplay) +
       '" allow="autoplay; encrypted-media" title="Canto" tabindex="-1"></iframe>';
+    primed = !!autoplay;
   }
 
-  function setPlayLabel() {
+  function setPlaying(on) {
+    playing = !!on;
     const btn = document.getElementById("listenPlay");
     if (!btn) return;
+    btn.setAttribute("data-playing", playing ? "1" : "0");
     const pt = typeof lang === "string" && lang === "pt";
     btn.textContent = playing ? (pt ? "Pausar" : "Pause") : pt ? "Tocar" : "Play";
+  }
+
+  function play() {
+    const item = LIST[idx];
+    const el = iframe();
+    if (!el || el.getAttribute("data-yt") !== item.yt) {
+      load(true);
+    } else if (!primed) {
+      command("playVideo");
+    } else {
+      command("playVideo");
+    }
+    primed = true;
+    setPlaying(true);
+  }
+
+  function pause() {
+    command("pauseVideo");
+    setPlaying(false);
   }
 
   function mount() {
@@ -87,38 +115,28 @@
         '<div id="listenPlayer" class="listen-player-sr" aria-hidden="true"></div>' +
         '<div class="desk-keys">' +
         '<button class="key" type="button" id="listenPrev">Anterior</button>' +
-        '<button class="key" type="button" id="listenPlay">Tocar</button>' +
+        '<button class="key" type="button" id="listenPlay" data-playing="0">Tocar</button>' +
         '<button class="key" type="button" id="listenNext">Pr\u00f3ximo</button>' +
         "</div>" +
         '<p class="desk-foot" id="listenFoot">Canto</p>' +
         "</div></div>";
       document.getElementById("listenPrev").addEventListener("click", function () {
         idx = (idx + LIST.length - 1) % LIST.length;
-        playing = false;
-        paint(false);
-        setPlayLabel();
+        pause();
+        load(false);
       });
       document.getElementById("listenNext").addEventListener("click", function () {
         idx = (idx + 1) % LIST.length;
-        playing = false;
-        paint(false);
-        setPlayLabel();
+        pause();
+        load(false);
       });
       document.getElementById("listenPlay").addEventListener("click", function () {
-        if (playing) {
-          command("pauseVideo");
-          playing = false;
-          setPlayLabel();
-          return;
-        }
-        paint(true);
-        command("playVideo");
-        playing = true;
-        setPlayLabel();
+        if (playing) pause();
+        else play();
       });
     }
-    paint(false);
-    setPlayLabel();
+    load(false);
+    setPlaying(playing);
   }
 
   const prev = window.showPane;

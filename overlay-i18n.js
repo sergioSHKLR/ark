@@ -4,8 +4,8 @@
       walk: "Walk the day", pause: "Pause walk", hour: "+1 hour",
       morningOpen: "Morning open", dayOpen: "Day open", nightOpen: "Night open",
       closed: "Closed", next: "Next office", camera: "Camera", library: "Library",
-      desk: "Desk", prev: "Prev", play: "Play", nextChant: "Next",
-      chantFoot: "Gregorian chant. YouTube until local files exist.",
+      desk: "Desk", prev: "Prev", play: "Play", pauseChant: "Pause", nextChant: "Next",
+      chantFoot: "Gregorian chant. Sound only.",
       write: "Write", listen: "Listen", log: "Log",
       morning: "Morning", day: "Day", night: "Night"
     },
@@ -13,8 +13,8 @@
       walk: "Percorrer o dia", pause: "Pausar", hour: "+1 hora",
       morningOpen: "Manh\u00e3 aberta", dayOpen: "Dia aberto", nightOpen: "Noite aberta",
       closed: "Fechado", next: "Pr\u00f3ximo of\u00edcio", camera: "C\u00e2mera", library: "Galeria",
-      desk: "Mesa", prev: "Anterior", play: "Tocar", nextChant: "Pr\u00f3ximo",
-      chantFoot: "Canto gregoriano. YouTube, enquanto n\u00e3o houver arquivos locais.",
+      desk: "Mesa", prev: "Anterior", play: "Tocar", pauseChant: "Pausar", nextChant: "Pr\u00f3ximo",
+      chantFoot: "Canto gregoriano. S\u00f3 o som.",
       write: "Escrever", listen: "Ouvir", log: "Registro",
       morning: "Manh\u00e3", day: "Dia", night: "Noite"
     }
@@ -85,7 +85,8 @@
     const desk = document.querySelector("#pane-listen .desk h3");
     if (desk) desk.textContent = t("desk");
     const prev = document.getElementById("listenPrev"); if (prev) prev.textContent = t("prev");
-    const play = document.getElementById("listenPlay"); if (play) play.textContent = t("play");
+    const play = document.getElementById("listenPlay");
+    if (play) play.textContent = play.getAttribute("data-playing") === "1" ? t("pauseChant") : t("play");
     const next = document.getElementById("listenNext"); if (next) next.textContent = t("nextChant");
     const foot = document.querySelector("#pane-listen .desk-foot"); if (foot) foot.textContent = t("chantFoot");
     if (typeof applyI18n === "function") applyI18n();
