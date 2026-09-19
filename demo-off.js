@@ -10,7 +10,19 @@
     } catch (e) {}
     return localStorage.getItem("noah-demo") !== "1";
   }
+  function hideDemoUi() {
+    const input = document.getElementById("demoToggle");
+    if (input) {
+      const row = input.closest(".remind-row") || input.parentNode;
+      if (row) row.style.display = "none";
+    }
+    document.querySelectorAll("label[for='demoToggle']").forEach(function (el) {
+      const row = el.closest(".remind-row") || el.parentNode;
+      if (row) row.style.display = "none";
+    });
+  }
   function apply() {
+    hideDemoUi();
     if (!off()) return;
     const actions = document.getElementById("dayRailActions");
     if (actions) actions.hidden = true;
