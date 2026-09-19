@@ -4,6 +4,18 @@
     { id: "midday", start: 12, end: 15 },
     { id: "night", start: 21, end: 24 }
   ];
+  const COPY = {
+    en: {
+      walk: "Walk the day", pause: "Pause walk", hour: "+1 hour",
+      morningOpen: "Morning open", dayOpen: "Day open", nightOpen: "Night open",
+      closed: "Closed", next: "Next office", midday: "midday", morning: "morning", night: "night"
+    },
+    pt: {
+      walk: "Percorrer o dia", pause: "Pausar", hour: "+1 hora",
+      morningOpen: "Manh\u00e3 aberta", dayOpen: "Dia aberto", nightOpen: "Noite aberta",
+      closed: "Fechado", next: "Pr\u00f3ximo of\u00edcio", midday: "meio-dia", morning: "manh\u00e3", night: "noite"
+    }
+  };
   const DAY_MS = 48000;
   let demoOn = false;
   let walking = false;
@@ -14,6 +26,17 @@
   let lastKind = "";
   const realTIME = typeof TIMENOW === "function" ? TIMENOW : null;
 
+  function langNow() {
+    try {
+      const s = localStorage.getItem("noah-lang");
+      if (s === "pt" || s === "en") return s;
+    } catch (e) {}
+    if (typeof lang === "string" && (lang === "pt" || lang === "en")) return lang;
+    return (navigator.language || "en").toLowerCase().indexOf("pt") === 0 ? "pt" : "en";
+  }
+  function tx(k) {
+    return (COPY[langNow()] || COPY.en)[k] || COPY.en[k] || k;
+  }
   function listening() {
     return document.documentElement.getAttribute("data-listen") === "1" ||
       !!(document.querySelector('.nav-bar button[data-pane="listen"].active'));
@@ -80,13 +103,18 @@
     if (needle) needle.style.left = left + "%";
     if (clock) clock.textContent = String(n.hour).padStart(2, "0") + ":" + String(n.minute).padStart(2, "0");
     if (state) {
-      state.textContent = n.open ? (n.period === "midday" ? "Day open" : n.period === "morning" ? "Morning open" : "Night open") : "Closed";
+      state.textContent = n.open
+        ? n.period === "midday" ? tx("dayOpen") : n.period === "morning" ? tx("morningOpen") : tx("nightOpen")
+        : tx("closed");
     }
+    const walk = document.getElementById("railWalk");
+    if (walk) walk.textContent = walking ? tx("pause") : tx("walk");
+    const step = document.getElementById("railStep");
+    if (step) step.textContent = tx("hour");
     document.querySelectorAll(".day-rail-win").forEach(function (el) {
       const id = el.getAttribute("data-win");
       const w = WINDOWS.filter(function (x) { return x.id === id; })[0];
-      const h = hoursNow();
-      el.classList.toggle("is-open", !!(w && h >= w.start && h < w.end));
+      el.classList.toggle("is-open", !!(w && hoursNow() >= w.start && hoursNow() < w.end));
     });
   }
 
@@ -123,7 +151,7 @@
     } else if (closed) {
       closed.hidden = false;
       const body = document.getElementById("officeClosedBody");
-      if (body) body.textContent = "Next office " + (n.nextAt || "") + " · " + (n.nextPeriod || "");
+      if (body) body.textContent = tx("next") + " " + (n.nextAt || "") + " \u00b7 " + tx(n.nextPeriod || "morning");
     }
     if (typeof renderDateLine === "function") renderDateLine();
   }
@@ -132,20 +160,17 @@
     demoMin = ((min % 1440) + 1440) % 1440;
     applyOffice(!!forceOffice);
   }
-
   function tickWalk(now) {
     if (!walking) return;
     const t = (now - walkStarted) / DAY_MS;
-    const loop = t - Math.floor(t);
-    demoMin = (walkFrom + loop * 1440) % 1440;
+    demoMin = (walkFrom + (t - Math.floor(t)) * 1440) % 1440;
     applyOffice(false);
     walkRaf = requestAnimationFrame(tickWalk);
   }
-
   function toggleWalk() {
     walking = !walking;
     const btn = document.getElementById("railWalk");
-    if (btn) btn.textContent = walking ? "Pause walk" : "Walk the day";
+    if (btn) btn.textContent = walking ? tx("pause") : tx("walk");
     if (walking) {
       walkFrom = demoMin == null ? 0 : demoMin;
       walkStarted = performance.now();
@@ -155,7 +180,6 @@
       walkRaf = 0;
     }
   }
-
   function stepDemo() {
     if (walking) toggleWalk();
     setDemoMin((demoMin == null ? 0 : demoMin) + 60, true);
@@ -163,16 +187,7 @@
 
   function mountRail() {
     inject();
-    if (document.getElementById("dayRail")) {
-      const actions = document.getElementById("dayRailActions");
-      if (actions) {
-        const walk = document.getElementById("railWalk");
-        const step = document.getElementById("railStep");
-        if (walk && step && walk.nextElementSibling !== step) actions.appendChild(step);
-      }
-      paintRail();
-      return;
-    }
+    if (document.getElementById("dayRail")) { paintRail(); return; }
     const box = document.createElement("div");
     box.className = "day-rail";
     box.id = "dayRail";
@@ -186,16 +201,15 @@
       '<span class="day-rail-needle" id="dayRailNeedle"></span></div>' +
       '<div class="day-rail-ticks"><span style="left:0">00</span><span style="left:20.833%">05</span><span style="left:37.5%">09</span><span style="left:50%">12</span><span style="left:62.5%">15</span><span style="left:87.5%">21</span><span style="left:100%">24</span></div>' +
       '<div class="day-rail-actions" id="dayRailActions" hidden>' +
-      '<button type="button" class="key" id="railWalk">Walk the day</button>' +
-      '<button type="button" class="key ghost" id="railStep">+1 hour</button></div>';
+      '<button type="button" class="key" id="railWalk"></button>' +
+      '<button type="button" class="key ghost" id="railStep"></button></div>';
     const head = document.querySelector(".masthead");
     if (head && head.parentNode) head.parentNode.insertBefore(box, head.nextSibling);
     else document.querySelector(".page").insertBefore(box, document.querySelector(".page").firstChild);
-    const track = document.getElementById("dayRailTrack");
-    track.addEventListener("click", function (e) {
+    document.getElementById("dayRailTrack").addEventListener("click", function (e) {
       if (!demoOn) return;
       if (walking) toggleWalk();
-      const r = track.getBoundingClientRect();
+      const r = e.currentTarget.getBoundingClientRect();
       setDemoMin(Math.round(Math.max(0, Math.min(1, (e.clientX - r.left) / r.width)) * 1440), true);
     });
     document.getElementById("railStep").addEventListener("click", stepDemo);
