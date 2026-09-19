@@ -3,8 +3,8 @@
   const STEPS = [
     {
       kicker: "O of\u00edcio",
-      title: "Tr\u00eas horas. Uma casa.",
-      body: "De manh\u00e3 o Evangelho (v\u00eddeos da Igreja). Ao meio-dia o mapa (Bible Project). \u00c0 noite um verso \u2014 salmo ou profeta."
+      title: "Tr\u00eas per\u00edodos. Uma casa.",
+      body: "De manh\u00e3 o Evangelho (v\u00eddeos da Igreja). Ao meio-dia o mapa (Bible Project). \u00c0 noite um verso \u2014 salmo ou profeta. A qualquer hora, cantos gregorianos."
     },
     {
       kicker: "A janela",
@@ -14,7 +14,7 @@
     {
       kicker: "Os tr\u00eas bot\u00f5es",
       title: "Escrever \u00b7 Ouvir \u00b7 Registro",
-      body: "Escrever \u00e9 o of\u00edcio do momento. Ouvir \u00e9 canto gregoriano. Registro \u00e9 o que j\u00e1 foi guardado \u2014 s\u00f3 leitura. A vela troca claro e escuro."
+      body: "Escrever \u00e9 o of\u00edcio do momento. Ouvir \u00e9 o canto. Registro \u00e9 o que j\u00e1 foi guardado \u2014 s\u00f3 leitura. A vela troca claro e escuro."
     }
   ];
 
