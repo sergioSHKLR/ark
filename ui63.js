@@ -2,6 +2,16 @@
   const DEMO_KEY = "noah-demo";
   const MOODS = ["blessed", "level", "heavy"];
   const GLYPH = { blessed: "\uD83D\uDD4A\uFE0F", level: "\u00B7", heavy: "\uD83E\uDEA8" };
+  const BIBLE_PROJECT = [
+    { id: "Q0BrP8bqj0c", title: "New Testament overview", ref: "NT" },
+    { id: "3Dv4-n6OYGI", title: "Matthew 1–13", ref: "Matthew 1–13" },
+    { id: "GGCF3OPWN14", title: "Matthew 14–28", ref: "Matthew 14–28" },
+    { id: "HGHqu9-DtXk", title: "Mark", ref: "Mark" },
+    { id: "XIb_dCIxzr0", title: "Luke 1–9", ref: "Luke 1–9" },
+    { id: "26z_KhwNdD8", title: "Luke 10–24", ref: "Luke 10–24" },
+    { id: "G-2e9mMf7E8", title: "John 1–12", ref: "John 1–12" },
+    { id: "RUfh_wOsauk", title: "John 13–21", ref: "John 13–21" }
+  ];
 
   function isDemo() {
     try {
@@ -31,8 +41,6 @@
       ".candle-btn .candle-unlit{filter:grayscale(1);opacity:.72}" +
       ".office-ticks{display:flex;justify-content:center;gap:1.1rem;margin:.15rem 0;font-size:.62rem;letter-spacing:.12em;text-transform:uppercase;color:var(--ink-soft)}" +
       ".office-ticks .is-now{color:var(--rubric)}" +
-      ".office-ticks .is-kept::after{content:' \u2713';color:var(--gold)}" +
-      ".office-ticks .is-missed::after{content:' \u00d7';color:var(--rubric)}" +
       ".nav-bar{grid-template-columns:1fr 1fr 1fr}" +
       ".mood-row{display:flex;justify-content:center;gap:.45rem;margin:.55rem 0 .15rem}" +
       ".mood-key{min-width:2.6rem;min-height:2.6rem;border:1px solid var(--rule);background:var(--paper);cursor:pointer}" +
@@ -41,7 +49,8 @@
       "#pane-listen .chant-hidden{position:static;width:100%;height:auto;margin:0 0 .55rem;clip:auto;overflow:visible}" +
       "#pane-listen #chantMount{position:relative;width:100%;aspect-ratio:16/9;background:#140f0c;border:1px solid var(--rule);overflow:hidden}" +
       "#pane-listen #chantMount iframe{width:100%;height:100%;border:0;display:block}" +
-      ".demo-banner{text-align:center;font-size:.72rem;letter-spacing:.14em;text-transform:uppercase;color:var(--rubric);margin:0 0 .7rem}";
+      ".demo-banner{text-align:center;font-size:.72rem;letter-spacing:.14em;text-transform:uppercase;color:var(--rubric);margin:0 0 .7rem}" +
+      "#bpFilm .film-frame{margin:.4rem 0}";
     document.head.appendChild(s);
   }
 
@@ -50,41 +59,65 @@
     return typeof driveToken === "string" && !!driveToken;
   }
 
+  function useGospelFilms() {
+    if (typeof filmList === "undefined" || !filmList.length) return;
+    filmList = filmList.filter(function (f) {
+      return f && f.id && String(f.id).indexOf("noah") !== 0;
+    });
+    if (typeof renderFilm === "function") renderFilm();
+  }
+
+  function pickBibleProject() {
+    const key = typeof todayKey === "function" ? todayKey() : new Date().toISOString().slice(0, 10);
+    let h = 0;
+    for (let i = 0; i < key.length; i++) h = (h * 31 + key.charCodeAt(i)) >>> 0;
+    return BIBLE_PROJECT[h % BIBLE_PROJECT.length];
+  }
+
+  function mountBibleProject() {
+    const pane = document.getElementById("pane-day");
+    if (!pane) return;
+    let card = document.getElementById("bpFilm");
+    const item = pickBibleProject();
+    if (!card) {
+      card = document.createElement("div");
+      card.id = "bpFilm";
+      card.className = "film";
+      const reflect = document.getElementById("middayReflect");
+      const body = pane.querySelector(".office-body") || pane;
+      body.insertBefore(card, reflect || body.firstChild);
+    }
+    card.innerHTML =
+      "<h3>Bible Project</h3>" +
+      '<p class="film-title">' +
+      item.title +
+      "</p>" +
+      '<p class="film-ref">' +
+      item.ref +
+      "</p>" +
+      '<div class="film-frame"><iframe src="https://www.youtube-nocookie.com/embed/' +
+      item.id +
+      '?rel=0&modestbranding=1&playsinline=1" allow="accelerometer; autoplay; encrypted-media; picture-in-picture" allowfullscreen title="Bible Project"></iframe></div>' +
+      '<p class="film-foot">Noon reading. Animation, then the keep.</p>';
+  }
+
   function shiftDate(iso, days) {
     const p = iso.split("-").map(Number);
     const d = new Date(p[0], p[1] - 1, p[2]);
     d.setDate(d.getDate() + days);
-    const y = d.getFullYear();
-    const m = String(d.getMonth() + 1).padStart(2, "0");
-    const day = String(d.getDate()).padStart(2, "0");
-    return y + "-" + m + "-" + day;
+    return d.getFullYear() + "-" + String(d.getMonth() + 1).padStart(2, "0") + "-" + String(d.getDate()).padStart(2, "0");
   }
 
   function seedDemoJournal() {
-    if (typeof loadJournal !== "function" || typeof saveJournalSilent !== "function")
-      return;
+    if (typeof loadJournal !== "function" || typeof saveJournalSilent !== "function") return;
     const today = typeof todayKey === "function" ? todayKey() : new Date().toISOString().slice(0, 10);
     const data = loadJournal();
     const pack = {};
-    pack[shiftDate(today, -3)] = {
-      notes: { morning: "Demo morning. The hour held.", day: "Demo midday. One act.", night: "Demo night. Quiet." },
-      mood: { morning: "blessed", day: "level", night: "heavy" },
-      updatedAt: shiftDate(today, -3) + "T21:40:00",
-    };
-    pack[shiftDate(today, -2)] = {
-      notes: { morning: "Kept the film and the prayer." },
-      mood: { morning: "level" },
-      updatedAt: shiftDate(today, -2) + "T08:10:00",
-    };
-    pack[shiftDate(today, -1)] = {
-      notes: { morning: "Out the door after the lesson.", day: "Kept one tongue." },
-      mood: { morning: "blessed", day: "blessed" },
-      updatedAt: shiftDate(today, -1) + "T15:02:00",
-    };
-    pack[today] = data[today] || { notes: {}, mood: {}, updatedAt: today + "T12:00:00" };
+    pack[shiftDate(today, -3)] = { notes: { morning: "Demo morning.", day: "Demo midday.", night: "Demo night." }, updatedAt: shiftDate(today, -3) + "T21:40:00" };
+    pack[shiftDate(today, -2)] = { notes: { morning: "Kept the film." }, updatedAt: shiftDate(today, -2) + "T08:10:00" };
+    pack[shiftDate(today, -1)] = { notes: { morning: "Out after the lesson.", day: "Kept one tongue." }, updatedAt: shiftDate(today, -1) + "T15:02:00" };
     Object.keys(pack).forEach(function (k) {
-      if (!data[k] || !data[k].notes || !Object.keys(data[k].notes).length)
-        data[k] = pack[k];
+      if (!data[k] || !data[k].notes || !Object.keys(data[k].notes).length) data[k] = pack[k];
     });
     saveJournalSilent(data);
     if (typeof renderLog === "function") renderLog();
@@ -107,6 +140,7 @@
     if (typeof renderLesson === "function") renderLesson();
     if (typeof renderFilm === "function") renderFilm();
     if (typeof renderOurFather === "function") renderOurFather();
+    mountBibleProject();
     if (typeof renderLog === "function") renderLog();
     let banner = document.getElementById("demoBanner");
     if (!banner) {
@@ -116,7 +150,7 @@
       const page = document.querySelector(".page");
       if (page) page.insertBefore(banner, page.children[1] || null);
     }
-    banner.textContent = "Demo · mock log · office open";
+    banner.textContent = "Demo \u00b7 mock log \u00b7 office open";
   }
 
   function addDemoToggle() {
@@ -124,8 +158,7 @@
     if (!box || document.getElementById("demoToggle")) return;
     const row = document.createElement("div");
     row.className = "remind-row";
-    row.innerHTML =
-      '<label for="demoToggle">Demo</label><input type="checkbox" id="demoToggle" />';
+    row.innerHTML = '<label for="demoToggle">Demo</label><input type="checkbox" id="demoToggle" />';
     box.parentNode.insertBefore(row, box);
     const input = row.querySelector("#demoToggle");
     input.checked = isDemo();
@@ -144,28 +177,18 @@
 
   function isDark() {
     const theme = localStorage.getItem("noah-theme") || "system";
-    return (
-      theme === "dark" ||
-      (theme !== "light" &&
-        window.matchMedia &&
-        window.matchMedia("(prefers-color-scheme: dark)").matches)
-    );
+    return theme === "dark" || (theme !== "light" && window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches);
   }
 
   function applyCandle() {
     const btn = document.getElementById("candleBtn");
-    if (!btn) return;
-    btn.classList.toggle("is-lit", isDark());
+    if (btn) btn.classList.toggle("is-lit", isDark());
   }
 
   function toggleCandle() {
     const next = isDark() ? "light" : "dark";
     localStorage.setItem("noah-theme", next);
-    if (next === "light" || next === "dark")
-      document.documentElement.setAttribute("data-theme", next);
-    document.querySelectorAll("[data-theme-choice]").forEach(function (x) {
-      x.classList.toggle("active", x.getAttribute("data-theme-choice") === next);
-    });
+    document.documentElement.setAttribute("data-theme", next);
     if (typeof applyTheme === "function") applyTheme();
     applyCandle();
   }
@@ -177,9 +200,7 @@
       c.type = "button";
       c.id = "candleBtn";
       c.className = "candle-btn";
-      c.setAttribute("aria-label", "Theme");
-      c.innerHTML =
-        '<span class="candle-unlit" aria-hidden="true">\uD83D\uDD6F\uFE0F</span><span class="candle-lit" aria-hidden="true">\uD83D\uDD6F\uFE0F</span>';
+      c.innerHTML = '<span class="candle-unlit">\uD83D\uDD6F\uFE0F</span><span class="candle-lit">\uD83D\uDD6F\uFE0F</span>';
       c.addEventListener("click", toggleCandle);
       head.insertBefore(c, head.firstChild);
     }
@@ -187,15 +208,14 @@
       const ticks = document.createElement("div");
       ticks.id = "officeTicks";
       ticks.className = "office-ticks";
-      ticks.innerHTML =
-        '<span data-tick="morning">Morning</span><span data-tick="day">Day</span><span data-tick="night">Night</span>';
+      ticks.innerHTML = '<span data-tick="morning">Morning</span><span data-tick="day">Day</span><span data-tick="night">Night</span>';
       const rule = head.querySelector(".rule");
       head.insertBefore(ticks, rule || null);
     }
     const gear = document.getElementById("settingsBtn");
     if (gear) gear.textContent = "\u2699";
     const line = document.getElementById("buildLine");
-    if (line) line.textContent = (typeof t === "function" ? t("buildLabel") : "Build") + " 63";
+    if (line) line.textContent = "Build 63";
   }
 
   function revealChant() {
@@ -210,23 +230,22 @@
   }
 
   function ensureListenPane() {
-    if (document.getElementById("pane-listen")) {
-      revealChant();
-      return;
+    if (!document.getElementById("pane-listen")) {
+      const listen = document.createElement("section");
+      listen.className = "pane";
+      listen.id = "pane-listen";
+      listen.hidden = true;
+      const body = document.createElement("div");
+      body.className = "office-body";
+      listen.appendChild(body);
+      const desk = document.querySelector("#pane-day .desk");
+      if (desk) body.appendChild(desk);
+      const log = document.getElementById("pane-log");
+      if (log && log.parentNode) log.parentNode.insertBefore(listen, log);
     }
-    const listen = document.createElement("section");
-    listen.className = "pane";
-    listen.id = "pane-listen";
-    listen.hidden = true;
-    const body = document.createElement("div");
-    body.className = "office-body";
-    listen.appendChild(body);
-    const desk = document.querySelector("#pane-day .desk");
-    const sleep = document.querySelector("#pane-night .sleep-row");
-    if (desk) body.appendChild(desk);
-    if (sleep) body.appendChild(sleep);
-    const log = document.getElementById("pane-log");
-    if (log && log.parentNode) log.parentNode.insertBefore(listen, log);
+    const sleep = document.querySelector("#pane-listen .sleep-row");
+    const night = document.querySelector("#pane-night .office-body") || document.getElementById("pane-night");
+    if (sleep && night) night.appendChild(sleep);
     revealChant();
   }
 
@@ -241,7 +260,7 @@
       MOODS.forEach(function (m) {
         const b = document.createElement("button");
         b.type = "button";
-        b.className = "mood-key" + (m === "level" ? " is-level" : "");
+        b.className = "mood-key";
         b.setAttribute("data-mood", m);
         b.textContent = GLYPH[m];
         row.appendChild(b);
@@ -293,6 +312,10 @@
       revealChant();
       return;
     }
+    if (mode === "log" && isDemo() && prevShow) {
+      prevShow("log");
+      return;
+    }
     if (isDemo() && mode === "write") {
       openDemoOffice();
       return;
@@ -309,16 +332,12 @@
     window.saveOffice = function (pane) {
       if (!isDemo()) return prevSave(pane);
       const area = document.querySelector("#pane-" + pane + " textarea.note[data-slot]");
-      const text = area ? area.value : "";
-      const now = typeof TIMENOW === "function" ? TIMENOW() : { date: new Date().toISOString().slice(0, 10) };
       const j = loadJournal();
-      const k = now.date;
-      j[k] = j[k] || { checks: {}, notes: {}, media: {}, mood: {} };
-      j[k].notes[pane] = text;
+      const k = typeof todayKey === "function" ? todayKey() : new Date().toISOString().slice(0, 10);
+      j[k] = j[k] || { checks: {}, notes: {}, media: {} };
+      j[k].notes[pane] = area ? area.value : "";
       j[k].updatedAt = new Date().toISOString();
       saveJournalSilent(j);
-      const meta = document.querySelector('[data-window-meta="' + pane + '"]');
-      if (meta) meta.textContent = typeof t === "function" ? t("savedOk") : "Saved.";
       if (typeof renderLog === "function") renderLog();
     };
   }
@@ -331,6 +350,8 @@
     retargetNav();
     applyCandle();
     addDemoToggle();
+    useGospelFilms();
+    mountBibleProject();
     if (isDemo()) {
       seedDemoJournal();
       openDemoOffice();
@@ -339,7 +360,6 @@
     if (signedIn() && typeof showPane === "function") showPane("write");
   }
 
-  if (document.readyState === "loading")
-    document.addEventListener("DOMContentLoaded", boot);
+  if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", boot);
   else setTimeout(boot, 0);
 })();
