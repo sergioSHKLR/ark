@@ -1,4 +1,4 @@
-const CACHE_VERSION = "noah-protocol-v63";
+const CACHE_VERSION = "noah-protocol-v64";
 const ASSETS_TO_CACHE = [
   "./",
   "./index.html",
@@ -10,6 +10,8 @@ const ASSETS_TO_CACHE = [
   "./drafts.js",
   "./drive-journal.js",
   "./share.js",
+  "./ui63.js",
+  "./office-year.js",
   "./readings.js",
   "./quotes.js",
   "./lessons.js",
@@ -36,14 +38,9 @@ const ASSETS_TO_CACHE = [
 
 self.addEventListener("install", (evt) => {
   evt.waitUntil(
-    caches
-      .open(CACHE_VERSION)
-      .then((cache) =>
-        Promise.all(
-          ASSETS_TO_CACHE.map((url) => cache.add(url).catch(function () {})),
-        ),
-      )
-      .then(() => self.skipWaiting()),
+    caches.open(CACHE_VERSION).then((cache) =>
+      Promise.all(ASSETS_TO_CACHE.map((url) => cache.add(url).catch(function () {})))
+    ).then(() => self.skipWaiting())
   );
 });
 
@@ -58,58 +55,23 @@ self.addEventListener("activate", (evt) => {
 self.addEventListener("fetch", (evt) => {
   const url = new URL(evt.request.url);
   if (url.origin !== self.location.origin) return;
-  if (url.pathname.endsWith("/version.json") || url.pathname.endsWith("version.json")) {
+  if (url.pathname.endsWith("version.json") || url.pathname.indexOf("ui63.js") !== -1 || url.pathname.indexOf("office-year.js") !== -1) {
     evt.respondWith(fetch(evt.request, { cache: "no-store" }));
     return;
   }
   evt.respondWith(
-    fetch(evt.request)
-      .then((resp) => {
-        if (resp && resp.ok && evt.request.method === "GET") {
-          const clone = resp.clone();
-          caches.open(CACHE_VERSION).then((cache) => cache.put(evt.request, clone));
-        }
-        return resp;
+    fetch(evt.request).then((resp) => {
+      if (resp && resp.ok && evt.request.method === "GET") {
+        const clone = resp.clone();
+        caches.open(CACHE_VERSION).then((cache) => cache.put(evt.request, clone));
+      }
+      return resp;
+    }).catch(() =>
+      caches.match(evt.request).then((cached) => {
+        if (cached) return cached;
+        if (evt.request.mode === "navigate") return caches.match("./index.html");
+        return undefined;
       })
-      .catch(() =>
-        caches.match(evt.request).then((cached) => {
-          if (cached) return cached;
-          if (evt.request.mode === "navigate") return caches.match("./index.html");
-          return undefined;
-        }),
-      )
-  );
-});
-
-self.addEventListener("message", (evt) => {
-  const data = evt.data || {};
-  if (data.type !== "notify") return;
-  evt.waitUntil(
-    self.registration.showNotification(data.title || "Ark", {
-      body: data.body || "",
-      tag: "ark-" + (data.pane || "bell"),
-      icon: "./icons/icon-192.png",
-      badge: "./icons/icon-192.png",
-      data: { pane: data.pane },
-    }),
-  );
-});
-
-self.addEventListener("notificationclick", (evt) => {
-  evt.notification.close();
-  const pane = evt.notification.data && evt.notification.data.pane;
-  const url = new URL("./index.html", self.registration.scope);
-  if (pane) url.searchParams.set("pane", pane);
-  evt.waitUntil(
-    self.clients
-      .matchAll({ type: "window", includeUncontrolled: true })
-      .then((list) => {
-        for (let i = 0; i < list.length; i++) {
-          const client = list[i];
-          client.postMessage({ type: "open-pane", pane: pane });
-          if (client.focus) return client.focus();
-        }
-        return self.clients.openWindow(url.href);
-      }),
+    )
   );
 });
