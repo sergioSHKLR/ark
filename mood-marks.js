@@ -1,8 +1,8 @@
 (function () {
   const MAP = { blessed: "\uD83D\uDD4A\uFE0F", level: "\u26AB", heavy: "\uD83E\uDEA8" };
   const LAB = {
-    en: { blessed: "Lite", level: "Mid", heavy: "Heavy" },
-    pt: { blessed: "Leve", level: "Meio", heavy: "Pesado" }
+    en: { blessed: "Lite", level: "Neutral", heavy: "Heavy" },
+    pt: { blessed: "Leve", level: "Neutro", heavy: "Pesado" }
   };
   function L() {
     try {
