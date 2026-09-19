@@ -34,13 +34,25 @@
   }
 
   function css() {
-    if (document.getElementById("settings-scroll-css")) return;
-    const s = document.createElement("style");
-    s.id = "settings-scroll-css";
+    let s = document.getElementById("settings-scroll-css");
+    if (!s) {
+      s = document.createElement("style");
+      s.id = "settings-scroll-css";
+      document.head.appendChild(s);
+    }
     s.textContent =
       "#settingsModal.modal-overlay,#settingsModal.open{align-items:flex-start;overflow-y:auto;-webkit-overflow-scrolling:touch}" +
-      "#settingsModal .modal-box{max-height:min(92vh,40rem);overflow-y:auto;margin:1.2rem auto 5.5rem;width:min(26rem,calc(100% - 1.6rem))}";
-    document.head.appendChild(s);
+      "#settingsModal .modal-box{max-height:min(92vh,40rem);overflow-y:auto;margin:1.2rem auto 5.5rem;width:min(26rem,calc(100% - 1.6rem))}" +
+      ".sleep-row,#noiseSelect,#noisePlay{display:none!important}";
+  }
+
+  function hushNoise() {
+    if (typeof stopNoise === "function") {
+      try { stopNoise(); } catch (e) {}
+    }
+    document.querySelectorAll(".sleep-row").forEach(function (el) {
+      el.hidden = true;
+    });
   }
 
   function paintNav() {
@@ -67,6 +79,7 @@
 
   function paint() {
     css();
+    hushNoise();
     paintNav();
     const walk = document.getElementById("railWalk");
     if (walk) walk.textContent = /pause|pausar/i.test(walk.textContent || "") ? t("pause") : t("walk");
