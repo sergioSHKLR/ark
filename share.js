@@ -108,7 +108,7 @@ window.addEventListener("load", function () {
     if (document.getElementById(id)) return;
     const s = document.createElement("script");
     s.id = id;
-    s.src = src + "?v=83";
+    s.src = src + "?v=84";
     document.body.appendChild(s);
   });
 });
