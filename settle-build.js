@@ -1,6 +1,6 @@
 function settleBuildLabel() {
   const line = document.getElementById("buildLine");
-  if (line) line.textContent = "Build 64";
+  if (line) line.textContent = "Build 65";
   const btn = document.getElementById("buildReload");
   if (btn) {
     btn.hidden = true;

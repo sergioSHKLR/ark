@@ -1,4 +1,4 @@
-const CACHE_VERSION = "noah-protocol-v64";
+const CACHE_VERSION = "noah-protocol-v65";
 const ASSETS_TO_CACHE = [
   "./",
   "./index.html",
@@ -12,6 +12,21 @@ const ASSETS_TO_CACHE = [
   "./share.js",
   "./ui63.js",
   "./office-year.js",
+  "./listen-desk.js",
+  "./listen-lock.js",
+  "./day-rail.js",
+  "./candle-flicker.js",
+  "./office-tidy.js",
+  "./mood-marks.js",
+  "./scroll-btn.js",
+  "./overlay-i18n.js",
+  "./wide-viewport.js",
+  "./lang-sweep.js",
+  "./date-line.js",
+  "./office-ticks-hide.js",
+  "./drop-cap.js",
+  "./marks-log.js",
+  "./porch.html",
   "./readings.js",
   "./quotes.js",
   "./lessons.js",
@@ -33,7 +48,7 @@ const ASSETS_TO_CACHE = [
   "./fonts/eb-garamond-400-italic.woff2",
   "./fonts/eb-garamond-700.woff2",
   "./fonts/grenze-gotisch-400.woff2",
-  "./ark.svg",
+  "./ark.svg"
 ];
 
 self.addEventListener("install", (evt) => {
@@ -55,7 +70,7 @@ self.addEventListener("activate", (evt) => {
 self.addEventListener("fetch", (evt) => {
   const url = new URL(evt.request.url);
   if (url.origin !== self.location.origin) return;
-  if (url.pathname.endsWith("version.json") || url.pathname.indexOf("ui63.js") !== -1 || url.pathname.indexOf("office-year.js") !== -1) {
+  if (url.pathname.endsWith("version.json") || /ui63|office-year|share\.js|day-rail|candle-flicker|lang-sweep/.test(url.pathname)) {
     evt.respondWith(fetch(evt.request, { cache: "no-store" }));
     return;
   }
