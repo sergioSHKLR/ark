@@ -1,5 +1,5 @@
 (function () {
-  const BUILD = 69;
+  const BUILD = 70;
   function liveToken() {
     return typeof driveToken === "string" && !!driveToken && driveToken !== "demo";
   }
