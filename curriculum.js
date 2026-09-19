@@ -1,4 +1,4 @@
-const FILM_EPOCH = "2026-09-06";
+const FILM_EPOCH = "2026-09-21";
 
 function pickLesson(dateKey) {
   const list = typeof LESSONS !== "undefined" ? LESSONS : [];
