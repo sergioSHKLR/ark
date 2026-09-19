@@ -43,7 +43,8 @@
     s.textContent =
       "#settingsModal.modal-overlay,#settingsModal.open{align-items:flex-start;overflow-y:auto;-webkit-overflow-scrolling:touch}" +
       "#settingsModal .modal-box{max-height:min(92vh,40rem);overflow-y:auto;margin:1.2rem auto 5.5rem;width:min(26rem,calc(100% - 1.6rem))}" +
-      ".sleep-row,#noiseSelect,#noisePlay{display:none!important}";
+      ".sleep-row,#noiseSelect,#noisePlay{display:none!important}" +
+      "#officeClosed:not([hidden]) #shareClosed{display:none!important}";
   }
 
   function hushNoise() {
@@ -52,6 +53,24 @@
     }
     document.querySelectorAll(".sleep-row").forEach(function (el) {
       el.hidden = true;
+    });
+  }
+
+  function gateShare() {
+    const closed = document.getElementById("officeClosed");
+    const shut = !!(closed && !closed.hidden);
+    const now = typeof TIMENOW === "function" ? TIMENOW() : null;
+    const openPane =
+      now && now.open && now.period
+        ? now.period === "midday" || now.period === "day"
+          ? "day"
+          : now.period
+        : "";
+    const shareClosed = document.getElementById("shareClosed");
+    if (shareClosed) shareClosed.hidden = true;
+    document.querySelectorAll("[data-share]").forEach(function (b) {
+      const pane = b.getAttribute("data-share");
+      b.hidden = shut || pane !== openPane;
     });
   }
 
@@ -80,6 +99,7 @@
   function paint() {
     css();
     hushNoise();
+    gateShare();
     paintNav();
     const walk = document.getElementById("railWalk");
     if (walk) walk.textContent = /pause|pausar/i.test(walk.textContent || "") ? t("pause") : t("walk");
