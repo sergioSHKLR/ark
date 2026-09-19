@@ -14,6 +14,11 @@
   let lastKind = "";
   const realTIME = typeof TIMENOW === "function" ? TIMENOW : null;
 
+  function listening() {
+    return document.documentElement.getAttribute("data-listen") === "1" ||
+      !!(document.querySelector('.nav-bar button[data-pane="listen"].active'));
+  }
+
   function clockNow() {
     if (demoMin != null) {
       const h = Math.floor(demoMin / 60) % 24;
@@ -94,10 +99,14 @@
     const n = clockNow();
     const kind = kindOf(n);
     paintRail();
+    if (listening()) return;
     if (!force && kind === lastKind) return;
     lastKind = kind;
     const closed = document.getElementById("officeClosed");
-    document.querySelectorAll(".pane").forEach(function (p) { p.hidden = true; });
+    document.querySelectorAll(".pane").forEach(function (p) {
+      if (p.id === "pane-listen") return;
+      p.hidden = true;
+    });
     if (kind === "morning") {
       const p = document.getElementById("pane-morning"); if (p) p.hidden = false;
       if (closed) closed.hidden = true;
