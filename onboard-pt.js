@@ -9,12 +9,12 @@
     {
       kicker: "A janela",
       title: "S\u00f3 vale na hora.",
-      body: "Manh\u00e3 05:00\u201309:00. Meio-dia 12:00\u201315:00. Noite 21:00\u201300:00. Passou, fechou. N\u00e3o tem atraso. O caderno vive no seu Google Drive, n\u00e3o num servidor nosso."
+      body: "Manh\u00e3 05:00\u201309:00. Meio-dia 12:00\u201315:00. Noite 21:00\u201300:00. Passou, fechou. N\u00e3o tem atraso. O caderno vive no seu Google Drive."
     },
     {
       kicker: "Os tr\u00eas bot\u00f5es",
       title: "Escrever \u00b7 Ouvir \u00b7 Registro",
-      body: "Escrever \u00e9 o of\u00edcio do momento. Ouvir \u00e9 o canto. Registro \u00e9 o que j\u00e1 foi guardado \u2014 s\u00f3 leitura. A vela troca claro e escuro."
+      body: "Escrever \u00e9 o of\u00edcio aberto agora. Ouvir \u00e9 o canto, o dia inteiro. Registro \u00e9 o que j\u00e1 foi guardado \u2014 s\u00f3 leitura. Tema claro ou escuro fica em Configura\u00e7\u00f5es."
     }
   ];
 
