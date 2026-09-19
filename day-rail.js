@@ -4,23 +4,25 @@
     { id: "midday", start: 12, end: 15 },
     { id: "night", start: 21, end: 24 }
   ];
-  const STOPS = [330, 600, 780, 1080, 1320];
   const FILMS = {
     morning: { id: "9_dr9njVzKM", title: "The Baptism of Jesus", ref: "Matthew 3" },
     midday: { id: "Q0BrP8bqj0c", title: "New Testament overview", ref: "Bible Project" },
     night: null
   };
+  const DAY_MS = 48000;
   let demoOn = false;
   let walking = false;
-  let walkTimer = 0;
-  let stopAt = 0;
+  let walkRaf = 0;
+  let walkStarted = 0;
+  let walkFrom = 0;
   let demoMin = null;
+  let lastKind = "";
   const realTIME = typeof TIMENOW === "function" ? TIMENOW : null;
 
   function clockNow() {
     if (demoMin != null) {
-      const h = Math.floor(demoMin / 60);
-      const m = demoMin % 60;
+      const h = Math.floor(demoMin / 60) % 24;
+      const m = Math.floor(demoMin % 60);
       const date = realTIME ? realTIME().date : new Date().toISOString().slice(0, 10);
       let period = null;
       for (let i = 0; i < WINDOWS.length; i++) {
@@ -39,7 +41,7 @@
     if (demoMin != null) return clockNow();
     return realTIME ? realTIME(d) : clockNow();
   };
-  function pct(min) { return (min / 1440) * 100; }
+  function pct(min) { return ((min % 1440) / 1440) * 100; }
 
   function inject() {
     if (document.getElementById("day-rail-css")) return;
@@ -53,14 +55,14 @@
       ".day-rail-win{position:absolute;top:0;bottom:0;background:var(--gold,#8a6d3b);opacity:.55}" +
       ".day-rail-win.is-open{opacity:.95;background:var(--rubric,#7a2418)}" +
       ".day-rail-fill{position:absolute;top:0;bottom:0;left:0;background:#111;opacity:.55;pointer-events:none}" +
-      ".day-rail-needle{position:absolute;top:-6px;bottom:-6px;width:5px;background:#0a0a0a;border:1px solid rgba(243,234,214,.35);transform:translateX(-2px);z-index:3;box-shadow:0 0 0 1px rgba(0,0,0,.4)}" +
+      ".day-rail-needle{position:absolute;top:-6px;bottom:-6px;width:5px;background:#0a0a0a;border:1px solid rgba(243,234,214,.35);transform:translateX(-2px);z-index:3}" +
       ".day-rail-ticks{position:relative;height:1.05rem;margin-top:.28rem;font-size:.58rem;letter-spacing:.08em;color:var(--ink-soft)}" +
       ".day-rail-ticks span{position:absolute;transform:translateX(-50%)}" +
       ".day-rail-actions{display:flex;gap:.4rem;margin:.45rem 0 0;justify-content:center}" +
       ".day-rail-actions .key{flex:none;padding:.28rem .7rem;font-size:.72rem}" +
-      "#demoStage{margin:0 1.1rem .8rem}" +
-      "#demoStage .film-frame{position:relative;width:100%;aspect-ratio:16/9;background:#140f0c;border:1px solid var(--rule);overflow:hidden}" +
-      "#demoStage iframe{position:absolute;inset:0;width:100%;height:100%;border:0}";
+      "#demoStage{display:none!important}" +
+      ".office-shift{transition:opacity .45s ease}" +
+      ".office-shift.is-dim{opacity:.35}";
     document.head.appendChild(s);
   }
 
@@ -89,6 +91,79 @@
       el.classList.toggle("is-open", !!(w && h >= w.start && h < w.end));
     });
   }
+
+  function kindOf(n) {
+    if (!n || !n.open) return "closed";
+    return n.period;
+  }
+
+  function applyOffice(force) {
+    const n = clockNow();
+    const kind = kindOf(n);
+    paintRail();
+    if (!force && kind === lastKind) return;
+    lastKind = kind;
+    const closed = document.getElementById("officeClosed");
+    document.querySelectorAll(".pane").forEach(function (p) {
+      p.classList.add("office-shift");
+      p.hidden = true;
+    });
+    if (kind === "morning") {
+      const p = document.getElementById("pane-morning"); if (p) p.hidden = false;
+      if (closed) closed.hidden = true;
+      if (typeof gateOfficeForm === "function") gateOfficeForm("morning", "open");
+    } else if (kind === "midday") {
+      const p = document.getElementById("pane-day"); if (p) p.hidden = false;
+      if (closed) closed.hidden = true;
+      if (typeof gateOfficeForm === "function") gateOfficeForm("day", "open");
+    } else if (kind === "night") {
+      const p = document.getElementById("pane-night"); if (p) p.hidden = false;
+      if (closed) closed.hidden = true;
+      if (typeof gateOfficeForm === "function") gateOfficeForm("night", "open");
+      if (typeof applyNightOffice === "function") applyNightOffice();
+    } else {
+      if (closed) {
+        closed.hidden = false;
+        const body = document.getElementById("officeClosedBody");
+        if (body) body.textContent = "Next office " + (n.nextAt || "") + " · " + (n.nextPeriod || "");
+      }
+    }
+    if (typeof renderDateLine === "function") renderDateLine();
+  }
+
+  function setDemoMin(min, forceOffice) {
+    demoMin = ((min % 1440) + 1440) % 1440;
+    applyOffice(!!forceOffice);
+  }
+
+  function tickWalk(now) {
+    if (!walking) return;
+    const t = (now - walkStarted) / DAY_MS;
+    const loop = t - Math.floor(t);
+    demoMin = (walkFrom + loop * 1440) % 1440;
+    applyOffice(false);
+    walkRaf = requestAnimationFrame(tickWalk);
+  }
+
+  function toggleWalk() {
+    walking = !walking;
+    const btn = document.getElementById("railWalk");
+    if (btn) btn.textContent = walking ? "Pause walk" : "Walk the day";
+    if (walking) {
+      walkFrom = demoMin == null ? 0 : demoMin;
+      walkStarted = performance.now();
+      walkRaf = requestAnimationFrame(tickWalk);
+    } else if (walkRaf) {
+      cancelAnimationFrame(walkRaf);
+      walkRaf = 0;
+    }
+  }
+
+  function stepDemo() {
+    if (walking) toggleWalk();
+    setDemoMin((demoMin == null ? 0 : demoMin) + 60, true);
+  }
+
   function mountRail() {
     inject();
     if (document.getElementById("dayRail")) { paintRail(); return; }
@@ -105,7 +180,7 @@
       '<span class="day-rail-needle" id="dayRailNeedle"></span></div>' +
       '<div class="day-rail-ticks"><span style="left:0">00</span><span style="left:20.833%">05</span><span style="left:37.5%">09</span><span style="left:50%">12</span><span style="left:62.5%">15</span><span style="left:87.5%">21</span><span style="left:100%">24</span></div>' +
       '<div class="day-rail-actions" id="dayRailActions" hidden>' +
-      '<button type="button" class="key ghost" id="railStep">Next hour</button>' +
+      '<button type="button" class="key ghost" id="railStep">+1 hour</button>' +
       '<button type="button" class="key" id="railWalk">Walk the day</button></div>';
     const head = document.querySelector(".masthead");
     if (head && head.parentNode) head.parentNode.insertBefore(box, head.nextSibling);
@@ -113,72 +188,15 @@
     const track = document.getElementById("dayRailTrack");
     track.addEventListener("click", function (e) {
       if (!demoOn) return;
+      if (walking) toggleWalk();
       const r = track.getBoundingClientRect();
-      setDemoMin(Math.round(Math.max(0, Math.min(1, (e.clientX - r.left) / r.width)) * 1440));
+      setDemoMin(Math.round(Math.max(0, Math.min(1, (e.clientX - r.left) / r.width)) * 1440), true);
     });
     document.getElementById("railStep").addEventListener("click", stepDemo);
     document.getElementById("railWalk").addEventListener("click", toggleWalk);
     paintRail();
   }
-  function ensureStage() {
-    let el = document.getElementById("demoStage");
-    if (el) return el;
-    el = document.createElement("div");
-    el.id = "demoStage";
-    el.hidden = true;
-    const rail = document.getElementById("dayRail");
-    if (rail && rail.parentNode) rail.parentNode.insertBefore(el, rail.nextSibling);
-    return el;
-  }
-  function showFilm(kind) {
-    const stage = ensureStage();
-    const pack = FILMS[kind];
-    if (!pack) { stage.hidden = true; stage.innerHTML = ""; return; }
-    stage.hidden = false;
-    stage.innerHTML = "<h3>" + (kind === "morning" ? "Morning film" : "Noon film") + "</h3><p class=\"film-title\">" + pack.title + "</p><p class=\"film-ref\">" + pack.ref + "</p><div class=\"film-frame\"><iframe src=\"https://www.youtube-nocookie.com/embed/" + pack.id + "?rel=0&modestbranding=1&playsinline=1\" allow=\"accelerometer; autoplay; encrypted-media; picture-in-picture\" allowfullscreen></iframe></div>";
-  }
-  function applyOffice() {
-    const n = clockNow();
-    const closed = document.getElementById("officeClosed");
-    document.querySelectorAll(".pane").forEach(function (p) { p.hidden = true; });
-    if (n.period === "morning") {
-      const p = document.getElementById("pane-morning"); if (p) p.hidden = false;
-      if (closed) closed.hidden = true;
-      if (typeof gateOfficeForm === "function") gateOfficeForm("morning", "open");
-      showFilm("morning");
-    } else if (n.period === "midday") {
-      const p = document.getElementById("pane-day"); if (p) p.hidden = false;
-      if (closed) closed.hidden = true;
-      if (typeof gateOfficeForm === "function") gateOfficeForm("day", "open");
-      showFilm("midday");
-    } else if (n.period === "night") {
-      const p = document.getElementById("pane-night"); if (p) p.hidden = false;
-      if (closed) closed.hidden = true;
-      if (typeof gateOfficeForm === "function") gateOfficeForm("night", "open");
-      if (typeof applyNightOffice === "function") applyNightOffice();
-      showFilm("night");
-    } else {
-      if (closed) {
-        closed.hidden = false;
-        const body = document.getElementById("officeClosedBody");
-        if (body) body.textContent = "Next office " + (n.nextAt || "") + " · " + (n.nextPeriod || "");
-      }
-      showFilm(null);
-    }
-    if (typeof renderDateLine === "function") renderDateLine();
-    paintRail();
-  }
-  function setDemoMin(min) { demoMin = Math.max(0, Math.min(1439, min)); applyOffice(); }
-  function stepDemo() { stopAt = (stopAt + 1) % STOPS.length; setDemoMin(STOPS[stopAt]); }
-  function toggleWalk() {
-    walking = !walking;
-    const btn = document.getElementById("railWalk");
-    if (btn) btn.textContent = walking ? "Pause walk" : "Walk the day";
-    if (walking) {
-      if (demoMin == null) setDemoMin(STOPS[0]);
-      walkTimer = setInterval(stepDemo, 7000);
-    } else if (walkTimer) { clearInterval(walkTimer); walkTimer = 0; }
-  }
+
   function isDemo() {
     try {
       const q = new URLSearchParams(location.search).get("demo");
@@ -192,7 +210,10 @@
     demoOn = isDemo();
     const actions = document.getElementById("dayRailActions");
     if (actions) actions.hidden = !demoOn;
-    if (demoOn) { setDemoMin(STOPS[0]); if (!walking) toggleWalk(); }
+    if (demoOn) {
+      setDemoMin(0, true);
+      if (!walking) toggleWalk();
+    }
   }
   if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", boot);
   else setTimeout(boot, 180);
