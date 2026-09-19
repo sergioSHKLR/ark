@@ -21,7 +21,10 @@
       ".mood-row{display:flex;justify-content:center;gap:.45rem;margin:.55rem 0 .15rem}" +
       ".mood-key{min-width:2.6rem;min-height:2.6rem;border:1px solid var(--rule);background:var(--paper);cursor:pointer}" +
       ".mood-key.active{border-color:var(--rubric);background:var(--paper-2)}" +
-      ".settings-btn{right:0;left:auto}";
+      ".settings-btn{right:0;left:auto}" +
+      "#pane-listen .chant-hidden{position:static;width:100%;height:auto;margin:0 0 .55rem;clip:auto;overflow:visible}" +
+      "#pane-listen #chantMount{position:relative;width:100%;aspect-ratio:16/9;background:#140f0c;border:1px solid var(--rule);overflow:hidden}" +
+      "#pane-listen #chantMount iframe{width:100%;height:100%;border:0;display:block}";
     document.head.appendChild(s);
   }
 
@@ -85,8 +88,22 @@
     if (line) line.textContent = (typeof t === "function" ? t("buildLabel") : "Build") + " 63";
   }
 
+  function revealChant() {
+    const mount = document.getElementById("chantMount");
+    if (mount) {
+      mount.classList.remove("chant-hidden");
+      mount.removeAttribute("hidden");
+    }
+    if (typeof chantMode !== "undefined") chantMode = "yt";
+    if (typeof chantLoaded !== "undefined") chantLoaded = true;
+    if (typeof renderChant === "function") renderChant(false);
+  }
+
   function ensureListenPane() {
-    if (document.getElementById("pane-listen")) return;
+    if (document.getElementById("pane-listen")) {
+      revealChant();
+      return;
+    }
     const listen = document.createElement("section");
     listen.className = "pane";
     listen.id = "pane-listen";
@@ -100,6 +117,7 @@
     if (sleep) body.appendChild(sleep);
     const log = document.getElementById("pane-log");
     if (log && log.parentNode) log.parentNode.insertBefore(listen, log);
+    revealChant();
   }
 
   function ensureMood() {
@@ -162,6 +180,7 @@
       });
       const closed = document.getElementById("officeClosed");
       if (closed) closed.hidden = true;
+      revealChant();
       return;
     }
     if (mode === "write" && typeof landingPane === "function" && prevShow) {
