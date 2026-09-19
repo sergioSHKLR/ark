@@ -15,24 +15,36 @@
       prev: "Prev",
       play: "Play",
       nextChant: "Next",
-      chantFoot: "Gregorian chant. YouTube until local files exist."
+      chantFoot: "Gregorian chant. YouTube until local files exist.",
+      write: "Write",
+      listen: "Listen",
+      log: "Log",
+      morning: "Morning",
+      day: "Day",
+      night: "Night"
     },
     pt: {
       walk: "Percorrer o dia",
       pause: "Pausar",
       hour: "+1 hora",
-      morningOpen: "Manhã aberta",
+      morningOpen: "Manh\u00e3 aberta",
       dayOpen: "Dia aberto",
       nightOpen: "Noite aberta",
       closed: "Fechado",
-      next: "Próximo ofício",
-      camera: "Câmera",
+      next: "Pr\u00f3ximo of\u00edcio",
+      camera: "C\u00e2mera",
       library: "Galeria",
       desk: "Mesa",
       prev: "Anterior",
       play: "Tocar",
-      nextChant: "Próximo",
-      chantFoot: "Canto gregoriano. YouTube, enquanto não houver arquivos locais."
+      nextChant: "Pr\u00f3ximo",
+      chantFoot: "Canto gregoriano. YouTube, enquanto n\u00e3o houver arquivos locais.",
+      write: "Escrever",
+      listen: "Ouvir",
+      log: "Registro",
+      morning: "Manh\u00e3",
+      day: "Dia",
+      night: "Noite"
     }
   };
 
@@ -51,7 +63,32 @@
     return pack[k] || S.en[k] || k;
   }
 
+  function css() {
+    if (document.getElementById("settings-scroll-css")) return;
+    const s = document.createElement("style");
+    s.id = "settings-scroll-css";
+    s.textContent =
+      "#settingsModal.modal-overlay,#settingsModal.open{" +
+      "align-items:flex-start;overflow-y:auto;-webkit-overflow-scrolling:touch;overscroll-behavior:contain}" +
+      "#settingsModal .modal-box{max-height:min(92vh,40rem);overflow-y:auto;-webkit-overflow-scrolling:touch;margin:1.2rem auto 5.5rem;width:min(26rem,calc(100% - 1.6rem))}";
+    document.head.appendChild(s);
+  }
+
+  function paintNav() {
+    document.querySelectorAll(".nav-bar button[data-pane]").forEach(function (b) {
+      const pane = b.getAttribute("data-pane");
+      if (pane === "listen") b.textContent = t("listen");
+      else if (pane === "log") b.textContent = t("log");
+      else if (pane === "morning") b.textContent = t("write");
+      else if (pane === "day") b.textContent = t("write");
+      else if (pane === "night") b.textContent = t("write");
+      else if (pane === "write") b.textContent = t("write");
+    });
+  }
+
   function paint() {
+    css();
+    paintNav();
     const walk = document.getElementById("railWalk");
     if (walk) {
       const pausing = /pause|pausar/i.test(walk.textContent || "");
@@ -88,7 +125,7 @@
 
   function boot() {
     paint();
-    setInterval(paint, 2500);
+    setInterval(paint, 2000);
     document.querySelectorAll("[data-lang]").forEach(function (b) {
       b.addEventListener("click", function () {
         setTimeout(paint, 30);
