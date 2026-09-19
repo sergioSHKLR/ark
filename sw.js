@@ -72,7 +72,7 @@ self.addEventListener("activate", (evt) => {
 self.addEventListener("fetch", (evt) => {
   const url = new URL(evt.request.url);
   if (url.origin !== self.location.origin) return;
-  if (url.pathname.endsWith("version.json") || /ui63|office-year|share\.js|day-rail|candle-flicker|lang-sweep|listen-desk|overlay-i18n/.test(url.pathname)) {
+  if (url.pathname.endsWith("version.json") || /ui63|office-year|share\.js|day-rail|candle-flicker|lang-sweep|listen-desk|overlay-i18n|settings-tidy/.test(url.pathname)) {
     evt.respondWith(fetch(evt.request, { cache: "no-store" }));
     return;
   }
