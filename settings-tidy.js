@@ -1,5 +1,5 @@
 (function () {
-  const BUILD = 65;
+  const BUILD = 66;
   function connected() {
     if (typeof driveToken === "string" && driveToken && driveToken !== "demo") return true;
     try {

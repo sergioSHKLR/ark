@@ -1,4 +1,4 @@
-const CACHE_VERSION = "noah-protocol-v65";
+const CACHE_VERSION = "noah-protocol-v66";
 const ASSETS_TO_CACHE = [
   "./",
   "./index.html",
@@ -23,7 +23,9 @@ const ASSETS_TO_CACHE = [
   "./wide-viewport.js",
   "./lang-sweep.js",
   "./date-line.js",
-  "./office-ticks-hide.js",
+  "./onboard-pt.js",
+  "./demo-off.js",
+  "./settings-tidy.js",
   "./drop-cap.js",
   "./marks-log.js",
   "./porch.html",
