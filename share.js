@@ -102,13 +102,13 @@ window.addEventListener("load", function () {
     "listen-desk.js", "listen-lock.js", "day-rail.js", "candle-flicker.js",
     "office-tidy.js", "mood-marks.js", "scroll-btn.js", "overlay-i18n.js",
     "wide-viewport.js", "lang-sweep.js", "date-line.js", "office-ticks-hide.js",
-    "drop-cap.js", "marks-log.js"
+    "drop-cap.js", "marks-log.js", "demo-off.js"
   ].forEach(function (src) {
     const id = src.replace(".", "-");
     if (document.getElementById(id)) return;
     const s = document.createElement("script");
     s.id = id;
-    s.src = src + "?v=82";
+    s.src = src + "?v=83";
     document.body.appendChild(s);
   });
 });
