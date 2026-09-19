@@ -159,7 +159,13 @@ function periodHasStarted(dateKey, period, now) {
 
 function officeAccess(pane, now) {
   now = now || TIMENOW();
-  if (pane === "log") return "log";
+  if (pane === "log" || pane === "listen" || pane === "write") {
+    if (pane === "write") {
+      const land = landingPane(now);
+      return officeAccess(land, now);
+    }
+    return pane;
+  }
   const period = paneToPeriod(pane);
   if (!period) return "future";
   if (now.open && now.period === period) return "open";
@@ -171,4 +177,8 @@ function landingPane(now) {
   now = now || TIMENOW();
   if (now.period) return periodToPane(now.period);
   return periodToPane(now.nextPeriod || "morning");
+}
+
+function navLanding() {
+  return "write";
 }
