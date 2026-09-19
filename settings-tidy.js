@@ -1,24 +1,26 @@
 (function () {
-  const BUILD = 66;
-  function connected() {
-    if (typeof driveToken === "string" && driveToken && driveToken !== "demo") return true;
-    try {
-      if (localStorage.getItem("noah-drive-consented") === "1") return true;
-      if (localStorage.getItem("noah-drive-file-id")) return true;
-      if (localStorage.getItem("noah-drive-synced")) return true;
-    } catch (e) {}
-    const st = document.getElementById("driveStatus");
-    const txt = st ? (st.textContent || "").toLowerCase() : "";
-    return /conectad|connected|sincroniz/.test(txt);
+  const BUILD = 69;
+  function liveToken() {
+    return typeof driveToken === "string" && !!driveToken && driveToken !== "demo";
   }
   function driveButtons() {
-    const on = connected();
+    const on = liveToken();
     const conn = document.getElementById("driveConnect");
     if (conn) conn.style.display = on ? "none" : "";
+    const gate = document.getElementById("connectCard");
     const main = document.getElementById("connectDriveMain");
-    if (main && on) {
-      const gate = document.getElementById("connectCard");
+    if (on) {
       if (gate) gate.hidden = true;
+      return;
+    }
+    if (gate) {
+      gate.hidden = false;
+      gate.removeAttribute("hidden");
+      if (gate.style) gate.style.display = "";
+    }
+    if (main) {
+      main.hidden = false;
+      if (main.style) main.style.display = "";
     }
   }
   function buildLine() {
@@ -37,7 +39,10 @@
     buildLine();
   }
   window.applyBuildLabels = buildLine;
-  window.checkBuild = function () { buildLine(); return Promise.resolve(); };
+  window.checkBuild = function () {
+    buildLine();
+    return Promise.resolve();
+  };
   function boot() {
     paint();
     setInterval(paint, 1500);
