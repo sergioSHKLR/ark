@@ -6,9 +6,9 @@
     s.id = "drop-cap-css";
     s.textContent =
       ".nav-bar{text-transform:none}" +
-      ".nav-bar button{font-family:var(--font-book);font-variant:normal;letter-spacing:.04em;font-size:.78rem;text-transform:none}" +
+      ".nav-bar button{font-family:var(--font-book);font-variant:normal;letter-spacing:.05em;font-size:1.02rem;text-transform:none}" +
       ".nav-bar button::first-letter{" +
-      "font-family:var(--font-display);font-variant:normal;font-size:1.85em;" +
+      "font-family:var(--font-display);font-variant:normal;font-size:1.7em;" +
       "color:var(--rubric);letter-spacing:0;margin:0 -.04em 0 0;padding:0;line-height:.9}" +
       ".our-father-text p:first-child::first-letter," +
       ".lede p::first-letter,.reading-body::first-letter," +
