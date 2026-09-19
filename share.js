@@ -32,10 +32,10 @@ function sharePayload(includeNote) {
     const note = officeNoteText(pane);
     if (note) bits.push(note);
   }
-  bits.push(t(periodLabelKey(period)) + " · " + now.date);
+  bits.push(t(periodLabelKey(period)) + " \u00b7 " + now.date);
   const url = formUrlValue();
   return {
-    title: (lang === "pt" ? "Arca" : "Ark") + " · " + t(periodLabelKey(period)),
+    title: (lang === "pt" ? "Arca" : "Ark") + " \u00b7 " + t(periodLabelKey(period)),
     text: bits.filter(Boolean).join("\n\n"),
     url: url || undefined,
   };
@@ -129,3 +129,11 @@ function bindShare() {
       openShareModal(periodToPane(now.prevPeriod), false);
     });
 }
+
+window.addEventListener("load", function () {
+  if (document.getElementById("ui63-src")) return;
+  const s = document.createElement("script");
+  s.id = "ui63-src";
+  s.src = "ui63.js";
+  document.body.appendChild(s);
+});
