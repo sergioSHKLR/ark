@@ -43,28 +43,16 @@ function sharePayload(includeNote) {
 
 function doSystemShare(includeNote) {
   const payload = sharePayload(includeNote);
-  const data = {
-    title: payload.title,
-    text: payload.text,
-  };
+  const data = { title: payload.title, text: payload.text };
   if (payload.url) data.url = payload.url;
   const pane = sharePayload.pane;
   const file = pane && pendingFiles[pane];
-  if (
-    file &&
-    navigator.canShare &&
-    navigator.canShare({ files: [file] })
-  )
-    data.files = [file];
-  const canShare =
-    navigator.share &&
-    (!navigator.canShare || navigator.canShare(data));
+  if (file && navigator.canShare && navigator.canShare({ files: [file] })) data.files = [file];
+  const canShare = navigator.share && (!navigator.canShare || navigator.canShare(data));
   const send = canShare
     ? navigator.share(data)
     : navigator.clipboard && navigator.clipboard.writeText
-      ? navigator.clipboard.writeText(
-          payload.title + "\n\n" + payload.text,
-        )
+      ? navigator.clipboard.writeText(payload.title + "\n\n" + payload.text)
       : Promise.reject(new Error("share"));
   return Promise.resolve(send)
     .then(function () {
@@ -131,6 +119,12 @@ function bindShare() {
 }
 
 window.addEventListener("load", function () {
+  if (!document.getElementById("office-year-src")) {
+    const y = document.createElement("script");
+    y.id = "office-year-src";
+    y.src = "office-year.js";
+    document.body.appendChild(y);
+  }
   if (document.getElementById("ui63-src")) return;
   const s = document.createElement("script");
   s.id = "ui63-src";
