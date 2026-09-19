@@ -119,7 +119,7 @@ function bindShare() {
 }
 
 window.addEventListener("load", function () {
-  ["office-year.js", "ui63.js", "settle-build.js"].forEach(function (src) {
+  ["office-year.js", "ui63.js", "settle-build.js", "onboard-pt.js"].forEach(function (src) {
     const id = src.replace(".", "-");
     if (document.getElementById(id)) return;
     const s = document.createElement("script");
