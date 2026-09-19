@@ -49,26 +49,18 @@ function doSystemShare(includeNote) {
   const file = pane && pendingFiles[pane];
   if (file && navigator.canShare && navigator.canShare({ files: [file] })) data.files = [file];
   const canShare = navigator.share && (!navigator.canShare || navigator.canShare(data));
-  const send = canShare
-    ? navigator.share(data)
-    : navigator.clipboard && navigator.clipboard.writeText
-      ? navigator.clipboard.writeText(payload.title + "\n\n" + payload.text)
-      : Promise.reject(new Error("share"));
-  return Promise.resolve(send)
-    .then(function () {
-      if (!canShare) setShareStatus(t("copied"));
-      else setShareStatus("");
-    })
-    .catch(function (err) {
-      if (err && err.name === "AbortError") return;
-      const fallback = payload.title + "\n\n" + payload.text;
-      if (navigator.clipboard && navigator.clipboard.writeText) {
-        return navigator.clipboard.writeText(fallback).then(function () {
-          setShareStatus(t("copied"));
-        });
-      }
-      setShareStatus(t("driveErr"));
-    });
+  const send = canShare ? navigator.share(data) : navigator.clipboard && navigator.clipboard.writeText ? navigator.clipboard.writeText(payload.title + "\n\n" + payload.text) : Promise.reject(new Error("share"));
+  return Promise.resolve(send).then(function () {
+    if (!canShare) setShareStatus(t("copied"));
+    else setShareStatus("");
+  }).catch(function (err) {
+    if (err && err.name === "AbortError") return;
+    const fallback = payload.title + "\n\n" + payload.text;
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      return navigator.clipboard.writeText(fallback).then(function () { setShareStatus(t("copied")); });
+    }
+    setShareStatus(t("driveErr"));
+  });
 }
 
 function setShareStatus(msg) {
@@ -81,10 +73,7 @@ function openShareModal(pane, reflectionOnly) {
   const modal = document.getElementById("shareModal");
   if (!modal) return;
   const box = document.getElementById("shareInclude");
-  if (box) {
-    box.checked = !!reflectionOnly;
-    box.disabled = false;
-  }
+  if (box) { box.checked = !!reflectionOnly; box.disabled = false; }
   setShareStatus("");
   modal.classList.add("open");
   modal.style.display = "flex";
@@ -93,38 +82,26 @@ function openShareModal(pane, reflectionOnly) {
 function bindShare() {
   bindFormUrl();
   const go = document.getElementById("shareGo");
-  if (go)
-    go.addEventListener("click", function () {
-      const box = document.getElementById("shareInclude");
-      const include = !!(box && box.checked);
-      if (include && !officeNoteText(sharePayload.pane || "")) {
-        setShareStatus(t("shareNeedNote"));
-        return;
-      }
-      doSystemShare(include);
-    });
+  if (go) go.addEventListener("click", function () {
+    const box = document.getElementById("shareInclude");
+    const include = !!(box && box.checked);
+    if (include && !officeNoteText(sharePayload.pane || "")) { setShareStatus(t("shareNeedNote")); return; }
+    doSystemShare(include);
+  });
   document.querySelectorAll("[data-share]").forEach(function (btn) {
     btn.addEventListener("click", function () {
-      const pane = btn.getAttribute("data-share");
-      openShareModal(pane, officeAccess(pane) === "past");
+      openShareModal(btn.getAttribute("data-share"), officeAccess(btn.getAttribute("data-share")) === "past");
     });
   });
-  const closed = document.getElementById("shareClosed");
-  if (closed)
-    closed.addEventListener("click", function () {
-      const now = TIMENOW();
-      if (!now.prevPeriod) return;
-      openShareModal(periodToPane(now.prevPeriod), false);
-    });
 }
 
 window.addEventListener("load", function () {
-  ["office-year.js", "ui63.js", "settle-build.js", "onboard-pt.js"].forEach(function (src) {
+  ["office-year.js", "ui63.js", "settle-build.js", "onboard-pt.js", "listen-desk.js"].forEach(function (src) {
     const id = src.replace(".", "-");
     if (document.getElementById(id)) return;
     const s = document.createElement("script");
     s.id = id;
-    s.src = src + "?v=64";
+    s.src = src + "?v=65";
     document.body.appendChild(s);
   });
 });

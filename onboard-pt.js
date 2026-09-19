@@ -4,7 +4,7 @@
     {
       kicker: "O of\u00edcio",
       title: "Tr\u00eas horas. Uma casa.",
-      body: "De manh\u00e3 o Evangelho (v\u00eddeos da Igreja). Ao meio-dia o mapa (Bible Project). \u00c0 noite um verso \u2014 salmo ou profeta. Sem filme de No\u00e9 na primeira x\u00edcara."
+      body: "De manh\u00e3 o Evangelho (v\u00eddeos da Igreja). Ao meio-dia o mapa (Bible Project). \u00c0 noite um verso \u2014 salmo ou profeta."
     },
     {
       kicker: "A janela",
@@ -58,35 +58,22 @@
     const last = i === STEPS.length - 1;
     wrap.innerHTML =
       '<div class="sheet" role="dialog" aria-modal="true">' +
-      '<p class="kicker">' +
-      step.kicker +
-      "</p><h2>" +
-      step.title +
-      "</h2><p>" +
-      step.body +
+      '<p class="kicker">' + step.kicker + "</p><h2>" + step.title + "</h2><p>" + step.body +
       '</p><div class="row">' +
       (i > 0 ? '<button type="button" class="key ghost" data-onb="prev">Voltar</button>' : "") +
-      '<button type="button" class="key" data-onb="next">' +
-      (last ? "Entrar" : "Continuar") +
+      '<button type="button" class="key" data-onb="next">' + (last ? "Entrar" : "Continuar") +
       "</button></div></div>";
     wrap.querySelector("[data-onb='next']").addEventListener("click", function () {
       if (last) closeOnboard();
       else show(i + 1);
     });
     const prev = wrap.querySelector("[data-onb='prev']");
-    if (prev)
-      prev.addEventListener("click", function () {
-        show(i - 1);
-      });
+    if (prev) prev.addEventListener("click", function () { show(i - 1); });
   }
 
   function boot() {
     if (!wantOnboard()) return;
-    try {
-      localStorage.setItem("noah-lang", "pt");
-    } catch (e) {}
-    if (typeof setLang === "function") setLang("pt");
-    else if (typeof lang !== "undefined") lang = "pt";
+    try { localStorage.setItem("noah-lang", "pt"); } catch (e) {}
     show(0);
   }
 
