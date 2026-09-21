@@ -1,18 +1,14 @@
 const FORM_URL_KEY = "noah-form-url";
-const DEMO_FORM = "https://sergioshklr.github.io/ark/porch.html";
 
 function formUrlValue() {
   const input = document.getElementById("formUrl");
   const typed = input && input.value.trim();
-  return typed || localStorage.getItem(FORM_URL_KEY) || (localStorage.getItem("noah-demo") === "1" ? DEMO_FORM : "");
+  return typed || localStorage.getItem(FORM_URL_KEY) || "";
 }
 
 function bindFormUrl() {
   const input = document.getElementById("formUrl");
   if (!input) return;
-  if (localStorage.getItem("noah-demo") === "1" && !localStorage.getItem(FORM_URL_KEY)) {
-    localStorage.setItem(FORM_URL_KEY, DEMO_FORM);
-  }
   input.value = localStorage.getItem(FORM_URL_KEY) || "";
   input.addEventListener("change", function () {
     localStorage.setItem(FORM_URL_KEY, input.value.trim());
@@ -24,41 +20,50 @@ function closeShare() {
   if (modal) { modal.classList.remove("open"); modal.style.display = "none"; }
 }
 
+function porchShareUrl(includeNote) {
+  const pane = sharePayload.pane || "morning";
+  const period = typeof paneToPeriod === "function" ? paneToPeriod(pane) : pane;
+  const now = typeof TIMENOW === "function" ? TIMENOW() : { date: "" };
+  const office = period === "midday" || period === "day" ? "day" : period === "night" ? "night" : "morning";
+  let hash = (now.date || "") + "/" + office;
+  if (includeNote && typeof officeNoteText === "function") {
+    const note = officeNoteText(pane);
+    if (note && String(note).trim()) {
+      hash += "&n=" + encodeURIComponent(String(note).trim().slice(0, 400));
+    }
+  }
+  const here = new URL(location.href);
+  const base = here.origin + here.pathname.replace(/[^/]+$/, "") + "porch.html";
+  return base + "#" + hash;
+}
+
 function sharePayload(includeNote) {
   const pane = sharePayload.pane || "morning";
-  const period = paneToPeriod(pane);
-  const now = TIMENOW();
-  const bits = [curriculumShareText(period, now.date)];
-  if (includeNote) {
-    const note = officeNoteText(pane);
-    if (note) bits.push(note);
-  }
-  bits.push(t(periodLabelKey(period)) + " \u00b7 " + now.date);
-  const url = formUrlValue();
-  return {
-    title: (lang === "pt" ? "Arca" : "Ark") + " \u00b7 " + t(periodLabelKey(period)),
-    text: bits.filter(Boolean).join("\n\n"),
-    url: url || undefined,
-  };
+  const period = typeof paneToPeriod === "function" ? paneToPeriod(pane) : pane;
+  const title = (typeof lang === "string" && lang === "pt" ? "Arca" : "Ark") +
+    " \u00b7 " + (typeof t === "function" ? t(periodLabelKey(period)) : period);
+  const url = porchShareUrl(includeNote);
+  return { title: title, text: title, url: url };
 }
 
 function doSystemShare(includeNote) {
   const payload = sharePayload(includeNote);
-  const data = { title: payload.title, text: payload.text };
-  if (payload.url) data.url = payload.url;
-  const pane = sharePayload.pane;
-  const file = pane && pendingFiles[pane];
-  if (file && navigator.canShare && navigator.canShare({ files: [file] })) data.files = [file];
-  const canShare = navigator.share && (!navigator.canShare || navigator.canShare(data));
-  const send = canShare ? navigator.share(data) : navigator.clipboard && navigator.clipboard.writeText ? navigator.clipboard.writeText(payload.title + "\n\n" + payload.text) : Promise.reject(new Error("share"));
+  const data = { title: payload.title, text: payload.text, url: payload.url };
+  const line = payload.title + "\n" + payload.url;
+  const canShare = navigator.share && (!navigator.canShare || navigator.canShare({ title: payload.title, text: payload.text, url: payload.url }));
+  const send = canShare
+    ? navigator.share(data)
+    : navigator.clipboard && navigator.clipboard.writeText
+      ? navigator.clipboard.writeText(line)
+      : Promise.reject(new Error("share"));
   return Promise.resolve(send).then(function () {
     if (!canShare) setShareStatus(t("copied"));
     else setShareStatus("");
+    closeShare();
   }).catch(function (err) {
     if (err && err.name === "AbortError") return;
-    const fallback = payload.title + "\n\n" + payload.text;
     if (navigator.clipboard && navigator.clipboard.writeText) {
-      return navigator.clipboard.writeText(fallback).then(function () { setShareStatus(t("copied")); });
+      return navigator.clipboard.writeText(line).then(function () { setShareStatus(t("copied")); });
     }
     setShareStatus(t("driveErr"));
   });
@@ -69,12 +74,12 @@ function setShareStatus(msg) {
   if (el) el.textContent = msg || "";
 }
 
-function openShareModal(pane, reflectionOnly) {
+function openShareModal(pane) {
   sharePayload.pane = pane;
   const modal = document.getElementById("shareModal");
   if (!modal) return;
   const box = document.getElementById("shareInclude");
-  if (box) { box.checked = !!reflectionOnly; box.disabled = false; }
+  if (box) { box.checked = false; box.disabled = false; }
   setShareStatus("");
   modal.classList.add("open");
   modal.style.display = "flex";
@@ -86,16 +91,17 @@ function bindShare() {
   if (go) go.addEventListener("click", function () {
     const box = document.getElementById("shareInclude");
     const include = !!(box && box.checked);
-    if (include && !officeNoteText(sharePayload.pane || "")) { setShareStatus(t("shareNeedNote")); return; }
+    if (include && typeof officeNoteText === "function" && !officeNoteText(sharePayload.pane || "")) {
+      setShareStatus(t("shareNeedNote"));
+      return;
+    }
     doSystemShare(include);
   });
   document.querySelectorAll("[data-share]").forEach(function (btn) {
     btn.addEventListener("click", function () {
-      openShareModal(btn.getAttribute("data-share"), officeAccess(btn.getAttribute("data-share")) === "past");
+      openShareModal(btn.getAttribute("data-share"));
     });
   });
 }
 
-window.addEventListener("load", function () {
-  // Overlays load from index.html. Do not inject office-ticks-hide.
-});
+window.addEventListener("load", function () {});
