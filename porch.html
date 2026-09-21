@@ -6,62 +6,198 @@
   <title>Arca · Porch</title>
   <link rel="stylesheet" href="app.css" />
   <style>
-    body{margin:0;background:#1a1612;color:#f3ead6}
-    .wrap{max-width:26rem;margin:0 auto;padding:1.4rem 1.2rem 3rem}
-    h1{font-family:"Grenze Gotisch",serif;font-weight:400;text-align:center}
-    label{display:block;margin:.7rem 0 .25rem;font-size:.78rem;letter-spacing:.12em;text-transform:uppercase}
-    input,textarea{width:100%;box-sizing:border-box;background:#f3ead6;color:#2a2118;border:1px solid #c9b896;padding:.55rem}
-    .marks{display:flex;gap:.5rem;margin:.4rem 0 1rem}
-    .marks button{flex:1;font-size:1.3rem;min-height:2.6rem}
-    .marks button.on{outline:2px solid #7a2418}
-    .ok{text-align:center;color:#c9b896}
+    body{margin:0;background:var(--paper,#f3ead6);color:var(--ink,#2a2118)}
+    .wrap{max-width:26rem;margin:0 auto;padding:1.3rem 1.15rem 3.2rem}
+    .word{font-family:"Grenze Gotisch",serif;font-weight:400;font-size:2.4rem;text-align:center;line-height:1}
+    .when{text-align:center;letter-spacing:.16em;text-transform:uppercase;font-size:.68rem;color:var(--gold-deep,#6a5228);margin:.35rem 0 1rem}
+    .passage{font-size:1.12rem;line-height:1.5;margin:0 0 .85rem}
+    .src{text-align:center;font-style:italic;color:var(--ink-soft,#5e5143);margin:0 0 1rem}
+    .note-card{border:1px solid var(--rule,#c4b089);background:var(--paper-2,#e9dcc0);padding:.85rem .9rem;margin:0 0 1.1rem}
+    .note-card em{display:block;font-size:.68rem;letter-spacing:.14em;text-transform:uppercase;color:var(--gold-deep,#6a5228);margin-bottom:.35rem;font-style:normal}
+    .note-card p{font-style:italic;margin:0;line-height:1.45}
+    label{display:block;margin:.7rem 0 .25rem;font-size:.68rem;letter-spacing:.14em;text-transform:uppercase;color:var(--gold-deep,#6a5228)}
+    input,textarea{width:100%;box-sizing:border-box;background:var(--paper,#f3ead6);color:var(--ink,#2a2118);border:1px solid var(--rule,#c4b089);padding:.55rem;font-family:"EB Garamond",serif;font-size:1.05rem}
+    .marks{display:flex;gap:.45rem;margin:.35rem 0 .2rem}
+    .marks button{flex:1;font-size:1.35rem;min-height:2.7rem;background:var(--paper-2,#e9dcc0);border:1px solid var(--rule,#c4b089)}
+    .marks button.on{outline:2px solid var(--rubric,#7a2418);background:var(--paper,#f3ead6)}
+    .send{width:100%;margin-top:1rem}
+    .foot{text-align:center;font-style:italic;color:var(--ink-soft,#5e5143);margin:1rem 0 0;font-size:.95rem}
+    .kept{text-align:center;color:var(--gold-deep,#6a5228);font-style:italic;margin:1.1rem 0 0}
+    iframe.sink{position:absolute;width:1px;height:1px;opacity:0;pointer-events:none}
   </style>
 </head>
 <body>
   <div class="wrap">
-    <h1>Porch</h1>
-    <p class="ok">No Google needed. Name is optional.</p>
+    <h1 class="word">Arca</h1>
+    <p class="when" id="when"></p>
+    <div class="passage" id="passage"></div>
+    <p class="src" id="src"></p>
+    <div class="note-card" id="noteCard" hidden>
+      <em id="noteLab">Nota</em>
+      <p id="noteText"></p>
+    </div>
     <form id="porch">
-      <label for="who">Name</label>
-      <input id="who" name="name" maxlength="80" placeholder="or leave blank" />
-      <label>Mark</label>
+      <label>Marca</label>
       <div class="marks">
-        <button type="button" data-mark="pray">🙏</button>
-        <button type="button" data-mark="love">❤️</button>
-        <button type="button" data-mark="up">👍</button>
+        <button type="button" data-mark="🙏">🙏</button>
+        <button type="button" data-mark="❤️">❤️</button>
+        <button type="button" data-mark="👍">👍</button>
       </div>
-      <label for="note">Word</label>
-      <textarea id="note" rows="4" maxlength="400"></textarea>
-      <button class="key connect-key" type="submit" style="width:100%;margin-top:1rem">Send</button>
+      <label for="who">Nome</label>
+      <input id="who" maxlength="80" autocomplete="name" />
+      <label for="word">Palavra</label>
+      <textarea id="word" rows="3" maxlength="400"></textarea>
+      <button class="key connect-key send" type="submit" id="send">Enviar</button>
     </form>
-    <p class="ok" id="done" hidden>Kept. The house will see it on the next sync.</p>
+    <p class="kept" id="done" hidden>Guardado. A casa vê no próximo ofício.</p>
+    <p class="foot" id="foot">Sem Google.</p>
   </div>
+  <iframe class="sink" name="porchSink" title=""></iframe>
+  <form id="gform" method="POST" target="porchSink" action="https://docs.google.com/forms/d/e/1FAIpQLScMvakAYYjF9fpFpHbAfAwtOpAyQUQmAZ-ro9Ei9jbSh_Y7HA/formResponse" hidden>
+    <input name="entry.1570400400" id="gName" />
+    <input name="entry.1428609420" id="gMark" />
+    <input name="entry.652243089" id="gWord" />
+    <input name="entry.2146650933" id="gOffice" />
+    <input name="entry.461410745_year" id="gYear" />
+    <input name="entry.461410745_month" id="gMonth" />
+    <input name="entry.461410745_day" id="gDay" />
+  </form>
+  <script src="i18n.js"></script>
+  <script src="time.js"></script>
+  <script src="lessons.js"></script>
+  <script src="quotes.js"></script>
+  <script src="curriculum.js"></script>
+  <script src="office-year.js"></script>
   <script>
-    var mark = "pray";
-    document.querySelectorAll("[data-mark]").forEach(function (b) {
-      b.addEventListener("click", function () {
-        mark = b.getAttribute("data-mark");
-        document.querySelectorAll("[data-mark]").forEach(function (x) {
-          x.classList.toggle("on", x === b);
+    (function () {
+      var pt = typeof lang === "string" ? lang === "pt" : true;
+      var mark = "🙏";
+      var parsed = parseHash();
+
+      function parseHash() {
+        var raw = (location.hash || "").replace(/^#/, "");
+        var date = "";
+        var office = "morning";
+        var note = "";
+        if (raw) {
+          var parts = raw.split("&");
+          var head = parts[0] || "";
+          var bits = head.split("/");
+          date = bits[0] || "";
+          office = bits[1] || "morning";
+          for (var i = 1; i < parts.length; i++) {
+            if (parts[i].indexOf("n=") === 0) {
+              try { note = decodeURIComponent(parts[i].slice(2)); } catch (e) { note = parts[i].slice(2); }
+            }
+          }
+        }
+        if (!date && typeof todayKey === "function") date = todayKey();
+        if (office === "midday") office = "day";
+        return { date: date, office: office, note: note };
+      }
+
+      function officeLabel() {
+        if (parsed.office === "night") return pt ? "Noite" : "Night";
+        if (parsed.office === "day") return pt ? "Meio-dia" : "Midday";
+        return pt ? "Manhã" : "Morning";
+      }
+
+      function formOffice() {
+        if (parsed.office === "night") return "Night";
+        if (parsed.office === "day") return "Noon";
+        return "Morning";
+      }
+
+      function fillReading() {
+        var pass = document.getElementById("passage");
+        var src = document.getElementById("src");
+        var title = "";
+        var body = "";
+        var ref = "";
+        try {
+          if (parsed.office === "night" && typeof pickNightOffice === "function") {
+            var night = typeof nightLoc === "function" ? nightLoc(pickNightOffice(parsed.date)) : pickNightOffice(parsed.date);
+            if (night) { ref = night.ref || ""; body = night.text || night.en || ""; }
+          } else if (typeof pickLesson === "function") {
+            var lesson = pickLesson(parsed.date);
+            var loc = typeof lessonLoc === "function" ? lessonLoc(lesson) : lesson;
+            if (loc) {
+              title = loc.title || "";
+              if (parsed.office === "day") body = loc.keep || loc.teach || "";
+              else body = loc.teach || "";
+            }
+            if (parsed.office === "morning" && typeof lessonWitness === "function") {
+              var wit = typeof quoteLoc === "function" ? quoteLoc(lessonWitness(lesson)) : lessonWitness(lesson);
+              if (wit && wit.text) { if (!body) body = wit.text; if (!ref) ref = wit.src || ""; }
+            }
+            if (parsed.office === "day" && typeof pickBibleProjectOffice === "function") {
+              var bp = pickBibleProjectOffice(parsed.date);
+              if (bp && bp.title) title = (pt ? bp.title.pt : bp.title.en) || title;
+            }
+          }
+        } catch (err) {}
+        pass.innerHTML = "";
+        if (title) {
+          var h = document.createElement("p");
+          h.style.fontStyle = "italic";
+          h.textContent = title;
+          pass.appendChild(h);
+        }
+        if (body) {
+          var p = document.createElement("p");
+          p.textContent = body;
+          pass.appendChild(p);
+        }
+        src.textContent = ref || "";
+      }
+
+      function paintChrome() {
+        document.getElementById("when").textContent = officeLabel() + " \u00b7 " + parsed.date;
+        document.title = "Arca \u00b7 " + officeLabel();
+        document.getElementById("send").textContent = pt ? "Enviar" : "Send";
+        document.getElementById("foot").textContent = pt ? "Sem Google." : "No Google.";
+        document.getElementById("done").textContent = pt
+          ? "Guardado. A casa vê no próximo ofício."
+          : "Kept. The house will see it.";
+        document.querySelector("label[for='who']").textContent = pt ? "Nome" : "Name";
+        document.querySelector("label[for='word']").textContent = pt ? "Palavra" : "Word";
+        document.querySelector(".marks").previousElementSibling.textContent = pt ? "Marca" : "Mark";
+        if (parsed.note) {
+          document.getElementById("noteCard").hidden = false;
+          document.getElementById("noteLab").textContent = pt ? "Nota" : "Note";
+          document.getElementById("noteText").textContent = parsed.note;
+        }
+      }
+
+      document.querySelectorAll("[data-mark]").forEach(function (b) {
+        b.addEventListener("click", function () {
+          mark = b.getAttribute("data-mark");
+          document.querySelectorAll("[data-mark]").forEach(function (x) {
+            x.classList.toggle("on", x === b);
+          });
         });
       });
-    });
-    document.querySelector("[data-mark='pray']").classList.add("on");
-    document.getElementById("porch").addEventListener("submit", function (e) {
-      e.preventDefault();
-      var row = {
-        at: new Date().toISOString(),
-        name: document.getElementById("who").value.trim() || "anon",
-        mark: mark,
-        note: document.getElementById("note").value.trim()
-      };
-      var key = "noah-porch-demo";
-      var list = [];
-      try { list = JSON.parse(localStorage.getItem(key) || "[]"); } catch (err) {}
-      list.push(row);
-      localStorage.setItem(key, JSON.stringify(list));
-      document.getElementById("done").hidden = false;
-    });
+      document.querySelector("[data-mark='🙏']").classList.add("on");
+
+      document.getElementById("porch").addEventListener("submit", function (e) {
+        e.preventDefault();
+        var date = parsed.date || "";
+        var bits = date.split("-");
+        document.getElementById("gName").value = document.getElementById("who").value.trim();
+        document.getElementById("gMark").value = mark;
+        document.getElementById("gWord").value = document.getElementById("word").value.trim();
+        document.getElementById("gOffice").value = formOffice();
+        document.getElementById("gYear").value = bits[0] || "";
+        document.getElementById("gMonth").value = String(parseInt(bits[1] || "0", 10));
+        document.getElementById("gDay").value = String(parseInt(bits[2] || "0", 10));
+        document.getElementById("gform").submit();
+        document.getElementById("done").hidden = false;
+        document.getElementById("send").disabled = true;
+      });
+
+      paintChrome();
+      fillReading();
+    })();
   </script>
 </body>
 </html>
