@@ -1,5 +1,16 @@
 const OFFICE_EPOCH = "2026-09-21";
 
+const NIGHT_EXAMEN = {
+  en: {
+    kicker: "In the world, not of it",
+    ask: "Where did you belong to the world today, and where did you refuse?"
+  },
+  pt: {
+    kicker: "No mundo, n\u00e3o do mundo",
+    ask: "Onde voc\u00ea pertenceu ao mundo hoje, e onde recusou?"
+  }
+};
+
 const OFFICE_BP_NT = [
   { id: "Q0BrP8bqj0c", title: { en: "New Testament overview", pt: "Vis\u00e3o do Novo Testamento" }, ref: "NT" },
   { id: "3Dv4-n6OYGI", title: { en: "Matthew 1\u201313", pt: "Mateus 1\u201313" }, ref: "Matthew 1\u201313" },
@@ -66,6 +77,11 @@ function nightLoc(row) {
   return { ref: row.ref, text: usePt ? row.pt : row.en };
 }
 
+function nightExamenLoc() {
+  const usePt = typeof lang !== "undefined" && lang === "pt";
+  return usePt ? NIGHT_EXAMEN.pt : NIGHT_EXAMEN.en;
+}
+
 function applyNightOffice() {
   const loc = nightLoc(pickNightOffice());
   if (!loc) return;
@@ -73,8 +89,20 @@ function applyNightOffice() {
   const close = document.getElementById("lessonClose");
   if (title) title.textContent = loc.ref;
   if (close) close.textContent = loc.text;
+  const card = close && close.parentNode;
+  if (!card) return;
+  let examen = document.getElementById("nightExamen");
+  if (!examen) {
+    examen = document.createElement("p");
+    examen.id = "nightExamen";
+    examen.className = "reading-body";
+    card.appendChild(examen);
+  }
+  const pack = nightExamenLoc();
+  examen.innerHTML = "<em>" + pack.kicker + "</em><br>" + pack.ask;
 }
 
 if (document.readyState === "loading")
   document.addEventListener("DOMContentLoaded", applyNightOffice);
 else setTimeout(applyNightOffice, 80);
+setInterval(applyNightOffice, 2000);
