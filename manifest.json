@@ -20,7 +20,7 @@
   "launch_handler": {
     "client_mode": "navigate-existing"
   },
-  "background_color": "#f3ead6",
+  "background_color": "#e9dcc0",
   "theme_color": "#e9dcc0",
   "description": "Daily rite: stoic, faithful, insulated.",
   "icons": [
