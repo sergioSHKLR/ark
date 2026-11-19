@@ -36,8 +36,9 @@ function applyTheme() {
 applyTheme();
 
 function applyAppName() {
-  const name = lang === "pt" ? "Arca" : "Ark";
-  document.title = name;
+  const name = lang === "pt" ? "Arca" : "Ark"; // Grenze wordmark keeps mixed case
+  const sysName = name.toUpperCase(); // kit: system name (title, home screen) is caps
+  document.title = sysName;
   const word = document.querySelector(".wordmark");
   if (word) word.textContent = name;
   const settingsBtn = document.getElementById("settingsBtn");
@@ -49,7 +50,7 @@ function applyAppName() {
     'meta[name="apple-mobile-web-app-title"]',
   );
   document.documentElement.setAttribute("dir", "ltr");
-  if (apple) apple.setAttribute("content", name);
+  if (apple) apple.setAttribute("content", sysName);
   const man = document.querySelector('link[rel="manifest"]');
   if (man)
     man.setAttribute(
