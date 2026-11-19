@@ -1,4 +1,4 @@
-const CACHE_VERSION = "noah-protocol-v71";
+const CACHE_VERSION = "noah-protocol-v72";
 const ASSETS_TO_CACHE = [
   "./",
   "./index.html",
@@ -46,9 +46,6 @@ const ASSETS_TO_CACHE = [
   "./icons/icon-512.png",
   "./icons/icon-maskable-512.png",
   "./icons/apple-touch-icon.png",
-  "./fonts/eb-garamond-400.woff2",
-  "./fonts/eb-garamond-400-italic.woff2",
-  "./fonts/eb-garamond-700.woff2",
   "./fonts/grenze-gotisch-400.woff2",
   "./ark.svg"
 ];

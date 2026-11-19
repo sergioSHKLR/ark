@@ -34,7 +34,7 @@
       "#onboardPt .sheet{width:min(26rem,100%);background:var(--paper,#f3ead6);color:var(--ink,#2a2118);border:1px solid var(--rule,#c9b896);padding:1.15rem 1.2rem 1.25rem}" +
       "#onboardPt .kicker{font-size:.68rem;letter-spacing:.16em;text-transform:uppercase;color:var(--rubric,#7a2418);margin:0 0 .35rem}" +
       "#onboardPt h2{font-family:'Grenze Gotisch',serif;font-weight:400;font-size:1.7rem;margin:0 0 .45rem}" +
-      "#onboardPt p{font-family:'EB Garamond',serif;font-size:1.05rem;line-height:1.45;margin:0 0 1rem}" +
+      "#onboardPt p{font-family:var(--font-book,serif);font-size:1.05rem;line-height:1.45;margin:0 0 1rem}" +
       "#onboardPt .row{display:flex;gap:.5rem}" +
       "#onboardPt .key{flex:1}";
     document.head.appendChild(s);

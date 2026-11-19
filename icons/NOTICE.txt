@@ -1,2 +1,2 @@
-App icon: boat only, transparent ground (no sky, no sea).
-ark.svg is the full artboard; icons/favicon.svg is a tight crop.
+App icons: SHKLR brand kit (final, Nov 2026), ark ship on a parchment plate, light/dark (favicon.svg switches with prefers-color-scheme).
+ark.svg is the original full artboard. shortcut-chant-*.png are unchanged.

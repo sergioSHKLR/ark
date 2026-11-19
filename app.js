@@ -27,11 +27,11 @@ function applyTheme() {
     (theme === "system" &&
       window.matchMedia &&
       window.matchMedia("(prefers-color-scheme: dark)").matches);
-  meta.setAttribute("content", dark ? "#1a1612" : "#000000");
+  meta.setAttribute("content", dark ? "#241f19" : "#e9dcc0");
   const bar = document.querySelector(
     'meta[name="apple-mobile-web-app-status-bar-style"]'
   );
-  if (bar) bar.setAttribute("content", dark ? "black-translucent" : "black");
+  if (bar) bar.setAttribute("content", dark ? "black-translucent" : "default");
 }
 applyTheme();
 
