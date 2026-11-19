@@ -5,14 +5,14 @@ From the SHKLR brand kit (final, rev 3, approved 19 Nov 2026). Generated; update
 ## ARK
 
 - Tagline: “The Noah Protocol.”
-- Mode: dual (light + dark, favicon.svg swaps with prefers-color-scheme)
+- Mode: dual (light + dark plates)
 - Plate light **#e9dcc0** — glyph #824c24 hull + cabin + door 5.14:1
 - Plate dark **#241f19** — glyph #c08a5a hull + cabin + door 5.47:1
 
 Files in `ark/`:
 - `icons/` master SVGs (glyph, tile, square, maskable, mono); `icons/flat/` flat copies for simple SVG tools (no groups, transforms, clips or arcs).
 - `png/` tile PNGs 16–1024, maskable and apple-touch.
-- `web/` site drop-ins: favicon.svg/.ico/16/32/48, apple-touch-icon, icon-192/512, maskable, monochrome, manifest.webmanifest, meta-head.html, splash/ (iOS).
+- `web/` site drop-ins: favicon.svg (bare stroke glyph, transparent, dark-tab colours via prefers-color-scheme) + favicon.ico/16/32/48 (transparent), apple-touch-icon, icon-192/512, maskable, monochrome, manifest.webmanifest, meta-head.html, splash/ (iOS).
 - `wordmark/` wordmark and lockups (SVG, flat SVG, PNG), all text outlined.
 - `social/` og-1200x630, x-card-1200x600, github-card-1280x640 (repo social preview), whatsapp, Instagram sizes.
 
