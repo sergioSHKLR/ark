@@ -1,4 +1,4 @@
-/* SHKLR brand kit — colour tokens (final, approved 19 Nov 2026). Generated; do not hand-edit. */
+/* SHKLR brand kit — colour tokens (rev 4, 22 Nov 2026; rev 3 approved 19 Nov 2026). Generated; do not hand-edit. */
 :root {
   --shklr-ink: #111111;
   --shklr-ink-inverse: #f2f2f2;
@@ -6,11 +6,11 @@
   --ark-light-plate: #e9dcc0;
   --ark-light-ink: #111111;
   --ark-light-muted: #5d584e;
-  --ark-light-glyph-1: #824c24; /* hull + cabin + door · 5.14:1 */
+  --ark-light-glyph-1: #824c24; /* ark: house + hull + mast (rev 4) · 5.14:1 */
   --ark-dark-plate: #241f19;
   --ark-dark-ink: #f2f2f2;
   --ark-dark-muted: #aaa8a6;
-  --ark-dark-glyph-1: #c08a5a; /* hull + cabin + door · 5.47:1 */
+  --ark-dark-glyph-1: #c08a5a; /* ark: house + hull + mast (rev 4) · 5.47:1 */
 }
 /* dual-mode apps: map the active scheme */
 .ark { --app-plate: var(--ark-light-plate); --app-ink: var(--ark-light-ink); --app-muted: var(--ark-light-muted); }

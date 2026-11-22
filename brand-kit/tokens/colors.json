@@ -1,5 +1,5 @@
 {
- "_note": "SHKLR brand kit final (approved 19 Nov 2026). plate = icon/tile background = app surface it was sampled from; ink/muted = text on that plate; glyph = icon stroke/fill colours with WCAG contrast vs plate.",
+ "_note": "SHKLR brand kit rev 4 (22 Nov 2026; rev 3 approved 19 Nov 2026). plate = icon/tile background = app surface it was sampled from; ink/muted = text on that plate; glyph = icon stroke/fill colours with WCAG contrast vs plate.",
  "apps": {
   "ark": {
    "name": "ARK",
@@ -14,7 +14,7 @@
      "muted_contrast": 5.2,
      "glyph": [
       {
-       "role": "hull + cabin + door",
+       "role": "ark: house + hull + mast (rev 4)",
        "hex": "#824c24",
        "contrast": 5.14
       }
@@ -29,7 +29,7 @@
      "muted_contrast": 6.9,
      "glyph": [
       {
-       "role": "hull + cabin + door",
+       "role": "ark: house + hull + mast (rev 4)",
        "hex": "#c08a5a",
        "contrast": 5.47
       }

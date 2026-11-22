@@ -1,6 +1,7 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24">
 <path d="M 5.25,0 L 18.75,0 C 19.6714988743,5.64255323432E-17 20.5769585653,0.242617192968 21.375,0.703366630132 S 22.8358839327,1.82695856527 23.2966333699,2.625 S 24,4.32850112567 24,5.25 L 24,18.75 C 24,19.6714988743 23.757382807,20.5769585653 23.2966333699,21.375 S 22.1730414347,22.8358839327 21.375,23.2966333699 S 19.6714988743,24 18.75,24 L 5.25,24 C 4.32850112567,24 3.42304143473,23.757382807 2.625,23.2966333699 S 1.1641160673,22.1730414347 0.703366630132,21.375 S 5.22078771664E-16,19.6714988743 0,18.75 L 0,5.25 C -1.12851064686E-16,4.32850112567 0.242617192968,3.42304143473 0.703366630132,2.625 S 1.82695856527,1.1641160673 2.625,0.703366630132 S 4.32850112567,1.6927659703E-16 5.25,0 Z" fill="#e9dcc0" stroke="none" stroke-width="0.000" stroke-linecap="butt" stroke-linejoin="miter"/>
-<path d="M 4,12.8 l 16,0 c -0.56,3.2 -2.72,5.6 -6,5.6 l -4,0 C 6.72,18.4 4.56,16 4,12.8 z" fill="none" stroke="#824c24" stroke-width="1.200" stroke-linecap="round" stroke-linejoin="round"/>
-<path d="M 7.6,12.8 L 7.6,9.2 L 12,5.6 l 4.4,3.6 L 16.4,12.8 z" fill="none" stroke="#824c24" stroke-width="1.200" stroke-linecap="round" stroke-linejoin="round"/>
-<path d="M 10.6,12.8 L 10.6,9.2 l 2.8,0 L 13.4,12.8" fill="none" stroke="#824c24" stroke-width="1.200" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M 12,2.7 L 17.212,6.964 L 17.212,11.228 L 16.3248,11.228 M 7.6368,11.228 L 6.788,11.228 L 6.788,6.964 L 12,2.7" fill="none" stroke="#824c24" stroke-width="1.600" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M 10.6,10.2536 L 10.6,6.664 L 13.4,6.664 L 13.4,10.264" fill="none" stroke="#824c24" stroke-width="1.600" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M 11.98,9.8 L 19.952,12.42 C 19.392,16.956 17.232,20.36 13.952,20.36 L 9.952,20.36 C 6.672,20.36 4.608,16.944 4.048,12.408 Z" fill="none" stroke="#824c24" stroke-width="1.600" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M 12,10.072 L 12,20.02" fill="none" stroke="#824c24" stroke-width="1.600" stroke-linecap="round" stroke-linejoin="round"/>
 </svg>

@@ -2,6 +2,6 @@
 
 # ARK
 
-Live: https://sergioshklr.github.io/ark/ · Brand: [brand-kit/](brand-kit/README.md) (SHKLR brand kit, final 19 Nov 2026).
+Live: https://sergioshklr.github.io/ark/ · Brand: [brand-kit/](brand-kit/README.md) (SHKLR brand kit, rev 4, 22 Nov 2026).
 
 The Noah Protocol: a daily office, stoic, faithful, insulated. Private, kept in your own Google Drive.
